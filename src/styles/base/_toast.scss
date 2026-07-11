@@ -1,0 +1,73 @@
+/* ==========================================================================
+   Toast Notifications System - Premium Dark Gold Theme
+   ========================================================================== */
+
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+  max-width: 380px;
+  width: 90%;
+}
+
+.toast-item {
+  background: rgba(18, 18, 20, 0.95);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+  padding: 16px 20px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 175, 55, 0.02);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.toast-item.active {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.toast-item.toast-success {
+  border-left: 4px solid #2ecc71;
+  background: linear-gradient(90deg, rgba(46, 204, 113, 0.05) 0%, rgba(18, 18, 20, 0.95) 100%);
+}
+
+.toast-item.toast-error {
+  border-left: 4px solid #e74c3c;
+  background: linear-gradient(90deg, rgba(231, 76, 60, 0.05) 0%, rgba(18, 18, 20, 0.95) 100%);
+}
+
+.toast-item.toast-info {
+  border-left: 4px solid #d4af37;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.05) 0%, rgba(18, 18, 20, 0.95) 100%);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #d4af37;
+  box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+}
+
+.toast-success .toast-icon {
+  background: #2ecc71;
+  box-shadow: 0 0 0 4px rgba(46, 204, 113, 0.1);
+}
+
+.toast-error .toast-icon {
+  background: #e74c3c;
+  box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+}

@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Melhores do Ano | Placa de Premiação Oficial</title>
+  <meta name="description" content="Consolide sua autoridade com a placa oficial de certificação dos Melhores do Ano. O reconhecimento do público materializado para o seu negócio.">
+  <link rel="canonical" href="https://melhoresdoano.com.br/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Melhores do Ano | Placa de Premiacao Oficial">
+  <meta property="og:description" content="Consolide sua autoridade com a placa oficial de certificacao dos Melhores do Ano.">
+  <meta property="og:url" content="https://melhoresdoano.com.br/">
+  <meta property="og:image" content="https://melhoresdoano.com.br/assets/images/trophy.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/webp" href="/assets/images/logo-emporio-excelencia.webp">
+  
+  <!-- Google Fonts (Plus Jakarta Sans and Cormorant Garamond for luxury serif headlines) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+  
+  <!-- Preload Critical Above-The-Fold Assets for LCP Optimization -->
+  <link rel="preload" href="/assets/images/trophy.webp" as="image" type="image/webp">
+
+  <!-- SCSS Entry File -->
+  <link rel="stylesheet" href="/src/styles/main.scss">
+
+  <!-- Prevent FOUC/flash on page load before GSAP initialises -->
+  <style>
+    .js-loading .navbar,
+    .js-loading .hero-overline,
+    .js-loading .hero-title-line,
+    .js-loading .hero-desc,
+    .js-loading .hero-cta-group,
+    .js-loading #heroInfiniteBanner {
+      opacity: 0 !important;
+    }
+  </style>
+</head>
+<body class="js-loading">
+
+  <!-- Smooth Scroll Container (Lenis) -->
+  <div id="smooth-wrapper">
+    <div id="smooth-content">
+      
+      <!-- Top Navigation -->
+      <nav class="navbar">
+        <div class="nav-container">
+          <a href="/" class="nav-logo" id="navLogo">
+            <img src="/assets/images/logo-emporio-excelencia.webp" alt="Melhores do Ano" class="logo-img">
+          </a>
+          
+          <ul class="nav-menu" id="navMenu">
+            <li><a href="#heroSection" class="nav-link active">O Prêmio</a></li>
+            <li><a href="#about" class="nav-link">Como Funciona</a></li>
+            <li><a href="#gallerySection" class="nav-link">Modelos de Placas</a></li>
+            <li><a href="#methodologySection" class="nav-link">Metodologia</a></li>
+            <li><a href="/votar.html" class="nav-link" style="color: #d4af37; font-weight: 600;">Votar Agora</a></li>
+            <li><a href="/resultados.html" class="nav-link">Resultados</a></li>
+          </ul>
+
+          <div class="nav-actions">
+            <a href="mailto:contato@melhoresdoano.com.br?subject=Tenho%20interesse%20na%20placa%20oficial%20Melhores%20do%20Ano" target="_blank" rel="noopener noreferrer" class="btn-nav-contact" id="navContactBtn" data-commercial-contact>
+              Falar com Consultor
+            </a>
+            <!-- Mobile Menu Toggle Button -->
+            <button class="menu-toggle" id="menuToggle" aria-label="Abrir Menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- HERO SECTION -->
+      <section class="hero" id="heroSection">
+        <!-- Premium Ambient Background/Atmosphere -->
+        <div class="hero-bg-overlay"></div>
+        <div class="hero-bg-lights">
+          <div class="light-orb orb-1"></div>
+          <div class="light-orb orb-2"></div>
+        </div>
+        
+        <!-- Fullscreen Trophy Image (Shifted to Right) -->
+        <div class="hero-trophy-wrapper" id="heroTrophyWrapper">
+          <img src="/assets/images/trophy.webp" alt="Troféu Melhores do Ano" class="hero-trophy" id="heroTrophy">
+          <div class="trophy-fog"></div>
+        </div>
+
+        <!-- Radial Mask for high contrast legibility -->
+        <div class="hero-readability-mask"></div>
+
+        <div class="hero-container">
+          <div class="hero-text-col">
+            <span class="hero-overline">Pesquisa Oficial Melhores do Ano</span>
+            <h1 class="hero-title">
+              <span class="hero-title-line line-1">Sua conquista merece</span>
+              <span class="hero-title-line line-2">ser materializada.</span>
+            </h1>
+            <p class="hero-desc">
+              Foi eleito o profissional ou empresa destaque na votação popular da sua região? Consolide sua autoridade expondo a placa oficial de certificação dos Melhores do Ano.
+            </p>
+            <div class="hero-cta-group" style="gap: 20px; flex-wrap: wrap;">
+              <a href="/votar.html" class="btn-about-filled">
+                <span>Entrar no Portal de Votação</span>
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7"/>
+                  <polyline points="7 7 17 7 17 17"/>
+                </svg>
+              </a>
+              <a href="/portal.html" class="btn-about-gray">
+                <span>Acessar Central de Portais</span>
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7"/>
+                  <polyline points="7 7 17 7 17 17"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Infinite Scrolling Text Banner (Centered Monumental Text) -->
+      <section class="hero-infinite-banner" id="heroInfiniteBanner">
+        <div class="infinite-track" id="infiniteTrack">
+          <div class="infinite-content">
+            <span>MELHORES DO ANO 2026</span> <span class="gold-separator">•</span>
+            <span>EXCELÊNCIA RECONHECIDA</span> <span class="gold-separator">•</span>
+            <span>LIDERANÇA REGIONAL</span> <span class="gold-separator">•</span>
+            <span>VOTADO PELO PÚBLICO</span> <span class="gold-separator">•</span>
+          </div>
+          <!-- Duplicate content to ensure seamless loop -->
+          <div class="infinite-content" aria-hidden="true">
+            <span>MELHORES DO ANO 2026</span> <span class="gold-separator">•</span>
+            <span>EXCELÊNCIA RECONHECIDA</span> <span class="gold-separator">•</span>
+            <span>LIDERANÇA REGIONAL</span> <span class="gold-separator">•</span>
+            <span>VOTADO PELO PÚBLICO</span> <span class="gold-separator">•</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="about" id="about">
+        <div class="about-container">
+          <!-- Coluna da Esquerda (Texto - 50%) -->
+          <div class="about-text-col">
+            <span class="about-overline">Como Funciona</span>
+            
+            <h2 class="about-title">
+              <span class="about-title-line">O selo físico</span>
+              <span class="about-title-line">do seu sucesso.</span>
+            </h2>
+            
+            <p class="about-desc">
+              Após a pesquisa regional que identifica os melhores do ano de cada categoria, os vencedores garantem a Placa Oficial de Certificação. Um símbolo físico de prestígio e alta credibilidade que atrai e retém clientes.
+            </p>
+
+            <div class="about-features-list">
+              <div class="about-feature-row">
+                <span class="feature-num">01</span>
+                <span class="feature-title">Acrílico cristal de luxo</span>
+                <span class="feature-separator">—</span>
+                <span class="feature-sub">Material nobre de alto brilho</span>
+              </div>
+              <div class="about-feature-row">
+                <span class="feature-num">02</span>
+                <span class="feature-title">Exclusivo para vencedores</span>
+                <span class="feature-separator">—</span>
+                <span class="feature-sub">Certificação oficial restrita</span>
+              </div>
+              <div class="about-feature-row">
+                <span class="feature-num">03</span>
+                <span class="feature-title">Autoridade imediata</span>
+                <span class="feature-separator">—</span>
+                <span class="feature-sub">Posicionamento de alto valor</span>
+              </div>
+            </div>
+
+            <div class="about-cta-group">
+              <a href="/candidato.html" class="btn-about-filled">
+                <span>Área do Candidato / Resgatar Placa</span>
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7"/>
+                  <polyline points="7 7 17 7 17 17"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+
+          <!-- Coluna da Direita (Imagem - 50%) -->
+          <div class="about-image-col">
+            <img src="/assets/images/sobre-nos.webp" alt="Placa Oficial Destaque" class="about-plaque-img">
+            <div class="about-image-overlay"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO DA GALERIA 3D -->
+      <section class="gallery-3d" id="gallerySection">
+        <div class="gallery-bg-overlay"></div>
+        <div class="gallery-container">
+          <div class="gallery-text-header">
+            <span class="gallery-overline">Selo de Excelência</span>
+            <h2 class="gallery-title">
+              Quer ver como sua placa vai ficar?
+            </h2>
+            <p class="gallery-desc">
+              Selecione o modelo oficial e exiba com orgulho o prêmio conquistado através do voto de seus clientes.
+            </p>
+            
+            <div class="gallery-cta-wrapper">
+              <a href="/candidato.html" class="btn-see-more">
+                <span>Área do Candidato / Resgatar Placa</span>
+                <span class="arrow-circle">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 12H21M21 12L13 4M21 12L13 20" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="scene">
+          <div class="a3d" style="--n: 12">
+            <img class="card" src="/assets/images/carousel-1.webp" style="--i: 0" alt="Placa 1" />
+            <img class="card" src="/assets/images/carousel-2.webp" style="--i: 1" alt="Placa 2" />
+            <img class="card" src="/assets/images/carousel-3.webp" style="--i: 2" alt="Placa 3" />
+            <img class="card" src="/assets/images/carousel-4.webp" style="--i: 3" alt="Placa 4" />
+            <img class="card" src="/assets/images/carousel-5.webp" style="--i: 4" alt="Placa 5" />
+            <img class="card" src="/assets/images/carousel-6.webp" style="--i: 5" alt="Placa 6" />
+            <img class="card" src="/assets/images/carousel-7.webp" style="--i: 6" alt="Placa 7" />
+            <img class="card" src="/assets/images/carousel-8.webp" style="--i: 7" alt="Placa 8" />
+            <img class="card" src="/assets/images/carousel-9.webp" style="--i: 8" alt="Placa 9" />
+            <img class="card" src="/assets/images/carousel-10.webp" style="--i: 9" alt="Placa 10" />
+            <img class="card" src="/assets/images/carousel-11.webp" style="--i: 10" alt="Placa 11" />
+            <img class="card" src="/assets/images/carousel-12.webp" style="--i: 11" alt="Placa 12" />
+          </div>
+        </div>
+
+        <div class="gallery-footer-grid">
+          <div class="footer-grid-item">
+            <span class="grid-number">#01</span>
+            <h4 class="grid-title">Votação Popular</h4>
+          </div>
+          <div class="footer-grid-item">
+            <span class="grid-number">#02</span>
+            <h4 class="grid-title">Acabamento Premium</h4>
+          </div>
+          <div class="footer-grid-item">
+            <span class="grid-number">#03</span>
+            <h4 class="grid-title">Gravação Personalizada</h4>
+          </div>
+          <div class="footer-grid-item">
+            <span class="grid-number">#04</span>
+            <h4 class="grid-title">Autoridade Imediata</h4>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO METODOLOGIA (SCROLL-PINNED INTERACTIVE SCAN) -->
+      <section class="methodology" id="methodologySection">
+        <div class="methodology-pin-container">
+          <div class="methodology-content">
+            <!-- Coluna da Esquerda: Mockup de Smartphone e Balões em Cascata -->
+            <div class="methodology-visual-col">
+              <div class="phone-frame-wrapper">
+                <div class="phone-frame">
+                  <div class="phone-screen">
+                    <div class="phone-post-image">
+                      <img src="/assets/images/celular-img.webp" alt="Post de Votação" class="phone-post-img-file">
+                    </div>
+                    <!-- Tela de Revelação da Placa Premiada -->
+                    <div class="phone-plaque-screen">
+                      <img src="/assets/images/celular-placa.webp" alt="Placa Certificada" class="phone-certified-plaque-img">
+                    </div>
+                    <div class="phone-laser-line"></div>
+                  </div>
+                </div>
+                <!-- Balões de Comentários para Efeito 3D Cascade -->
+                <div class="comments-cascade">
+                  <div class="comment-bubble cb-1">
+                    <span class="cb-user">Maria S. <span class="cb-badge">✓ Voto Confirmado</span></span>
+                    <span class="cb-text">Votei no melhor restaurante!</span>
+                  </div>
+                  <div class="comment-bubble cb-2">
+                    <span class="cb-user">André L. <span class="cb-badge">✓ Voto Confirmado</span></span>
+                    <span class="cb-text">Meu voto foi para a clínica de estética.</span>
+                  </div>
+                  <div class="comment-bubble cb-3">
+                    <span class="cb-user">Ana P. <span class="cb-badge">✓ Voto Confirmado</span></span>
+                    <span class="cb-text">Melhor atendimento da região!</span>
+                  </div>
+                  <div class="comment-bubble cb-4">
+                    <span class="cb-user">Pedro M. <span class="cb-badge">✓ Voto Confirmado</span></span>
+                    <span class="cb-text">Voto computado com sucesso.</span>
+                  </div>
+                  <div class="comment-bubble cb-5">
+                    <span class="cb-user">Luana A. <span class="cb-badge">✓ Voto Confirmado</span></span>
+                    <span class="cb-text">Sempre entregam qualidade incrível.</span>
+                  </div>
+                  <div class="comment-bubble cb-6">
+                    <span class="cb-user">Sabores L. <span class="cb-badge">✓ Voto Confirmado</span></span>
+                    <span class="cb-text">Merecido demais! Voto garantido.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna da Direita: Textos explicativos e contador de auditoria -->
+            <div class="methodology-text-col">
+              <span class="methodology-overline">Transparência & Auditoria</span>
+              <h2 class="methodology-title">Como é feita a apuração?</h2>
+
+              <div class="methodology-steps">
+                <div class="methodology-step-item active" data-step="1">
+                  <div class="step-progress-bar">
+                    <div class="step-progress-fill"></div>
+                  </div>
+                  <span class="step-num">01</span>
+                  <div class="step-info">
+                    <h3 class="step-title">Abertura Oficial</h3>
+                    <p class="step-desc">As categorias e candidatos oficiais são disponibilizados no portal de votação para a participação livre da comunidade local.</p>
+                  </div>
+                </div>
+
+                <div class="methodology-step-item" data-step="2">
+                  <div class="step-progress-bar">
+                    <div class="step-progress-fill"></div>
+                  </div>
+                  <span class="step-num">02</span>
+                  <div class="step-info">
+                    <h3 class="step-title">Voto Autenticado</h3>
+                    <p class="step-desc">A população registra seus votos com segurança diretamente pelo site, com validação inteligente de dados.</p>
+                  </div>
+                </div>
+
+                <div class="methodology-step-item" data-step="3">
+                  <div class="step-progress-bar">
+                    <div class="step-progress-fill"></div>
+                  </div>
+                  <span class="step-num">03</span>
+                  <div class="step-info">
+                    <h3 class="step-title">Auditoria contra Fraudes</h3>
+                    <p class="step-desc">Varredura automatizada do sistema para validar os votos, prevenir duplicidades e anular acessos suspeitos/bots.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="methodology-counter-wrapper">
+                <div class="counter-label">Votos Computados e Auditados</div>
+                <div class="counter-number"><span class="counter-value">0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção de Sobreposição: O Kit de Autoridade (Inicialmente Oculto) -->
+          <div class="methodology-overlap-kit">
+            <div class="kit-container">
+              <div class="kit-header">
+                <span class="kit-overline">O Kit Oficial</span>
+                <h2 class="kit-title">O que você recebe ao se certificar</h2>
+                <p class="kit-desc">
+                  Sua conquista materializada em um conjunto exclusivo de selos físicos e digitais de altíssima qualidade. O reconhecimento do público consolidado para o seu negócio.
+                </p>
+              </div>
+
+              <div class="kit-cards-grid">
+                
+                <!-- Card 1: Placa de Luxo -->
+                <div class="kit-card" data-card="plaque">
+                  <div class="kit-card-visual">
+                    <img src="/assets/images/kit-plaque.webp" class="kit-card-img" alt="Placa Acrílica de Luxo Oficial">
+                  </div>
+                  <div class="kit-card-content">
+                    <button class="kit-card-toggle" aria-label="Ver Detalhes">
+                      <svg class="toggle-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19" class="toggle-line-vertical"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="kit-card-text-group">
+                      <span class="kit-card-tag">Item Físico</span>
+                      <h3 class="kit-card-title">Placa Acrílica de Luxo</h3>
+                    </div>
+                  </div>
+                  <!-- Overlay Details Panel (GSAP-Animated Slide-Up) -->
+                  <div class="kit-card-details-panel">
+                    <p class="kit-card-description">Placa física em acrílico cristal nobre de 8mm, corte a laser e gravação dourada metálica premium.</p>
+                    <ul class="kit-card-features">
+                      <li>Acrílico cristal de alta densidade (8mm)</li>
+                      <li>Gravação dourada escovada</li>
+                      <li>Suporte em madeira nobre de lei</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Card 2: Selo Digital -->
+                <div class="kit-card" data-card="seal">
+                  <div class="kit-card-visual">
+                    <video src="/assets/videos/kit-seal-video.mp4" class="kit-card-video" autoplay loop muted playsinline preload="metadata"></video>
+                  </div>
+                  <div class="kit-card-content">
+                    <button class="kit-card-toggle" aria-label="Ver Detalhes">
+                      <svg class="toggle-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19" class="toggle-line-vertical"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="kit-card-text-group">
+                      <span class="kit-card-tag">Identidade Digital</span>
+                      <h3 class="kit-card-title">Selo Digital Oficial</h3>
+                    </div>
+                  </div>
+                  <!-- Overlay Details Panel (GSAP-Animated Slide-Up) -->
+                  <div class="kit-card-details-panel">
+                    <p class="kit-card-description">Arquivos vetoriais em alta resolução para presença online, sites, e-mails e materiais impressos.</p>
+                    <ul class="kit-card-features">
+                      <li>Formatos AI, PDF, SVG e PNG</li>
+                      <li>Versões para fundo escuro e claro</li>
+                      <li>QR Code de autenticidade</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Card 3: Kit Social -->
+                <div class="kit-card" data-card="social">
+                  <div class="kit-card-visual">
+                    <img src="/assets/images/kit-intro.webp" class="kit-card-img" alt="Divulgação Social">
+                  </div>
+                  <div class="kit-card-content">
+                    <button class="kit-card-toggle" aria-label="Ver Detalhes">
+                      <svg class="toggle-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19" class="toggle-line-vertical"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </button>
+                    <div class="kit-card-text-group">
+                      <span class="kit-card-tag">Redes Sociais</span>
+                      <h3 class="kit-card-title">Divulgação Social</h3>
+                    </div>
+                  </div>
+                  <!-- Overlay Details Panel (GSAP-Animated Slide-Up) -->
+                  <div class="kit-card-details-panel">
+                    <p class="kit-card-description">Templates customizados e de alta conversão para Stories e Feed do Instagram para anunciar sua vitória.</p>
+                    <ul class="kit-card-features">
+                      <li>Stories animados prontos para uso</li>
+                      <li>Artes estáticas editáveis para Feed</li>
+                      <li>Criativos de alta performance</li>
+                    </ul>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="kit-footer-cta">
+                <a href="mailto:contato@melhoresdoano.com.br?subject=Tenho%20interesse%20na%20placa%20oficial%20Melhores%20do%20Ano" class="btn-about-filled" data-commercial-contact>
+                  <span>Falar com Comercial</span>
+                  <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7"/>
+                    <polyline points="7 7 17 7 17 17"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO CTA FINAL -->
+      <section class="cta-final" id="ctaFinalSection">
+        <div class="cta-bg-overlay"></div>
+        <div class="cta-container">
+          <div class="cta-content">
+            <span class="cta-overline">Garanta Seu Reconhecimento</span>
+            <h2 class="cta-title">
+              <span class="cta-title-line">Sua excelência</span>
+              <span class="cta-title-line">eternizada em ouro.</span>
+            </h2>
+            <p class="cta-desc">
+              Não perca a oportunidade de exibir o selo de maior prestígio do seu mercado. Adquira agora mesmo a Placa Oficial de Certificação.
+            </p>
+            <div class="cta-btn-wrapper">
+              <a href="mailto:contato@melhoresdoano.com.br?subject=Tenho%20interesse%20na%20placa%20oficial%20Melhores%20do%20Ano" class="btn-about-filled" data-commercial-contact>
+                <span>Falar com Comercial</span>
+                <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="7" y1="17" x2="17" y2="7"/>
+                  <polyline points="7 7 17 7 17 17"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO FOOTER -->
+      <footer class="footer" id="footer">
+        <div class="footer-container">
+          <div class="footer-top">
+            <div class="footer-brand-col">
+              <a href="/" class="footer-logo">
+                <img src="/assets/images/logo-emporio-excelencia.webp" alt="Melhores do Ano" class="footer-logo-img">
+              </a>
+              <p class="footer-brand-desc">
+                Reconhecendo e certificando a excelência de profissionais e empresas que se destacam pelo voto popular em suas regiões.
+              </p>
+              <div class="footer-socials">
+                <a href="mailto:contato@melhoresdoano.com.br?subject=Contato%20Melhores%20do%20Ano" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="Contato comercial" data-commercial-contact>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                  </svg>
+                </a>
+                <a href="mailto:contato@melhoresdoano.com.br?subject=Contato%20Melhores%20do%20Ano" target="_blank" rel="noopener noreferrer" class="social-icon-btn" aria-label="Contato comercial" data-commercial-contact>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                  </svg>
+                </a>
+              </div>
+            </div>
+
+            <div class="footer-links-col">
+              <h4 class="footer-col-title">Navegação</h4>
+              <ul class="footer-links-list">
+                <li><a href="/votar.html" class="footer-link" style="color: #d4af37; font-weight: 500;">Votar na Região 🏆</a></li>
+                <li><a href="/resultados.html" class="footer-link">Resultados</a></li>
+                <li><a href="#heroSection" class="footer-link">O Prêmio</a></li>
+                <li><a href="#about" class="footer-link">Como Funciona</a></li>
+              </ul>
+            </div>
+
+            <div class="footer-links-col">
+              <h4 class="footer-col-title">Portais</h4>
+              <ul class="footer-links-list">
+                <li><a href="/candidato.html" class="footer-link">Painel do Concorrente</a></li>
+                <li><a href="/portal.html" class="footer-link">Central de Portais</a></li>
+                <li><a href="mailto:contato@melhoresdoano.com.br?subject=Tenho%20interesse%20na%20placa%20oficial%20Melhores%20do%20Ano" class="footer-link" data-commercial-contact>Falar com Comercial</a></li>
+              </ul>
+            </div>
+
+            <div class="footer-links-col">
+              <h4 class="footer-col-title">Contato e Suporte</h4>
+              <ul class="footer-links-list">
+                <li><a href="mailto:contato@melhoresdoano.com.br?subject=Suporte%20Melhores%20do%20Ano" target="_blank" rel="noopener noreferrer" class="footer-link" data-commercial-contact>Suporte Comercial</a></li>
+                <li><span class="footer-info-item">contato@melhoresdoano.com.br</span></li>
+                <li><span class="footer-info-item">Atendimento: Seg a Sex, 9h às 18h</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <p class="footer-copyright">
+              &copy; 2026 Melhores do Ano Oficial. Todos os direitos reservados.
+            </p>
+            <div class="footer-bottom-links">
+              <a href="/termos.html" class="footer-bottom-link">Termos de Uso</a>
+              <span class="footer-separator">•</span>
+              <a href="/privacidade.html" class="footer-bottom-link">Políticas de Privacidade</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- Entry JavaScript File -->
+  <script type="module" src="/src/js/main.js"></script>
+</body>
+</html>

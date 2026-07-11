@@ -1,0 +1,64 @@
+// ==========================================================================
+// Base Reset & Lenis Setup
+// ==========================================================================
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background-color: $color-bg;
+  color: $color-grey-light;
+  font-family: $font-body;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+// Lenis CSS recommendation for smooth scrolling
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+// Smooth scrolling wrappers
+#smooth-wrapper {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+#smooth-content {
+  overflow: visible;
+  width: 100%;
+  /* ensures content can render cleanly in 3D perspective space */
+  transform-style: flat;
+}

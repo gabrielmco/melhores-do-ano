@@ -1,0 +1,27 @@
+// ==========================================================================
+// Design Tokens & Variables
+// ==========================================================================
+$color-bg: #070708;
+$color-bg-alt: #0e0e10;
+$color-gold-light: #f3d078;
+$color-gold: #d4af37;
+$color-gold-dark: #aa841c;
+$color-grey-light: #e0e0e0;
+$color-grey: #8e8e93;
+$color-grey-dark: #1c1c1e;
+$color-border: rgba(212, 175, 55, 0.15);
+
+$font-headings: 'Basis Grotesk', 'Plus Jakarta Sans', sans-serif;
+$font-body: 'Basis Grotesk', 'Plus Jakarta Sans', sans-serif;
+
+// Gold Gradient & Textures
+$gold-gradient: linear-gradient(135deg, #f5d788 0%, #d4af37 40%, #aa841c 100%);
+
+@mixin gold-text-texture {
+  background: $gold-gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}

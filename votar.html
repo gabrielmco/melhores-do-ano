@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Votação Oficial | Empório Excelência</title>
+  <meta name="description" content="Vote no destaque e profissional do ano da sua cidade. Sua escolha faz a diferença.">
+  <link rel="canonical" href="https://melhoresdoano.com.br/votar.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Votacao Oficial | Melhores do Ano">
+  <meta property="og:description" content="Vote nos profissionais e empresas destaque da sua cidade.">
+  <meta property="og:url" content="https://melhoresdoano.com.br/votar.html">
+  <meta property="og:image" content="https://melhoresdoano.com.br/assets/images/trophy.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/webp" href="/assets/images/logo-emporio-excelencia.webp">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Cloudflare Turnstile Script -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+  <!-- SCSS Entry File -->
+  <link rel="stylesheet" href="/src/styles/main.scss">
+  
+  <style>
+    /* Estilos customizados da página de votação (Luxurious Dark & Gold) */
+    body {
+      background-color: #070708;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .vote-layout {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px 40px 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .vote-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 8px;
+      padding: 32px;
+      width: 100%;
+      box-sizing: border-box;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    @media (max-width: 480px) {
+      .vote-card {
+        padding: 24px 16px;
+      }
+    }
+
+    .vote-logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .vote-logo img {
+      max-height: 48px;
+    }
+
+    .step-indicator {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      position: relative;
+    }
+
+    .step-indicator::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #0e0e10;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      position: relative;
+      z-index: 2;
+      transition: all 0.3s ease;
+    }
+
+    .step-dot.active {
+      border-color: #d4af37;
+      color: #070708;
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+    }
+
+    .step-dot.completed {
+      border-color: #d4af37;
+      color: #d4af37;
+      background: #070708;
+    }
+
+    .step-panel {
+      display: none;
+    }
+
+    .step-panel.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #d4af37;
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    select.form-control option {
+      background: #0e0e10;
+      color: #ffffff;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      border: none;
+      color: #070708;
+      padding: 14px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.25);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn-back {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: rgba(255, 255, 255, 0.7);
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .btn-back:hover {
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+    }
+
+    .candidate-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 12px;
+    }
+
+    .candidate-card:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+      background: rgba(212, 175, 55, 0.02);
+    }
+
+    .candidate-card.selected {
+      border-color: #d4af37;
+      background: rgba(212, 175, 55, 0.06);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+    }
+
+    .candidate-logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+    .candidate-info {
+      flex: 1;
+    }
+
+    .candidate-name {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .candidate-instagram {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: #d4af37;
+    }
+
+    .checkbox-group label {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.65);
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .checkbox-group a {
+      color: #d4af37;
+      text-decoration: none;
+    }
+
+    .checkbox-group a:hover {
+      text-decoration: underline;
+    }
+
+    .turnstile-widget {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+      min-height: 65px;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.85rem;
+      text-align: center;
+      align-items: center;
+    }
+
+    /* Tela de Compartilhamento / Sucesso */
+    .success-screen {
+      text-align: center;
+    }
+
+    .success-icon {
+      width: 78px;
+      height: 78px;
+      margin: 0 auto 16px;
+      animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .success-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.3); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .share-box {
+      background: rgba(212, 175, 55, 0.05);
+      border: 1px dashed rgba(212, 175, 55, 0.3);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+
+    .btn-share {
+      background: #0b0b0d;
+      color: #ffffff;
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-share:hover {
+      background: rgba(212, 175, 55, 0.1);
+      border-color: #d4af37;
+    }
+
+    /* Modal de Indicação Customizado (Premium Glassmorphism & Gold) */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(7, 7, 8, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .modal-card {
+      background: rgba(20, 20, 22, 0.95);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      border-radius: 8px;
+      width: 90%;
+      max-width: 440px;
+      padding: 28px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8), 0 0 32px rgba(212, 175, 55, 0.04);
+      transform: scale(0.92) translateY(10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      backdrop-filter: blur(20px);
+    }
+    
+    .modal-overlay.active .modal-card {
+      transform: scale(1) translateY(0);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 12px;
+    }
+    
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #d4af37;
+      letter-spacing: 0.02em;
+    }
+    
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.75rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+    
+    .btn-close-modal:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    .modal-body {
+      margin-bottom: 24px;
+    }
+    
+    .modal-footer {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="vote-layout">
+    <div class="vote-card">
+      <div class="vote-logo">
+        <a href="/" aria-label="Voltar para a página inicial">
+          <img src="/assets/images/logo-emporio-excelencia.webp" alt="Melhores do Ano">
+        </a>
+      </div>
+
+      <!-- Indicador de Etapas -->
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot1">1</div>
+        <div class="step-dot" id="dot2">2</div>
+        <div class="step-dot" id="dot3">3</div>
+        <div class="step-dot" id="dot4">4</div>
+      </div>
+
+      <!-- ETAPA 1: Seleção de Cidade e Categoria -->
+      <div class="step-panel active" id="panel1">
+        <h2 style="font-size: 1.3rem; font-weight: 500; margin-bottom: 24px; text-align: center;">Selecione a Localidade e Categoria</h2>
+        
+        <div class="form-group">
+          <label for="selectCity">Cidade da Premiação</label>
+          <select id="selectCity" class="form-control">
+            <option value="">Carregando cidades...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="selectCategory">Categoria Profissional</label>
+          <select id="selectCategory" class="form-control" disabled>
+            <option value="">Selecione primeiro a cidade</option>
+          </select>
+        </div>
+
+        <button class="btn-submit" id="btnGoToStep2" disabled>Continuar</button>
+      </div>
+
+      <!-- ETAPA 2: Seleção de Candidato ou Indicação -->
+      <div class="step-panel" id="panel2">
+        <h2 style="font-size: 1.3rem; font-weight: 500; margin-bottom: 24px; text-align: center;">Escolha o Candidato</h2>
+        
+        <div class="form-group">
+          <input type="text" id="inputSearchCandidate" class="form-control" placeholder="Busque pelo nome ou apelido...">
+        </div>
+
+        <div id="candidatesList" style="max-height: 240px; overflow-y: auto; margin-bottom: 15px;">
+          <!-- Lista carregada dinamicamente -->
+        </div>
+
+        <div id="searchFeedback" style="display: none; text-align: center; color: rgba(255,255,255,0.4); font-size: 0.9rem; margin-bottom: 15px;">
+          Nenhum candidato encontrado com este nome.
+        </div>
+
+        <div class="nominate-box" style="text-align: center; padding: 16px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(212,175,55,0.25); border-radius: 8px; margin-bottom: 20px;">
+          <p style="color: rgba(255, 255, 255, 0.65); font-size: 0.85rem; margin: 0 0 10px 0;">Não encontrou quem procurava na lista?</p>
+          <button class="btn-share" id="btnNominate" style="font-size: 0.8rem; padding: 8px 16px; margin: 0;">Indicar Novo Candidato</button>
+        </div>
+
+        <button class="btn-submit" id="btnGoToStep3" disabled>Avançar</button>
+        <button class="btn-back" onclick="goToStep(1)">Voltar</button>
+      </div>
+
+      <!-- ETAPA 3: Dados de Contato e Turnstile -->
+      <div class="step-panel" id="panel3">
+        <h2 style="font-size: 1.3rem; font-weight: 500; margin-bottom: 24px; text-align: center;">Confirmação de Voto</h2>
+        
+        <div id="selectedCandidateSummary" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+          <!-- Resumo do candidato escolhido -->
+        </div>
+
+        <!-- Se for indicação de novo candidato, mostrar campos extras -->
+        <div id="nominationFields" style="display: none; background: rgba(255, 255, 255, 0.01); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+          <h3 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 16px; color: #d4af37;">Formulário de Indicação</h3>
+          <div class="form-group">
+            <label for="nomName">Nome do Indicado *</label>
+            <input type="text" id="nomName" class="form-control" placeholder="Nome da empresa ou profissional">
+          </div>
+          <div class="form-group">
+            <label for="nomType">Tipo de Candidato</label>
+            <select id="nomType" class="form-control">
+              <option value="profissional">Profissional Liberal</option>
+              <option value="empresa">Empresa / Negócio</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="nomInstagram">Instagram do Indicado (Opcional)</label>
+            <input type="text" id="nomInstagram" class="form-control" placeholder="@username">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="voterName">Seu Nome Completo</label>
+          <input type="text" id="voterName" class="form-control" placeholder="Digite seu nome">
+        </div>
+
+        <div class="form-group">
+          <label for="voterType">Tipo de Contato</label>
+          <select id="voterType" class="form-control">
+            <option value="whatsapp">WhatsApp</option>
+            <option value="email">E-mail</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="voterIdentifier" id="lblVoterIdentifier">Seu Número de WhatsApp</label>
+          <input type="text" id="voterIdentifier" class="form-control" placeholder="(00) 00000-0000">
+        </div>
+
+        <!-- Checkboxes LGPD obrigatórios -->
+        <div class="checkbox-group">
+          <input type="checkbox" id="privacyConsent">
+          <label for="privacyConsent">Li e aceito a <a href="/privacidade.html" target="_blank" rel="noopener noreferrer">Política de Privacidade</a> de coleta de dados.</label>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="validationConsent">
+          <label for="validationConsent">Autorizo o uso dos meus dados para validação e auditoria da legitimidade do voto.</label>
+        </div>
+
+        <!-- Widget Turnstile da Cloudflare -->
+        <div id="turnstileWidget" class="turnstile-widget"></div>
+
+        <button class="btn-submit" id="btnSubmitVote" disabled>Confirmar Meu Voto</button>
+        <button class="btn-back" id="btnBackToStep2">Voltar</button>
+      </div>
+
+      <!-- ETAPA 4: Sucesso e Compartilhamento -->
+      <div class="step-panel success-screen" id="panel4">
+        <div class="success-icon"><img src="/assets/images/logo-emporio-excelencia.webp" alt=""></div>
+        <h2 style="font-size: 1.5rem; color: #d4af37; margin-bottom: 12px;">Voto Registrado com Sucesso!</h2>
+        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.6;">Obrigado por participar. Sua escolha foi salva e auditada de forma segura.</p>
+        
+        <div class="share-box">
+          <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Incentive seus amigos!</h3>
+          <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.85rem; margin-bottom: 16px; line-height: 1.4;">Compartilhe no Instagram Stories para que outros profissionais e marcas de excelência também recebam reconhecimento.</p>
+          <button class="btn-share" id="btnCopyShareLink">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            <span>Copiar Link de Votação</span>
+          </button>
+        </div>
+
+        <button class="btn-submit" onclick="resetVoteFlow()" style="background: transparent; border: 1px solid rgba(212, 175, 55, 0.4); color: #d4af37;">Votar em Outra Categoria</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Customizado para Indicação (Luxury Overlay) -->
+  <div id="nominationModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Indicar Novo Candidato</h3>
+        <button id="btnCloseModal" class="btn-close-modal" aria-label="Fechar modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="modalNomName" style="color: rgba(255,255,255,0.8); font-size: 0.85rem; display: block; margin-bottom: 8px;">Nome da Empresa ou Profissional *</label>
+          <input type="text" id="modalNomName" class="form-control" placeholder="Digite o nome completo..." style="background: rgba(0,0,0,0.2); border: 1px solid rgba(212,175,55,0.25);">
+          <div id="modalError" style="color: #ff5555; font-size: 0.8rem; margin-top: 8px; display: none; font-weight: 500;">
+            O nome deve conter pelo menos 2 caracteres.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCancelModal" class="btn-back" style="margin-top: 0; padding: 10px 18px;">Cancelar</button>
+        <button id="btnConfirmModal" class="btn-submit" style="width: auto; padding: 10px 24px;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align: center; padding: 20px; color: rgba(255,255,255,0.3); font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.03);">
+    &copy; 2026 Empório Excelência Oficial. Todos os direitos reservados.
+  </footer>
+
+  <!-- Entry Script -->
+  <script type="module" src="/src/js/votar.js"></script>
+</body>
+</html>

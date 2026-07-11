@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo | Empório Excelência</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/webp" href="/assets/images/logo-emporio-excelencia.webp">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SCSS Entry File -->
+  <link rel="stylesheet" href="/src/styles/main.scss">
+  
+  <style>
+    body {
+      background-color: #070708;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .admin-container {
+      display: flex;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    @media (max-width: 900px) {
+      .admin-container {
+        flex-direction: column;
+      }
+    }
+
+    /* Sidebar Estilizada */
+    .sidebar {
+      width: 260px;
+      background: #0c0c0e;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 24px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 100%;
+        padding: 24px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+    }
+
+    .sidebar-logo {
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.05em;
+      color: #d4af37;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .nav-list {
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+    }
+
+    .nav-item {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background: rgba(212, 175, 55, 0.08);
+      color: #d4af37;
+    }
+
+    .nav-mark {
+      width: 24px;
+      height: 24px;
+      border: 1px solid rgba(212, 175, 55, 0.28);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #d4af37;
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      background: rgba(212, 175, 55, 0.06);
+      flex-shrink: 0;
+    }
+
+    .nav-item.active {
+      font-weight: 600;
+      border-left: 3px solid #d4af37;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* Conteúdo Principal */
+    .content {
+      flex: 1;
+      padding: 40px 48px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding: 24px 16px;
+      }
+    }
+
+    /* Tela de Login Administrativo */
+    .auth-card {
+      max-width: 400px;
+      margin: 100px auto;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 8px;
+      padding: 48px 36px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    .auth-card h2 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.6rem;
+      color: #d4af37;
+    }
+
+    .auth-card p {
+      margin-top: 0;
+      margin-bottom: 32px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .auth-card .form-group {
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .auth-card .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Cards de Estatísticas */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .stat-card-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.4);
+      margin-bottom: 8px;
+    }
+
+    .stat-card-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Tabela Genérica */
+    .table-container {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 16px;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.6);
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.01);
+    }
+
+    /* Formulários e botões */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: rgba(255,255,255,0.6);
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #d4af37;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      border: none;
+      color: #070708;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.7);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.3);
+      color: #ffffff;
+      box-shadow: none;
+    }
+
+    .btn-danger {
+      background: #ff5555;
+      color: #ffffff;
+    }
+
+    .btn-danger:hover {
+      box-shadow: 0 5px 15px rgba(255, 85, 85, 0.3);
+    }
+
+    /* Painéis de Abas */
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botão Voltar Flutuante no Canto Superior Esquerdo -->
+  <a href="/#footer" onclick="if(window.history.length > 1) { window.history.back(); return false; }" class="btn-back-floating" style="position: absolute; top: 24px; left: 24px; display: inline-flex; align-items: center; gap: 8px; color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.85rem; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 50px; z-index: 1000;" onmouseover="this.style.color='#d4af37'; this.style.borderColor='rgba(212,175,55,0.3)'; this.style.background='rgba(212,175,55,0.03)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.02)'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Voltar
+  </a>
+
+  <!-- 1. TELA DE AUTENTICAÇÃO DO STAFF -->
+  <div class="auth-card" id="adminLoginScreen">
+    <h2>Acesso Administrativo</h2>
+    <p>Área restrita aos moderadores, administradores e agentes comerciais.</p>
+    
+    <form id="adminLoginForm">
+      <div class="form-group" style="text-align: left;">
+        <label for="adminEmail">E-mail Corporativo</label>
+        <input type="email" id="adminEmail" class="form-control" placeholder="admin@seudominio.com.br" autocomplete="username" required>
+      </div>
+      <div class="form-group" style="text-align: left;">
+        <label for="adminPassword">Senha</label>
+        <input type="password" id="adminPassword" class="form-control" placeholder="Senha" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn" style="width: 100%; padding: 14px; justify-content: center;">Entrar no Painel</button>
+    </form>
+    <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
+      <a href="/#footer" onclick="if(window.history.length > 1) { window.history.back(); return false; }" style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Voltar para o Site Principal
+      </a>
+    </div>
+  </div>
+
+  <!-- 2. LAYOUT DO PAINEL PRINCIPAL -->
+  <div class="admin-container" id="adminDashboardLayout" style="display: none;">
+    
+    <!-- Sidebar de Navegação -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="nav-mark">AD</span>
+        <span>ADMINISTRAÇÃO</span>
+      </div>
+      
+      <nav style="flex: 1;">
+        <ul class="nav-list">
+          <li class="nav-item active" data-tab="tab-moderacao" id="navModeracao">
+            <span class="nav-mark">MI</span> Moderar Indicações
+          </li>
+          <li class="nav-item" data-tab="tab-mesclagem" id="navMesclagem">
+            <span class="nav-mark">MC</span> Mesclar Candidatos
+          </li>
+          <li class="nav-item" data-tab="tab-crm" id="navCrm">
+            <span class="nav-mark">CV</span> CRM Vendas
+          </li>
+          <li class="nav-item" data-tab="tab-eleicoes" id="navEleicoes">
+            <span class="nav-mark">CE</span> Config. Eleições
+          </li>
+          <li class="nav-item" data-tab="tab-estrutura" id="navEstrutura">
+            <span class="nav-mark">GE</span> Gerenciar Estrutura
+          </li>
+          <li class="nav-item" data-tab="tab-logs" id="navLogs">
+            <span class="nav-mark">LA</span> Logs de Auditoria
+          </li>
+        </ul>
+      </nav>
+
+      <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+        <div id="txtAdminUser" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Carregando...</div>
+        <div id="txtAdminRole" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 16px;">Papel</div>
+        <button class="btn btn-secondary" id="btnAdminLogout" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px 12px;">Sair do Painel</button>
+      </div>
+    </aside>
+
+    <!-- Área de Conteúdo da Aba Ativa -->
+    <main class="content">
+      
+      <!-- ABA 1: MODERAÇÃO DE INDICAÇÕES -->
+      <section class="tab-panel active" id="tab-moderacao">
+        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Fila de Indicações</h2>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Analise e aprove as indicações enviadas pelo público para que virem concorrentes oficiais.</p>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-title">Novas Indicações</div>
+            <div class="stat-card-value" id="statPendingNominations">0</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome Indicado</th>
+                <th>Tipo</th>
+                <th>Rede Social / Instagram</th>
+                <th>Contato Eleitor</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="nominationsTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando fila de moderação...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ABA 2: MESCLAGEM DE CONCORRENTES DUPLICADOS -->
+      <section class="tab-panel" id="tab-mesclagem">
+        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Mesclagem de Candidatos</h2>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Agrupe concorrentes duplicados (ex: "Dr. João" e "João Advogados") para transferir votos e aliases de forma limpa.</p>
+
+        <div class="panel-card" style="max-width: 600px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 32px; border-radius: 10px;">
+          <form id="mergeForm">
+            <div class="form-group">
+              <label for="mergeCity">Cidade</label>
+              <select id="mergeCity" class="form-control" required>
+                <option value="">Selecione uma Cidade</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="mergeCategory">Categoria</label>
+              <select id="mergeCategory" class="form-control" required disabled>
+                <option value="">Selecione a categoria</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="mergeTarget">Candidato Oficial (Aquele que irá receber os votos e o selo)</label>
+              <select id="mergeTarget" class="form-control" required disabled>
+                <option value="">Selecione o candidato oficial</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="mergeDuplicate">Candidato Duplicado (Aquele que será mesclado e inativado)</label>
+              <select id="mergeDuplicate" class="form-control" required disabled>
+                <option value="">Selecione o candidato duplicado</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn" id="btnExecuteMerge" style="margin-top: 12px; width: 100%; justify-content: center;" disabled>Executar Mesclagem Segura</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ABA 3: CRM DE VENDAS (COMERCIAL) -->
+      <section class="tab-panel" id="tab-crm">
+        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">CRM Funil de Contatos Comerciais</h2>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Acompanhe a prospecção e venda de selos para os candidatos oficiais.</p>
+
+        <div class="selector-card" style="display: flex; gap: 16px; margin-bottom: 24px; background: transparent; padding: 0; border: none; box-shadow: none;">
+          <select id="crmSelectCity" class="form-control" style="max-width: 250px;">
+            <option value="">Selecione a cidade</option>
+          </select>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome Concorrente</th>
+                <th>Categoria</th>
+                <th>Contato WhatsApp / E-mail</th>
+                <th>Funil / Pacote / Valor</th>
+                <th>Próxima Ação / Observações</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="crmTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: rgba(255,255,255,0.3);">Selecione uma cidade para carregar o CRM comercial.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ABA 4: CONFIGURAÇÕES E APURAÇÃO DE ELEIÇÕES -->
+      <section class="tab-panel" id="tab-eleicoes">
+        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Status de Eleições & Publicação</h2>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Encerre as edições ativas, apure os votos validados e publique os resultados oficiais.</p>
+
+        <div class="panel-card" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+          <h3 style="color: #d4af37; font-size: 1.05rem; margin: 0 0 14px 0;">Desempate Manual Auditado</h3>
+          <form id="formResolveTie" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end;">
+            <div class="form-group" style="margin: 0;">
+              <label for="tieElection">Eleicao</label>
+              <select id="tieElection" class="form-control" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="tieCategory">Categoria</label>
+              <select id="tieCategory" class="form-control" required disabled>
+                <option value="">Selecione a eleicao</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="tieCandidate">Vencedor do desempate</label>
+              <select id="tieCandidate" class="form-control" required disabled>
+                <option value="">Selecione a categoria</option>
+              </select>
+            </div>
+            <button type="submit" class="btn" id="btnResolveTie" style="justify-content: center;">Registrar Desempate</button>
+          </form>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Cidade / Eleição</th>
+                <th>Ano</th>
+                <th>Período</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="electionsTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando edições cadastradas...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ABA 5: GERENCIAR ESTRUTURA (Cidades, Categorias, Eleições, Candidatos) -->
+      <section class="tab-panel" id="tab-estrutura">
+        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Gerenciar Estrutura</h2>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Configure cidades, categorias fixas, eleições e gerencie concorrentes diretamente.</p>
+
+        <!-- Sub-navegação interna da Estrutura -->
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+          <button type="button" class="btn btn-secondary sub-tab-btn active" data-subtab="subtab-cidades" style="font-size: 0.8rem; padding: 6px 12px;">Cidades</button>
+          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-categorias" style="font-size: 0.8rem; padding: 6px 12px;">Categorias</button>
+          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-eleicoes" style="font-size: 0.8rem; padding: 6px 12px;">Criar Eleição & Vincular</button>
+          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-candidatos" style="font-size: 0.8rem; padding: 6px 12px;">Candidatos</button>
+        </div>
+
+        <!-- 1. SUB-TAB: CIDADES -->
+        <div class="sub-tab-panel active" id="subtab-cidades">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Adicionar Cidade</h3>
+              <form id="formAddCity" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+                <div class="form-group">
+                  <label for="inputCityName">Nome da Cidade</label>
+                  <input type="text" id="inputCityName" class="form-control" placeholder="Ex: Campinas" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Salvar Cidade</button>
+              </form>
+            </div>
+            <div>
+              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Cidades Cadastradas</h3>
+              <div class="table-container" style="max-height: 300px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="citiesTableBody">
+                    <tr>
+                      <td colspan="2" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando cidades...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. SUB-TAB: CATEGORIAS -->
+        <div class="sub-tab-panel" id="subtab-categorias" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Adicionar Categoria</h3>
+              <form id="formAddCategory" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+                <div class="form-group">
+                  <label for="inputCategoryName">Nome da Categoria</label>
+                  <input type="text" id="inputCategoryName" class="form-control" placeholder="Ex: Melhor Hamburgueria" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Salvar Categoria</button>
+              </form>
+            </div>
+            <div>
+              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Categorias Cadastradas</h3>
+              <div class="table-container" style="max-height: 300px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="categoriesTableBody">
+                    <tr>
+                      <td colspan="2" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando categorias...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. SUB-TAB: CRIAR ELEIÇÃO & VINCULAR -->
+        <div class="sub-tab-panel" id="subtab-eleicoes" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px;">
+            <div>
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Criar Edição/Eleição</h3>
+              <form id="formAddElection" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+                <div class="form-group">
+                  <label for="selectElectionCity">Cidade</label>
+                  <select id="selectElectionCity" class="form-control" required>
+                    <option value="">Selecione...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="inputElectionYear">Ano</label>
+                  <input type="number" id="inputElectionYear" class="form-control" value="2026" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputElectionStart">Data de Início</label>
+                  <input type="date" id="inputElectionStart" class="form-control" required>
+                </div>
+                <div class="form-group">
+                  <label for="inputElectionEnd">Data de Fim</label>
+                  <input type="date" id="inputElectionEnd" class="form-control" required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Criar Edição</button>
+              </form>
+            </div>
+            <div>
+              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Vincular Categorias à Eleição</h3>
+              <form id="formLinkCategories" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+                <div class="form-group">
+                  <label for="selectLinkElection">Selecionar Eleição</label>
+                  <select id="selectLinkElection" class="form-control" required>
+                    <option value="">Selecione uma eleição...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label style="margin-bottom: 12px; display: block;">Selecione as Categorias Ativas nesta Edição</label>
+                  <div id="linkCategoriesCheckboxes" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                    <!-- Checkboxes injetados via JS -->
+                    <span style="color: rgba(255,255,255,0.3); font-size: 0.85rem;">Selecione primeiro uma eleição...</span>
+                  </div>
+                </div>
+                <button type="submit" class="btn" id="btnSaveCategoryLinks" style="width: 100%; justify-content: center;" disabled>Salvar Vínculos de Categoria</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. SUB-TAB: CANDIDATOS -->
+        <div class="sub-tab-panel" id="subtab-candidatos" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 24px;">
+            <div>
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;" id="lblCandidateForm">Adicionar Candidato Oficial</h3>
+              <form id="formAddCandidate" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+                <input type="hidden" id="inputCandidateId">
+                <div class="form-group">
+                  <label for="selectCandElection">Eleição (Cidade / Ano)</label>
+                  <select id="selectCandElection" class="form-control" required>
+                    <option value="">Selecione a eleição...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="selectCandCategory">Categoria</label>
+                  <select id="selectCandCategory" class="form-control" required disabled>
+                    <option value="">Selecione primeiro a eleição</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="inputCandName">Nome Oficial do Candidato</label>
+                  <input type="text" id="inputCandName" class="form-control" placeholder="Ex: Chefe Rodrigo Castro" required>
+                </div>
+                <div class="form-group">
+                  <label for="selectCandType">Tipo</label>
+                  <select id="selectCandType" class="form-control" required>
+                    <option value="profissional">Profissional</option>
+                    <option value="empresa">Empresa</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="inputCandInstagram">Instagram (Sem @)</label>
+                  <input type="text" id="inputCandInstagram" class="form-control" placeholder="Ex: cheferodrigo">
+                </div>
+                <div class="form-group">
+                  <label for="inputCandWhatsapp">WhatsApp</label>
+                  <input type="text" id="inputCandWhatsapp" class="form-control" placeholder="Ex: 19999999999">
+                </div>
+                <div class="form-group">
+                  <label for="inputCandEmail">E-mail de Contato</label>
+                  <input type="email" id="inputCandEmail" class="form-control" placeholder="Ex: contato@rodrigo.com">
+                </div>
+                <div class="form-group">
+                  <label for="inputCandLogo">URL do Logotipo/Foto</label>
+                  <input type="url" id="inputCandLogo" class="form-control" placeholder="https://exemplo.com/foto.jpg">
+                </div>
+                <div class="form-group">
+                  <label for="inputCandDesc">Descrição Curta</label>
+                  <textarea id="inputCandDesc" class="form-control" rows="3" placeholder="Descrição do concorrente..."></textarea>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="submit" class="btn" style="flex: 1; justify-content: center;">Salvar Candidato</button>
+                  <button type="button" class="btn btn-secondary" id="btnCancelCandEdit" style="display: none;">Cancelar</button>
+                </div>
+              </form>
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="color: #ffffff; font-size: 1.1rem; margin: 0;">Lista de Candidatos Oficiais</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <select id="filterListElection" class="form-control" style="max-width: 200px; padding: 6px; font-size: 0.8rem;">
+                    <option value="">Filtrar por Eleição...</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-container" style="max-height: 600px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nome / Instagram</th>
+                      <th>Categoria</th>
+                      <th>Cidade / Ano</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="candidatesTableBody">
+                    <tr>
+                      <td colspan="4" style="text-align: center; color: rgba(255,255,255,0.3);">Selecione ou filtre por eleição para listar candidatos.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ABA 6: LOGS DE AUDITORIA E VOTOS SUSPEITOS -->
+      <section class="tab-panel" id="tab-logs">
+        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Logs do Sistema & Auditoria</h2>
+        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Monitore as ações dos administradores e analise logs de auditoria contra fraudes.</p>
+
+        <h3 style="color: #d4af37; font-size: 1.1rem; border-bottom: 1px solid rgba(212,175,55,0.1); padding-bottom: 8px; margin-bottom: 16px;">Logs de Ações de Administradores</h3>
+        <div class="table-container" style="max-height: 250px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Admin Email</th>
+                <th>Ação</th>
+                <th>Detalhes</th>
+              </tr>
+            </thead>
+            <tbody id="adminActionLogsTableBody">
+              <tr>
+                <td colspan="4" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando histórico de auditoria...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="color: #ff5555; font-size: 1.1rem; border-bottom: 1px solid rgba(255,85,85,0.15); padding-bottom: 8px; margin-top: 40px; margin-bottom: 16px;">Votos Sinalizados como Suspeitos</h3>
+        <div class="table-container" style="max-height: 250px;">
+          <table>
+            <thead>
+              <tr>
+                <th>ID Voto</th>
+                <th>Candidato</th>
+                <th>Votante</th>
+                <th>IP / Dispositivo</th>
+                <th>Motivo Suspeito</th>
+              </tr>
+            </thead>
+            <tbody id="suspiciousVotesTableBody">
+              <tr>
+                <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Nenhum voto suspeito sinalizado.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="/src/js/admin.js"></script>
+</body>
+</html>

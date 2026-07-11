@@ -1,0 +1,22 @@
+// ==========================================================================
+// Main Entry Stylesheet - Melhores do Ano
+// Imports modular partial styles based on section structures
+// ==========================================================================
+
+// 1. Abstracts & Tokens
+@import './abstracts/variables';
+
+// 2. Core Base Styles & Wrappers
+@import './base/reset';
+@import './base/toast';
+@import './base/modal';
+
+// 3. Section Component Styles
+@import './sections/navbar';
+@import './sections/hero';
+@import './sections/about';
+@import './sections/gallery';
+@import './sections/methodology';
+@import './sections/cta';
+@import './sections/footer';
+@import './sections/portal';

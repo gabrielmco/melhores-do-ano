@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central de Acesso | Melhores do Ano</title>
+  <meta name="description" content="Central oficial de acesso aos portais de votação, resultados de vencedores e painel de controle do candidato do prêmio Melhores do Ano.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://melhoresdoano.com.br/portal.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Central de Acesso | Melhores do Ano">
+  <meta property="og:description" content="Acesse votacao, resultados e portais autorizados do Melhores do Ano.">
+  <meta property="og:url" content="https://melhoresdoano.com.br/portal.html">
+  <meta property="og:image" content="https://melhoresdoano.com.br/assets/images/trophy.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/webp" href="/assets/images/logo-emporio-excelencia.webp">
+  
+  <!-- Google Fonts (Plus Jakarta Sans) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SCSS Entry File -->
+  <link rel="stylesheet" href="/src/styles/main.scss">
+</head>
+<body class="portal-page">
+
+  <div class="portal-wrapper">
+    <!-- Header with Centered Logo -->
+    <header class="portal-header-logo">
+      <a href="/" class="logo-link">
+        <img src="/assets/images/logo-emporio-excelencia.webp" alt="Melhores do Ano Logo" class="logo-img">
+      </a>
+    </header>
+
+    <!-- Main Content Portal Section -->
+    <main class="portal-main">
+      <div class="portal-intro">
+        <span class="portal-overline">Central de Acesso Oficial</span>
+        <h1 class="portal-title">Selecione o seu portal</h1>
+        <p class="portal-desc">
+          Participe da votação, confira a lista de marcas consagradas ou gerencie sua placa e selos digitais de excelência.
+        </p>
+      </div>
+
+      <!-- 3-Column Portal Cards Grid -->
+      <div class="portal-grid">
+        
+        <!-- Card 1: Votação -->
+        <a href="/votar.html" class="portal-card" data-portal="votar">
+          <div class="portal-card-overlay"></div>
+          <div class="portal-card-content">
+            <span class="portal-card-tag">Aberto ao Público</span>
+            <h3 class="portal-card-title">Portal de Votação</h3>
+            <p class="portal-card-desc">
+              Participe da pesquisa popular da sua região, indique novos nomes e vote nos melhores profissionais e empresas da cidade.
+            </p>
+            <div class="portal-card-btn">
+              <span>Votar Agora</span>
+              <svg class="portal-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 2: Resultados -->
+        <a href="/resultados.html" class="portal-card" data-portal="resultados">
+          <div class="portal-card-overlay"></div>
+          <div class="portal-card-content">
+            <span class="portal-card-tag">Galeria Oficial</span>
+            <h3 class="portal-card-title">Galeria de Resultados</h3>
+            <p class="portal-card-desc">
+              Consulte a listagem consolidada de vencedores e marcas eleitas como o grande destaque do ano na sua localidade.
+            </p>
+            <div class="portal-card-btn">
+              <span>Conferir Ganhadores</span>
+              <svg class="portal-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Card 3: Candidato -->
+        <a href="/candidato.html" class="portal-card" data-portal="candidato">
+          <div class="portal-card-overlay"></div>
+          <div class="portal-card-content">
+            <span class="portal-card-tag font-gold">Área do Concorrente</span>
+            <h3 class="portal-card-title">Painel do Candidato</h3>
+            <p class="portal-card-desc">
+              Acesse seu painel restrito para editar seus dados públicos de perfil, baixar seus selos e realizar o resgate da placa física oficial.
+            </p>
+            <div class="portal-card-btn">
+              <span>Acessar Painel</span>
+              <svg class="portal-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="portal-footer">
+      <p class="copyright">&copy; 2026 Empório Excelência Oficial. Todos os direitos reservados.</p>
+      <div class="footer-links">
+        <a href="/">Início</a>
+        <span class="bullet">•</span>
+        <a href="/termos.html">Termos de Uso</a>
+        <span class="bullet">•</span>
+        <a href="/privacidade.html">Políticas de Privacidade</a>
+      </div>
+    </footer>
+  </div>
+
+</body>
+</html>

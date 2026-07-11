@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /candidato.html
+Disallow: /comercial.html
+Disallow: /portal.html
+
+Sitemap: https://melhoresdoano.com.br/sitemap.xml

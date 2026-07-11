@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resultados Oficiais | Empório Excelência</title>
+  <meta name="description" content="Confira os profissionais e marcas eleitos como destaques do ano em sua cidade.">
+  <link rel="canonical" href="https://melhoresdoano.com.br/resultados.html">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Resultados Oficiais | Melhores do Ano">
+  <meta property="og:description" content="Confira os profissionais e marcas eleitos como destaques do ano em sua cidade.">
+  <meta property="og:url" content="https://melhoresdoano.com.br/resultados.html">
+  <meta property="og:image" content="https://melhoresdoano.com.br/assets/images/trophy.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/webp" href="/assets/images/logo-emporio-excelencia.webp">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SCSS Entry File -->
+  <link rel="stylesheet" href="/src/styles/main.scss">
+  
+  <style>
+    body {
+      background-color: #070708;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .results-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 80px 24px 40px 24px;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+
+    .header-section {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .header-section h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-section p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .selector-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .selector-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 0;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #d4af37;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    select.form-control option {
+      background: #0e0e10;
+      color: #ffffff;
+    }
+
+    .category-results-group {
+      margin-bottom: 48px;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .category-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      border-left: 3px solid #d4af37;
+      padding-left: 12px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .winners-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .winners-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .winner-card {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(212, 175, 55, 0.02) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.05);
+      overflow: hidden;
+    }
+
+    .winner-card::before {
+      content: 'VENCEDOR';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      color: #070708;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.06em;
+    }
+
+    .finalist-card {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+    }
+
+    .finalist-card::before {
+      content: 'FINALISTA';
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.06em;
+    }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      background-size: cover;
+      background-position: center;
+      flex-shrink: 0;
+    }
+
+    .winner-card .avatar {
+      width: 80px;
+      height: 80px;
+      border: 2px solid #d4af37;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    .info {
+      flex: 1;
+    }
+
+    .name {
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 6px;
+    }
+
+    .winner-card .name {
+      font-size: 1.4rem;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+    }
+
+    .instagram {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .instagram a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .instagram a:hover {
+      color: #d4af37;
+      text-decoration: underline;
+    }
+
+    .votes-badge {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.4);
+      margin-top: 4px;
+    }
+
+    .status-msg {
+      text-align: center;
+      padding: 40px;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="results-container">
+    <div class="header-section">
+      <h1>Resultados Oficiais</h1>
+      <p>Conheça as marcas, empresas e profissionais liberais consagrados como os Melhores do Ano em sua região.</p>
+    </div>
+
+    <!-- Seletor de Localidade e Edição -->
+    <div class="selector-card">
+      <div class="form-group">
+        <label for="selectCity">Cidade</label>
+        <select id="selectCity" class="form-control">
+          <option value="">Carregando cidades...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="selectElection">Edição / Ano</label>
+        <select id="selectElection" class="form-control" disabled>
+          <option value="">Selecione primeiro a cidade</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Resultados Carregados -->
+    <div id="resultsList">
+      <div class="status-msg" id="statusMessage">Selecione a cidade e a edição para conferir os resultados.</div>
+    </div>
+  </div>
+
+  <footer style="text-align: center; padding: 20px; color: rgba(255,255,255,0.3); font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.03);">
+    &copy; 2026 Empório Excelência Oficial. Todos os direitos reservados.
+  </footer>
+
+  <!-- Entry Script -->
+  <script type="module" src="/src/js/resultados.js"></script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel do Candidato | Empório Excelência</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/webp" href="/assets/images/logo-emporio-excelencia.webp">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SCSS Entry File -->
+  <link rel="stylesheet" href="/src/styles/main.scss">
+  
+  <style>
+    body {
+      background-color: #070708;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .panel-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 80px 24px 40px 24px;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+
+    .auth-card {
+      max-width: 400px;
+      margin: 100px auto;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 8px;
+      padding: 48px 36px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    .auth-card h2 {
+      font-size: 1.6rem;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: #d4af37;
+    }
+
+    .auth-card p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+      margin-top: 0;
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 10px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #d4af37;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-action {
+      width: 100%;
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      border: none;
+      color: #070708;
+      padding: 14px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.25);
+    }
+
+    /* Layout do Painel Principal */
+    .dashboard-layout {
+      display: none; /* Ativado via JS */
+      animation: fadeIn 0.5s ease;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 24px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.8rem;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.6);
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-logout:hover {
+      border-color: #ff5555;
+      color: #ff5555;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-card h3 {
+      font-size: 1.2rem;
+      margin-top: 0;
+      margin-bottom: 24px;
+      color: #d4af37;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      padding-bottom: 12px;
+    }
+
+    /* Preview de Selos e Downloads */
+    .kit-item {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .kit-thumb {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: #070708;
+      font-weight: 700;
+    }
+
+    .kit-info {
+      flex: 1;
+    }
+
+    .kit-thumb-label {
+      font-size: 0.82rem;
+      letter-spacing: 0.12em;
+      border: 1px solid rgba(212, 175, 55, 0.28);
+      background: rgba(212, 175, 55, 0.08);
+      color: #d4af37;
+    }
+
+    .kit-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+
+    .kit-desc {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    .btn-download {
+      background: rgba(212, 175, 55, 0.1);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: #d4af37;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-download:hover {
+      background: #d4af37;
+      color: #070708;
+    }
+
+    .profile-summary {
+      background: rgba(212, 175, 55, 0.03);
+      border: 1px solid rgba(212, 175, 55, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .profile-summary-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .profile-summary-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .profile-summary-row span:first-child {
+      color: rgba(255,255,255,0.4);
+    }
+
+    .profile-summary-row span:last-child {
+      font-weight: 600;
+    }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .status-aprovado { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+    .status-pendente { background: rgba(241, 196, 15, 0.15); color: #f1c40f; }
+    .status-rejeitado { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Botão Voltar Flutuante no Canto Superior Esquerdo -->
+  <a href="/#footer" onclick="if(window.history.length > 1) { window.history.back(); return false; }" class="btn-back-floating" style="position: absolute; top: 24px; left: 24px; display: inline-flex; align-items: center; gap: 8px; color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.85rem; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 50px; z-index: 1000;" onmouseover="this.style.color='#d4af37'; this.style.borderColor='rgba(212,175,55,0.3)'; this.style.background='rgba(212,175,55,0.03)'" onmouseout="this.style.color='rgba(255,255,255,0.5)'; this.style.borderColor='rgba(255,255,255,0.08)'; this.style.background='rgba(255,255,255,0.02)'">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+    Voltar
+  </a>
+
+  <div class="panel-container">
+    
+    <!-- TELA 1: LOGIN DO CANDIDATO -->
+    <div class="auth-card" id="loginScreen">
+      <h2>Painel do Candidato</h2>
+      <p>Acesse seu perfil oficial do prêmio para atualizar suas informações e obter os selos de marketing.</p>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">E-mail Cadastrado</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="voce@empresa.com.br" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Senha de Acesso</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Sua senha" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn-action" id="btnLoginSubmit" style="justify-content: center;">Entrar</button>
+      </form>
+      <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
+        <a href="/#footer" onclick="if(window.history.length > 1) { window.history.back(); return false; }" style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Voltar para o Site Principal
+        </a>
+      </div>
+    </div>
+
+    <!-- TELA 2: DASHBOARD DO CANDIDATO -->
+    <div class="dashboard-layout" id="dashboardScreen">
+      <div class="dashboard-header">
+        <div>
+          <h1 id="txtCandidateName">Carregando candidato...</h1>
+          <p style="margin: 4px 0 0 0; color: rgba(255,255,255,0.4); font-size: 0.9rem;" id="txtEditionInfo">Edição Oficial</p>
+        </div>
+        <button class="btn-logout" id="btnLogout">Sair</button>
+      </div>
+
+      <div class="dashboard-grid">
+        
+        <!-- Bloco de Edição de Informações -->
+        <div class="panel-card">
+          <h3>Atualizar Meu Perfil Público</h3>
+          
+          <form id="profileUpdateForm">
+            <div class="profile-summary">
+              <div class="profile-summary-row">
+                <span>Status da Votação:</span>
+                <span id="badgeStatus" class="status-badge status-pendente">Carregando</span>
+              </div>
+              <div class="profile-summary-row">
+                <span>WhatsApp (Privado):</span>
+                <span id="txtWhatsapp">...</span>
+              </div>
+              <div class="profile-summary-row">
+                <span>E-mail (Privado):</span>
+                <span id="txtEmail">...</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="inputInstagram">Instagram Profissional / Comercial</label>
+              <input type="text" id="inputInstagram" class="form-control" placeholder="@username">
+            </div>
+
+            <div class="form-group">
+              <label for="inputLogoUrl">Link da Logomarca (URL)</label>
+              <input type="url" id="inputLogoUrl" class="form-control" placeholder="https://exemplo.com/sua-logo.png">
+            </div>
+
+            <div class="form-group">
+              <label for="inputDescription">Descrição Profissional / Resumo da Empresa</label>
+              <textarea id="inputDescription" class="form-control" rows="4" style="resize: vertical;" placeholder="Fale um pouco sobre sua trajetória, especialidades e o que faz seu negócio se destacar..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-action" id="btnUpdateProfile">Salvar Informações</button>
+          </form>
+        </div>
+
+        <!-- Bloco de Selos e Downloads -->
+        <div class="panel-card" style="align-self: start;">
+          <h3>Kit de Divulgação Oficial</h3>
+          <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); line-height: 1.5; margin-bottom: 24px;">
+            Aproveite a visibilidade do prêmio para promover sua marca nas redes sociais. Baixe os materiais liberados e solicite os itens comerciais oficiais quando quiser ampliar a divulgação.
+          </p>
+
+          <!-- Selo 1: Votação Aberta -->
+          <div class="kit-item">
+            <div class="kit-thumb kit-thumb-label">AB</div>
+            <div class="kit-info">
+              <div class="kit-title">Selo Votação Aberta</div>
+              <div class="kit-desc">Instagram Stories</div>
+            </div>
+            <a href="/assets/images/kit-seal.webp" class="btn-download" download>Baixar</a>
+          </div>
+
+          <!-- Selo 2: Vencedor Oficial -->
+          <div class="kit-item" id="winnerKitItem" style="display: none;">
+            <div class="kit-thumb kit-thumb-label">DA</div>
+            <div class="kit-info">
+              <div class="kit-title">Selo Destaque do Ano</div>
+              <div class="kit-desc">Instagram Feed (1080x1080)</div>
+            </div>
+            <a href="/assets/images/trophy.webp" class="btn-download" download>Baixar</a>
+          </div>
+
+          <!-- Selo 3: Selo de Excelência em Alta Resolução -->
+          <div class="kit-item">
+            <div class="kit-thumb kit-thumb-label">EX</div>
+            <div class="kit-info">
+              <div class="kit-title">Logotipo Oficial</div>
+              <div class="kit-desc">PNG transparente em alta resolucao</div>
+            </div>
+            <a href="/assets/images/logo-emporio-excelencia.png" class="btn-download" download>Baixar</a>
+          </div>
+
+          <!-- Solicitação Comercial -->
+          <div class="kit-item">
+            <div class="kit-thumb kit-thumb-label">PR</div>
+            <div class="kit-info">
+              <div class="kit-title">Placa e Kit Premium</div>
+              <div class="kit-desc">Solicitação comercial rastreada</div>
+            </div>
+            <a href="mailto:comercial@melhoresdoano.com.br" class="btn-download" id="commercialRequestLink" target="_blank" rel="noopener noreferrer">Solicitar</a>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <footer style="text-align: center; padding: 20px; color: rgba(255,255,255,0.3); font-size: 0.8rem; border-top: 1px solid rgba(255,255,255,0.03);">
+    &copy; 2026 Empório Excelência Oficial. Todos os direitos reservados.
+  </footer>
+
+  <!-- Entry Script -->
+  <script type="module" src="/src/js/candidato.js"></script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+// ==========================================================================
+// Navigation — Full-width, page-aligned, smart hide/show
+// ==========================================================================
+
+// The navbar sits flush with the page — no pill, no floating island.
+// It is transparent over the hero and transitions to solid on scroll.
+// It hides (slides up) when scrolling down past the hero and
+// reappears (slides down) when scrolling up — all driven by JS classes.
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+
+  // Smooth base transitions (position, opacity, bg, border)
+  transition:
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.45s ease,
+    border-bottom-color 0.45s ease,
+    box-shadow 0.45s ease;
+
+  // --- State: at the very top of the page (hero area) ---
+  // Completely transparent — the logo floats on the hero with no block beneath it.
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  box-shadow: none;
+
+  // --- State: after scrolling past the hero trigger point ---
+  &.navbar-solid {
+    background-color: rgba(7, 7, 8, 0.82);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.14);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03), 0 8px 32px rgba(0, 0, 0, 0.5);
+  }
+
+  // --- State: hidden (scrolled down) ---
+  // Slides the whole bar upward out of the viewport
+  &.navbar-hidden {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (max-width: 992px) {
+    height: 68px;
+  }
+}
+
+// Inner container — matches hero-container padding exactly so logo & hero text align
+.nav-container {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 6vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+
+  @media (max-width: 992px) {
+    padding: 0 24px;
+  }
+}
+
+// Logo — icon only (no text, no year badge)
+.nav-logo {
+  display: flex;
+  align-items: center;
+  z-index: 110;
+  height: 100%;
+
+  .logo-img {
+    height: 44px;
+    width: auto;
+    display: block;
+    object-fit: contain;
+    // Warm golden drop-shadow — visible on both transparent & solid navbar states
+    filter: drop-shadow(0 0 10px rgba($color-gold, 0.3));
+    transition: filter 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      .logo-img {
+        filter: drop-shadow(0 0 18px rgba($color-gold-light, 0.65));
+        transform: scale(1.06);
+      }
+    }
+  }
+}
+
+
+// Nav links
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+  z-index: 105;
+
+  @media (max-width: 992px) {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 300px;
+    height: 100vh;
+    background-color: rgba(7, 7, 8, 0.98);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 100px 40px;
+    gap: 32px;
+    transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+
+    &.active {
+      right: 0;
+    }
+  }
+
+  .nav-link {
+    font-family: $font-headings;
+    font-size: 1.0rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.58);
+    letter-spacing: 0.02em;
+    position: relative;
+    padding: 8px 0;
+    transition: color 0.3s ease;
+
+    @media (max-width: 992px) {
+      font-size: 1.4rem;
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: linear-gradient(to right, $color-gold-light, $color-gold);
+      border-radius: 1px;
+      transition: width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        color: #fff;
+
+        &::after {
+          width: 100%;
+        }
+      }
+    }
+
+    &.active {
+      color: $color-gold-light;
+      font-weight: 400;
+
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  z-index: 110;
+}
+
+.btn-nav-contact {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid rgba($color-gold, 0.38);
+  background-color: transparent;
+  color: $color-gold-light;
+  font-family: $font-headings;
+  font-weight: 300;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      border-bottom-color: $color-gold-light;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+  }
+
+  &:active {
+    transform: translateY(1px);
+    transition: transform 0.1s ease;
+  }
+}
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 120;
+
+  @media (max-width: 992px) {
+    display: flex;
+  }
+
+  span {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background-color: rgba(#fff, 0.85);
+    border-radius: 1px;
+    transition: all 0.3s ease;
+  }
+
+  &.active {
+    span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    span:nth-child(2) {
+      opacity: 0;
+    }
+
+    span:nth-child(3) {
+      transform: translateY(-7.5px) rotate(-45deg);
+    }
+  }
+}

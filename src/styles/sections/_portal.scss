@@ -1,0 +1,283 @@
+// ==========================================================================
+// Central de Portais Styling (_portal.scss)
+// ==========================================================================
+
+.portal-page {
+  background-color: $color-bg;
+  color: #ffffff;
+  font-family: $font-body;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(circle, rgba($color-gold, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.portal-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  position: relative;
+  z-index: 2;
+}
+
+.portal-header-logo {
+  text-align: center;
+  margin-bottom: 40px;
+
+  .logo-link {
+    display: inline-block;
+    transition: transform 0.3s ease;
+
+    @media (hover: hover) {
+      &:hover {
+        transform: scale(1.03);
+      }
+    }
+  }
+
+  .logo-img {
+    height: 64px;
+    object-fit: contain;
+  }
+}
+
+.portal-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 60px;
+}
+
+.portal-intro {
+  text-align: center;
+  max-width: 700px;
+  margin-bottom: 48px;
+
+  .portal-overline {
+    font-family: $font-headings;
+    font-size: 0.82rem;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    display: block;
+    margin-bottom: 12px;
+    @include gold-text-texture;
+  }
+
+  .portal-title {
+    font-family: $font-headings;
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin: 0 0 16px 0;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .portal-desc {
+    font-family: $font-body;
+    font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.55;
+    margin: 0;
+  }
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    gap: 20px;
+  }
+}
+
+.portal-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 36px;
+  box-sizing: border-box;
+  text-decoration: none;
+  overflow: hidden;
+  transition: 
+    border-color 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    transform 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+    box-shadow 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 280px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 100%, rgba($color-gold, 0.04) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      border-color: rgba($color-gold, 0.35);
+      transform: translateY(-4px);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        0 8px 20px rgba($color-gold, 0.03);
+
+      &::before {
+        opacity: 1;
+      }
+
+      .portal-arrow {
+        transform: translateX(4px);
+      }
+
+      .portal-card-btn {
+        color: #ffffff;
+      }
+    }
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.99);
+  }
+
+  .portal-card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+
+  .portal-card-tag {
+    font-family: $font-headings;
+    font-size: 0.72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 16px;
+    display: inline-block;
+
+    &.font-gold {
+      color: $color-gold-light;
+    }
+  }
+
+  .portal-card-title {
+    font-family: $font-headings;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: #ffffff;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.01em;
+  }
+
+  .portal-card-desc {
+    font-family: $font-body;
+    font-size: 0.92rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+  }
+
+  .portal-card-btn {
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: $color-gold-light;
+    font-family: $font-headings;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: auto;
+    transition: color 0.3s ease;
+
+    .portal-arrow {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s ease;
+    }
+  }
+}
+
+.portal-footer {
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding-top: 32px;
+  width: 100%;
+
+  .copyright {
+    font-family: $font-body;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.3);
+    margin: 0 0 12px 0;
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    a {
+      font-family: $font-body;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.45);
+      text-decoration: none;
+      transition: color 0.3s ease;
+
+      @media (hover: hover) {
+        &:hover {
+          color: $color-gold-light;
+        }
+      }
+    }
+
+    .bullet {
+      color: rgba(255, 255, 255, 0.15);
+      font-size: 0.8rem;
+    }
+  }
+}
