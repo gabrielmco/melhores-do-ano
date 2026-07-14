@@ -69,36 +69,79 @@
   gap: 18px;
 }
 
+@keyframes rotateBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 .access-panel-card {
   position: relative;
   display: flex;
   min-width: 0;
   min-height: 300px;
-  padding: clamp(28px, 4vw, 46px);
-  color: #1b1b18;
+  padding: 1px;
+  color: #ffffff;
   text-decoration: none;
-  background-color: #ffffff;
-  border: 1px solid #dfded8;
-  border-radius: 2px;
-  box-shadow: 0 1px 0 rgba(24, 24, 20, 0.03);
+  background-color: transparent;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   overflow: hidden;
+  z-index: 0;
   transform: translate3d(0, 0, 0);
   transition:
     transform 0.46s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.38s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.46s cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -2;
+    left: -50%;
+    top: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+      from 0deg,
+      #d4af37 0deg,
+      transparent 40deg,
+      transparent 180deg,
+      #d4af37 180deg,
+      transparent 220deg,
+      transparent 360deg
+    );
+    animation: rotateBorder 8s linear infinite;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 1px;
+    top: 1px;
+    width: calc(100% - 2px);
+    height: calc(100% - 2px);
+    background: #08080a;
+    border-radius: 11px;
+    transition: background-color 0.38s ease;
+  }
 
   &:hover {
     transform: translate3d(0, -7px, 0);
-    border-color: #c8c6bd;
-    background-color: #fdfdfc;
-    box-shadow: 0 28px 70px -34px rgba(31, 30, 25, 0.34);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+
+    &::after {
+      background-color: #0c0c0f;
+    }
 
     .access-panel-icon {
-      color: #ffffff;
-      background-color: #1f1f1c;
-      border-color: #1f1f1c;
+      color: #000000;
+      background-color: #d4af37;
+      border-color: #d4af37;
       transform: translate3d(0, -2px, 0) rotate(3deg);
     }
 
@@ -107,12 +150,12 @@
     }
 
     .access-panel-link {
-      border-color: #8d8b83;
+      border-color: #d4af37;
     }
   }
 
   &:focus-visible {
-    outline: 2px solid #1f1f1c;
+    outline: 2px solid #d4af37;
     outline-offset: 4px;
   }
 
@@ -125,7 +168,7 @@
 .access-panel-card--candidate {
   grid-column: 1 / -1;
   min-height: 286px;
-  background-color: #f4f3ef;
+  background-color: transparent;
 
   .access-panel-content {
     display: grid;
@@ -133,20 +176,15 @@
     column-gap: clamp(44px, 8vw, 120px);
     align-items: end;
   }
-
-  .access-panel-meta {
-    align-self: start;
-  }
-
-  .access-panel-copy {
-    align-self: end;
-  }
 }
 
 .access-panel-content {
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding: clamp(27px, 3.9vw, 45px);
+  box-sizing: border-box;
+  z-index: 1;
 }
 
 .access-panel-meta {
@@ -157,7 +195,7 @@
 }
 
 .access-panel-index {
-  color: #85837b;
+  color: rgba(255, 255, 255, 0.5);
   font-family: $font-body;
   font-size: 0.67rem;
   font-weight: 700;
@@ -170,9 +208,9 @@
   height: 44px;
   flex: 0 0 44px;
   place-items: center;
-  color: #242421;
-  background-color: transparent;
-  border: 1px solid #cfcdc5;
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   transform: translate3d(0, 0, 0) rotate(0);
   transition:
@@ -199,7 +237,7 @@
 .access-panel-status {
   display: block;
   margin-bottom: 14px;
-  color: #77746c;
+  color: #d4af37;
   font-family: $font-body;
   font-size: 0.68rem;
   font-weight: 700;
@@ -213,7 +251,7 @@
 
 .access-panel-title {
   margin: 0 0 14px;
-  color: #191916;
+  color: #ffffff;
   font-family: $font-headings;
   font-size: clamp(1.55rem, 2.8vw, 2.85rem);
   font-weight: 450;
@@ -228,7 +266,7 @@
 .access-panel-desc {
   max-width: 55ch;
   margin: 0;
-  color: #68665f;
+  color: rgba(255, 255, 255, 0.7);
   font-family: $font-body;
   font-size: 0.9rem;
   line-height: 1.65;
@@ -241,13 +279,13 @@
   gap: 20px;
   margin-top: 30px;
   padding-top: 18px;
-  color: #1b1b18;
+  color: #d4af37;
   font-family: $font-body;
   font-size: 0.74rem;
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  border-top: 1px solid #d7d5ce;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   transition: border-color 0.38s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
