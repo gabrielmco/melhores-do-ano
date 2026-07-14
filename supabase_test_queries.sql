@@ -26,7 +26,7 @@ INSERT INTO public.profiles (id, name, role) VALUES
 
 -- 3. INSERIR ESTRUTURA BÁSICA (Cidade, Eleição, Categorias)
 INSERT INTO public.cities (id, name) VALUES
-  ('11111111-1111-1111-1111-111111111111', 'São Paulo');
+  ('11111111-1111-1111-1111-111111111111', 'Bom Jardim - MG');
 
 -- Criar Eleição aberta (em andamento)
 INSERT INTO public.elections (id, city_id, year, status, start_date, end_date) VALUES

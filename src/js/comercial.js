@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient.js';
+import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
 
 // DOM Elements
 const comercialLoginScreen = document.getElementById('comercialLoginScreen');
@@ -165,18 +166,17 @@ function setupEventListeners() {
 }
 
 async function initCrmDropdown() {
-  crmSelectCity.innerHTML = '<option value="">Carregando cidades...</option>';
+  crmSelectCity.innerHTML = `<option value="">Carregando ${OFFICIAL_CITY.displayName}...</option>`;
   try {
     const { data, error } = await supabase.from('cities').select('*').order('name');
     if (error) throw error;
 
-    crmSelectCity.innerHTML = '<option value="">Selecione uma Cidade</option>';
-    data.forEach(city => {
-      const option = document.createElement('option');
-      option.value = city.id;
-      option.textContent = city.name;
-      crmSelectCity.appendChild(option);
-    });
+    const officialCity = findOfficialCity(data);
+    if (!officialCity) throw new Error(`${OFFICIAL_CITY.displayName} não está cadastrada.`);
+    crmSelectCity.innerHTML = `<option value="${officialCity.id}">${OFFICIAL_CITY.displayName}</option>`;
+    crmSelectCity.value = officialCity.id;
+    crmSelectCity.disabled = true;
+    await loadCrmData(officialCity.id);
   } catch (err) {
     console.error(err);
   }

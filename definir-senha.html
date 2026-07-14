@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Definir Nova Senha | Melhores do Ano</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #070708;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      max-width: 400px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(212, 175, 55, 0.15);
+      border-radius: 8px;
+      padding: 40px 30px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    }
+    h2 {
+      color: #d4af37;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 6px;
+      padding: 12px;
+      color: #ffffff;
+      font-family: inherit;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #d4af37;
+    }
+    .btn {
+      background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%);
+      border: none;
+      color: #070708;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2);
+    }
+    .message {
+      margin-top: 15px;
+      font-size: 0.9rem;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+    .success {
+      background: rgba(40, 167, 69, 0.15);
+      color: #28a745;
+      border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+    .error {
+      background: rgba(220, 53, 69, 0.15);
+      color: #dc3545;
+      border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>Definir Nova Senha</h2>
+    <p>Digite a senha desejada para a sua conta de administrador abaixo.</p>
+    
+    <form id="passwordForm">
+      <div class="form-group">
+        <label for="newPassword">Nova Senha</label>
+        <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" required minlength="6">
+      </div>
+      <button type="submit" class="btn">Salvar Senha</button>
+    </form>
+    
+    <div id="statusMessage" class="message"></div>
+  </div>
+
+  <script type="module">
+    import { supabase } from './src/js/supabaseClient.js';
+
+    const form = document.getElementById('passwordForm');
+    const input = document.getElementById('newPassword');
+    const msg = document.getElementById('statusMessage');
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        showMsg('Atenção: Nenhuma sessão de autenticação ativa encontrada. O link que você usou pode ter expirado. Por favor, envie um novo e-mail de recuperação de senha pelo painel do Supabase.', 'error');
+        form.style.display = 'none';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.style.display = 'none';
+      
+      const newPassword = input.value.trim();
+      if (newPassword.length < 6) {
+        showMsg('A senha precisa ter no mínimo 6 caracteres.', 'error');
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) {
+          showMsg(error.message, 'error');
+        } else {
+          showMsg('Senha salva com sucesso! Você pode fechar esta página e entrar no painel (/admin.html).', 'success');
+          input.value = '';
+          form.style.display = 'none';
+        }
+      } catch (err) {
+        showMsg('Erro ao atualizar a senha: ' + err.message, 'error');
+      }
+    });
+
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = 'message ' + type;
+      msg.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

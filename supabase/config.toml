@@ -1,0 +1,7 @@
+project_id = "projetos-melhores-do-ano"
+
+[functions.vote]
+verify_jwt = false
+
+[functions.nominate]
+verify_jwt = false

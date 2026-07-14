@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient.js';
+import { OFFICIAL_CITY, findOfficialCity, isOfficialCity } from './siteConfig.js';
 
 // Auth Elements
 const adminLoginScreen = document.getElementById('adminLoginScreen');
@@ -200,12 +201,13 @@ async function initStaffDashboard() {
 function applyRolePermissions(role) {
   const isCrmOnly = role === 'comercial';
   const hasFullAdmin = role === 'admin' || role === 'super_admin';
+  const canUseCrm = hasFullAdmin || isCrmOnly;
 
   document.getElementById('navModeracao').style.display = isCrmOnly ? 'none' : 'flex';
   document.getElementById('navMesclagem').style.display = isCrmOnly ? 'none' : 'flex';
-  document.getElementById('navCrm').style.display = 'flex'; // Comercial e Admins vêem CRM
-  document.getElementById('navEleicoes').style.display = isCrmOnly ? 'none' : 'flex';
-  document.getElementById('navLogs').style.display = isCrmOnly ? 'none' : 'flex';
+  document.getElementById('navCrm').style.display = canUseCrm ? 'flex' : 'none';
+  document.getElementById('navEleicoes').style.display = hasFullAdmin ? 'flex' : 'none';
+  document.getElementById('navLogs').style.display = hasFullAdmin ? 'flex' : 'none';
   
   // Apenas administradores e super_admins podem gerenciar estrutura
   const navEstrutura = document.getElementById('navEstrutura');
@@ -253,7 +255,7 @@ function setupEventListeners() {
   // Configuração de eventos para Mesclagem (Tab 2)
   mergeCity.addEventListener('change', async () => {
     const cityId = mergeCity.value;
-    mergeCategory.innerHTML = '<option value="">Selecione primeiro a cidade</option>';
+    mergeCategory.innerHTML = '<option value="">Aguardando a localidade oficial</option>';
     mergeCategory.disabled = true;
     resetMergeCandidatesFields();
     
@@ -416,15 +418,16 @@ async function loadNominations() {
 
     if (error) throw error;
 
-    statPendingNominations.textContent = data.length;
+    const officialNominations = data.filter(nomination => isOfficialCity(nomination.elections?.cities));
+    statPendingNominations.textContent = officialNominations.length;
     nominationsTableBody.innerHTML = '';
 
-    if (data.length === 0) {
+    if (officialNominations.length === 0) {
       nominationsTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3); padding: 24px 0;">Fila limpa! Nenhuma indicação pendente de moderação.</td></tr>';
       return;
     }
 
-    data.forEach(nom => {
+    officialNominations.forEach(nom => {
       const row = document.createElement('tr');
       const categoryName = nom.categories ? nom.categories.name : 'N/A';
       const cityName = nom.elections && nom.elections.cities ? nom.elections.cities.name : 'N/A';
@@ -517,9 +520,9 @@ async function rejectNomination(id) {
 
 async function initMergeTab() {
   mergeForm.reset();
-  mergeCity.innerHTML = '<option value="">Carregando cidades...</option>';
+  mergeCity.innerHTML = `<option value="">Carregando ${OFFICIAL_CITY.displayName}...</option>`;
   mergeCity.disabled = false;
-  mergeCategory.innerHTML = '<option value="">Selecione primeiro a cidade</option>';
+  mergeCategory.innerHTML = '<option value="">Aguardando a localidade oficial</option>';
   mergeCategory.disabled = true;
   resetMergeCandidatesFields();
 
@@ -527,13 +530,12 @@ async function initMergeTab() {
     const { data, error } = await supabase.from('cities').select('*').order('name');
     if (error) throw error;
 
-    mergeCity.innerHTML = '<option value="">Selecione uma Cidade</option>';
-    data.forEach(city => {
-      const option = document.createElement('option');
-      option.value = city.id;
-      option.textContent = city.name;
-      mergeCity.appendChild(option);
-    });
+    const officialCity = findOfficialCity(data);
+    if (!officialCity) throw new Error(`${OFFICIAL_CITY.displayName} não está cadastrada.`);
+    mergeCity.innerHTML = `<option value="${officialCity.id}">${OFFICIAL_CITY.displayName}</option>`;
+    mergeCity.value = officialCity.id;
+    mergeCity.disabled = true;
+    await loadMergeCategories(officialCity.id);
   } catch (err) {
     console.error(err);
   }
@@ -672,20 +674,19 @@ async function executeMergeFlow(e) {
 // ============================================================================
 
 async function initCrmTab() {
-  crmSelectCity.innerHTML = '<option value="">Carregando cidades...</option>';
+  crmSelectCity.innerHTML = `<option value="">Carregando ${OFFICIAL_CITY.displayName}...</option>`;
   crmTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: rgba(255,255,255,0.3);">Selecione uma cidade para carregar o CRM comercial.</td></tr>';
 
   try {
     const { data, error } = await supabase.from('cities').select('*').order('name');
     if (error) throw error;
 
-    crmSelectCity.innerHTML = '<option value="">Selecione uma Cidade</option>';
-    data.forEach(city => {
-      const option = document.createElement('option');
-      option.value = city.id;
-      option.textContent = city.name;
-      crmSelectCity.appendChild(option);
-    });
+    const officialCity = findOfficialCity(data);
+    if (!officialCity) throw new Error(`${OFFICIAL_CITY.displayName} não está cadastrada.`);
+    crmSelectCity.innerHTML = `<option value="${officialCity.id}">${OFFICIAL_CITY.displayName}</option>`;
+    crmSelectCity.value = officialCity.id;
+    crmSelectCity.disabled = true;
+    await loadCrmData(officialCity.id);
   } catch (err) {
     console.error(err);
   }
@@ -827,10 +828,11 @@ async function loadElections() {
 
     if (error) throw error;
 
+    const officialElections = data.filter(election => isOfficialCity(election.cities));
     electionsTableBody.innerHTML = '';
-    populateTieElectionOptions(data);
+    populateTieElectionOptions(officialElections);
     
-    data.forEach(el => {
+    officialElections.forEach(el => {
       const row = document.createElement('tr');
       const start = new Date(el.start_date).toLocaleDateString('pt-BR');
       const end = new Date(el.end_date).toLocaleDateString('pt-BR');
@@ -997,7 +999,7 @@ async function handleResolveTie(e) {
   const confirmed = await showConfirm({
     eyebrow: 'Desempate',
     title: 'Registrar desempate auditado',
-    message: 'Esta acao cria um voto tecnico de desempate registrado nos logs administrativos.',
+    message: 'Esta ação registra uma decisão administrativa separada, sem alterar a quantidade real de votos.',
     confirmText: 'Registrar desempate',
     variant: 'danger'
   });
@@ -1118,22 +1120,18 @@ async function loadCitiesList() {
     if (error) throw error;
 
     citiesTableBody.innerHTML = '';
-    if (data.length === 0) {
-      citiesTableBody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: rgba(255,255,255,0.3);">Nenhuma cidade cadastrada.</td></tr>';
+    const officialCity = findOfficialCity(data);
+    if (!officialCity) {
+      citiesTableBody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: rgba(255,255,255,0.3);">${OFFICIAL_CITY.displayName} ainda não foi cadastrada.</td></tr>`;
       return;
     }
 
-    data.forEach(city => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td style="font-weight: 600;">${escapeHtml(city.name)}</td>
-        <td>
-          <button class="btn btn-danger btn-delete-city" data-id="${city.id}" style="font-size:0.75rem; padding: 4px 8px;">Remover</button>
-        </td>
-      `;
-      row.querySelector('.btn-delete-city').addEventListener('click', () => handleDeleteCity(city.id, city.name));
-      citiesTableBody.appendChild(row);
-    });
+    citiesTableBody.innerHTML = `
+      <tr>
+        <td style="font-weight: 600;">${escapeHtml(OFFICIAL_CITY.displayName)}</td>
+        <td><span style="color:#d4af37; font-size:0.75rem; font-weight:700; text-transform:uppercase;">Localidade protegida</span></td>
+      </tr>
+    `;
   } catch (err) {
     console.error(err);
     citiesTableBody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #ff5555;">Erro ao obter cidades.</td></tr>';
@@ -1142,15 +1140,14 @@ async function loadCitiesList() {
 
 async function handleAddCity(e) {
   e.preventDefault();
-  const name = inputCityName.value.trim();
-  if (!name) return;
+  const name = OFFICIAL_CITY.displayName;
 
   try {
     const { error } = await supabase.rpc('admin_create_city', { p_name: name });
     if (error) throw error;
 
-    showToast('Cidade cadastrada com sucesso!', 'success');
-    formAddCity.reset();
+    showToast(`${OFFICIAL_CITY.displayName} está configurada como localidade oficial.`, 'success');
+    inputCityName.value = OFFICIAL_CITY.displayName;
     await loadCitiesList();
   } catch (err) {
     console.error(err);
@@ -1257,16 +1254,14 @@ async function loadElectionsDropdowns() {
     const { data: cities, error: citiesErr } = await supabase.from('cities').select('*').order('name');
     if (citiesErr) throw citiesErr;
 
-    selectElectionCity.innerHTML = '<option value="">Selecione...</option>';
-    cities.forEach(city => {
-      const opt = document.createElement('option');
-      opt.value = city.id;
-      opt.textContent = city.name;
-      selectElectionCity.appendChild(opt);
-    });
+    const officialCity = findOfficialCity(cities);
+    if (!officialCity) throw new Error(`${OFFICIAL_CITY.displayName} não está cadastrada.`);
+    selectElectionCity.innerHTML = `<option value="${officialCity.id}">${OFFICIAL_CITY.displayName}</option>`;
+    selectElectionCity.value = officialCity.id;
+    selectElectionCity.disabled = true;
 
     // Carregar Eleições para Vínculo
-    const { data: elections, error: electErr } = await supabase.from('elections').select('*, cities(name)').order('year', { ascending: false });
+    const { data: elections, error: electErr } = await supabase.from('elections').select('*, cities(name)').eq('city_id', officialCity.id).order('year', { ascending: false });
     if (electErr) throw electErr;
 
     selectLinkElection.innerHTML = '<option value="">Selecione uma eleição...</option>';
@@ -1397,13 +1392,14 @@ async function loadCandidatesDropdowns() {
   try {
     const { data: elections, error } = await supabase.from('elections').select('*, cities(name)').order('year', { ascending: false });
     if (error) throw error;
+    const officialElections = elections.filter(election => isOfficialCity(election.cities));
 
     // Preencher dropdown de cadastro
     selectCandElection.innerHTML = '<option value="">Selecione a eleição...</option>';
     // Preencher dropdown de filtro de lista
     filterListElection.innerHTML = '<option value="">Filtrar por Eleição...</option>';
 
-    elections.forEach(el => {
+    officialElections.forEach(el => {
       const label = `${el.cities ? el.cities.name : 'N/A'} (${el.year}) - ${el.status}`;
       
       const opt1 = document.createElement('option');

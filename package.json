@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:assets": "node scripts/check-assets-links.js",
-    "test:links": "node scripts/check-assets-links.js"
+    "test:links": "node scripts/check-assets-links.js",
+    "test:security": "node scripts/check-supabase-security.mjs",
+    "test:browser": "node scripts/smoke-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",

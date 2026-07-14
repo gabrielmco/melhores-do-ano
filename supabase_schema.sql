@@ -966,7 +966,7 @@ begin
     raise exception 'Acesso negado: perfil sem privilegios comerciais.';
   end if;
 
-  if p_commercial_status not in ('nÃ£o contatado', 'chamou no WhatsApp', 'interessado', 'comprou', 'recusou') then
+  if p_commercial_status not in ('não contatado', 'chamou no WhatsApp', 'interessado', 'comprou', 'recusou') then
     raise exception 'Status comercial invalido.';
   end if;
 

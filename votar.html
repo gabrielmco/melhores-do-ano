@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Votação Oficial | Empório Excelência</title>
-  <meta name="description" content="Vote no destaque e profissional do ano da sua cidade. Sua escolha faz a diferença.">
+  <title>Votação Oficial Bom Jardim–MG | Melhores do Ano</title>
+  <meta name="description" content="Vote nos profissionais e empresas destaque de Bom Jardim–MG. Sua escolha ajuda a reconhecer a excelência local.">
   <link rel="canonical" href="https://melhoresdoano.com.br/votar.html">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Votacao Oficial | Melhores do Ano">
-  <meta property="og:description" content="Vote nos profissionais e empresas destaque da sua cidade.">
+  <meta property="og:title" content="Votação Oficial Bom Jardim–MG | Melhores do Ano">
+  <meta property="og:description" content="Vote nos profissionais e empresas que se destacam em Bom Jardim, Minas Gerais.">
   <meta property="og:url" content="https://melhoresdoano.com.br/votar.html">
   <meta property="og:image" content="https://melhoresdoano.com.br/assets/images/trophy.webp">
   <meta name="twitter:card" content="summary_large_image">
@@ -484,19 +484,19 @@
 
       <!-- ETAPA 1: Seleção de Cidade e Categoria -->
       <div class="step-panel active" id="panel1">
-        <h2 style="font-size: 1.3rem; font-weight: 500; margin-bottom: 24px; text-align: center;">Selecione a Localidade e Categoria</h2>
+        <h2 style="font-size: 1.3rem; font-weight: 500; margin-bottom: 24px; text-align: center;">Votação de Bom Jardim–MG</h2>
         
         <div class="form-group">
-          <label for="selectCity">Cidade da Premiação</label>
+          <label for="selectCity">Localidade oficial</label>
           <select id="selectCity" class="form-control">
-            <option value="">Carregando cidades...</option>
+            <option value="">Carregando Bom Jardim - MG...</option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="selectCategory">Categoria Profissional</label>
           <select id="selectCategory" class="form-control" disabled>
-            <option value="">Selecione primeiro a cidade</option>
+            <option value="">Aguardando a localidade oficial</option>
           </select>
         </div>
 
@@ -525,7 +525,7 @@
         </div>
 
         <button class="btn-submit" id="btnGoToStep3" disabled>Avançar</button>
-        <button class="btn-back" onclick="goToStep(1)">Voltar</button>
+        <button class="btn-back" id="btnBackToStep1" type="button">Voltar</button>
       </div>
 
       <!-- ETAPA 3: Dados de Contato e Turnstile -->
@@ -610,7 +610,7 @@
           </button>
         </div>
 
-        <button class="btn-submit" onclick="resetVoteFlow()" style="background: transparent; border: 1px solid rgba(212, 175, 55, 0.4); color: #d4af37;">Votar em Outra Categoria</button>
+        <button class="btn-submit" id="btnResetVoteFlow" type="button" style="background: transparent; border: 1px solid rgba(212, 175, 55, 0.4); color: #d4af37;">Votar em Outra Categoria</button>
       </div>
 
     </div>

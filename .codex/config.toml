@@ -1,0 +1,6 @@
+[mcp_servers.supabase_bom_jardim]
+url = "https://mcp.supabase.com/mcp?project_ref=pjgaidootluetzkbqmak&read_only=true&features=database,debugging,development,functions,docs"
+auth = "oauth"
+default_tools_approval_mode = "prompt"
+startup_timeout_sec = 20
+enabled = true

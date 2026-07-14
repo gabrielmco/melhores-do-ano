@@ -1,10 +1,11 @@
 import { supabase } from './supabaseClient.js';
+import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
 
 // Elements
 const selectCity = document.getElementById('selectCity');
 const selectElection = document.getElementById('selectElection');
 const resultsList = document.getElementById('resultsList');
-const statusMessage = document.getElementById('statusMessage');
+let statusMessage = document.getElementById('statusMessage');
 
 // State
 let state = {
@@ -55,7 +56,7 @@ function setupEventListeners() {
     if (state.selectedCityId) {
       await loadElections(state.selectedCityId);
     } else {
-      selectElection.innerHTML = '<option value="">Selecione primeiro a cidade</option>';
+      selectElection.innerHTML = '<option value="">Aguardando a localidade oficial</option>';
     }
   });
 
@@ -80,16 +81,21 @@ async function loadCities() {
 
     if (error) throw error;
 
-    selectCity.innerHTML = '<option value="">Selecione uma Cidade</option>';
-    data.forEach(city => {
-      const option = document.createElement('option');
-      option.value = city.id;
-      option.textContent = city.name;
-      selectCity.appendChild(option);
-    });
+    const officialCity = findOfficialCity(data);
+    if (!officialCity) {
+      selectCity.innerHTML = `<option value="">${OFFICIAL_CITY.displayName} ainda não foi configurada</option>`;
+      selectCity.disabled = true;
+      return;
+    }
+
+    selectCity.innerHTML = `<option value="${officialCity.id}">${OFFICIAL_CITY.displayName}</option>`;
+    selectCity.value = officialCity.id;
+    selectCity.disabled = true;
+    state.selectedCityId = officialCity.id;
+    await loadElections(officialCity.id);
   } catch (err) {
-    console.error('Erro ao buscar cidades:', err);
-    selectCity.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+    console.error('Erro ao buscar a localidade oficial:', err);
+    selectCity.innerHTML = `<option value="">Erro ao carregar ${OFFICIAL_CITY.displayName}</option>`;
   }
 }
 
@@ -106,8 +112,8 @@ async function loadElections(cityId) {
     if (error) throw error;
 
     if (data.length === 0) {
-      selectElection.innerHTML = '<option value="">Nenhuma edição publicada nesta cidade</option>';
-      statusMessage.textContent = 'Não há resultados publicados para a cidade selecionada no momento.';
+      selectElection.innerHTML = `<option value="">Nenhuma edição publicada em ${OFFICIAL_CITY.displayName}</option>`;
+      statusMessage.textContent = `Ainda não há resultados publicados para ${OFFICIAL_CITY.displayName}.`;
       statusMessage.style.display = 'block';
       return;
     }
@@ -121,6 +127,9 @@ async function loadElections(cityId) {
     });
 
     selectElection.disabled = false;
+    selectElection.value = data[0].id;
+    state.selectedElectionId = data[0].id;
+    await loadResults(data[0].id);
   } catch (err) {
     console.error('Erro ao buscar edições:', err);
     selectElection.innerHTML = '<option value="">Erro ao carregar edições</option>';
@@ -129,7 +138,8 @@ async function loadElections(cityId) {
 
 // Limpar tela de resultados
 function clearResults() {
-  resultsList.innerHTML = '<div class="status-msg" id="statusMessage">Selecione a cidade e a edição para conferir os resultados.</div>';
+  resultsList.innerHTML = `<div class="status-msg" id="statusMessage">Selecione a edição de ${OFFICIAL_CITY.displayName} para conferir os resultados.</div>`;
+  statusMessage = document.getElementById('statusMessage');
 }
 
 // Carregar e agrupar resultados da eleição selecionada

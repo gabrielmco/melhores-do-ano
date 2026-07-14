@@ -5,11 +5,29 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.21.0";
 const TURNSTILE_SECRET = Deno.env.get("CLOUDFLARE_TURNSTILE_SECRET_KEY") ?? "";
 const VOTE_HASH_SECRET = Deno.env.get("VOTE_HASH_SECRET") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
+function getSupabaseAdminKey() {
+  const legacyKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  if (legacyKey) return legacyKey;
+
+  try {
+    const availableKeys = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") ?? "{}") as Record<string, string>;
+    return availableKeys.default ?? Object.values(availableKeys)[0] ?? "";
+  } catch {
+    return "";
+  }
+}
+
+const SUPABASE_ADMIN_KEY = getSupabaseAdminKey();
 const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const TURNSTILE_EXPECTED_HOSTNAMES = (Deno.env.get("TURNSTILE_EXPECTED_HOSTNAMES") ?? "")
+  .split(",")
+  .map((hostname) => hostname.trim().toLowerCase())
+  .filter(Boolean);
+const TURNSTILE_EXPECTED_ACTION = Deno.env.get("TURNSTILE_EXPECTED_ACTION") ?? "voting";
 
 function buildCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
@@ -27,7 +45,14 @@ function buildCorsHeaders(req: Request) {
 }
 
 function requiredConfigIsPresent() {
-  return Boolean(TURNSTILE_SECRET && VOTE_HASH_SECRET && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY && ALLOWED_ORIGINS.length > 0);
+  return Boolean(
+    TURNSTILE_SECRET &&
+    VOTE_HASH_SECRET.length >= 32 &&
+    SUPABASE_URL &&
+    SUPABASE_ADMIN_KEY &&
+    ALLOWED_ORIGINS.length > 0 &&
+    TURNSTILE_EXPECTED_HOSTNAMES.length > 0
+  );
 }
 
 function originIsAllowed(req: Request) {
@@ -62,10 +87,11 @@ function isValidEmail(value: string) {
 }
 
 function isValidWhatsapp(value: string) {
-  return value.replace(/\D/g, "").length >= 10;
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 10 && digits.length <= 15;
 }
 
-async function hmacIdentifier(value: string) {
+async function hmacValue(namespace: string, value: string) {
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(VOTE_HASH_SECRET),
@@ -76,11 +102,40 @@ async function hmacIdentifier(value: string) {
   const signatureBuffer = await crypto.subtle.sign(
     "HMAC",
     key,
-    new TextEncoder().encode(value),
+    new TextEncoder().encode(namespace ? `${namespace}:${value}` : value),
   );
   return Array.from(new Uint8Array(signatureBuffer))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
+}
+
+function getClientIp(req: Request) {
+  return req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "127.0.0.1";
+}
+
+async function turnstileIsValid(token: string, ipAddress: string) {
+  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      secret: TURNSTILE_SECRET,
+      response: token,
+      remoteip: ipAddress,
+    }),
+  });
+  if (!response.ok) return false;
+
+  const result = await response.json() as {
+    success?: boolean;
+    hostname?: string;
+    action?: string;
+  };
+  const hostname = String(result.hostname ?? "").toLowerCase();
+  return Boolean(
+    result.success &&
+    TURNSTILE_EXPECTED_HOSTNAMES.includes(hostname) &&
+    result.action === TURNSTILE_EXPECTED_ACTION
+  );
 }
 
 serve(async (req) => {
@@ -148,6 +203,23 @@ serve(async (req) => {
       });
     }
 
+    if (
+      typeof voter_name !== "string" ||
+      voter_name.trim().length < 2 ||
+      voter_name.trim().length > 120 ||
+      typeof voter_identifier !== "string" ||
+      voter_identifier.length > 254 ||
+      typeof cookie_id !== "string" ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cookie_id) ||
+      typeof turnstile_token !== "string" ||
+      turnstile_token.length > 2048
+    ) {
+      return new Response(JSON.stringify({ error: "Formato dos dados inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const candidateName = String(name).trim();
     if (candidateName.length < 2 || candidateName.length > 160) {
       return new Response(JSON.stringify({ error: "Nome indicado inválido" }), {
@@ -184,30 +256,24 @@ serve(async (req) => {
       });
     }
 
-    const turnstileResponse = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        secret: TURNSTILE_SECRET,
-        response: turnstile_token,
-      }),
-    });
-
-    const turnstileData = await turnstileResponse.json();
-    if (!turnstileData.success) {
+    const ipAddress = getClientIp(req);
+    if (!await turnstileIsValid(String(turnstile_token), ipAddress)) {
       return new Response(JSON.stringify({ error: "Validação anti-bot falhou" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "127.0.0.1";
-    const userAgent = req.headers.get("user-agent") || "";
+    const userAgent = (req.headers.get("user-agent") || "").slice(0, 512);
     const normalizedIdentifier = normalizeIdentifier(String(voter_identifier), String(voter_type));
-    const voterIdentifierHash = await hmacIdentifier(normalizedIdentifier);
+    // O contato mantém o formato legado para preservar a trava de duplicidade existente.
+    const voterIdentifierHash = await hmacValue("", normalizedIdentifier);
+    const ipAddressHash = await hmacValue("ip", ipAddress);
+    const userAgentHash = await hmacValue("user-agent", userAgent);
+    const cookieIdHash = await hmacValue("device", String(cookie_id));
     const normalizedCandidateName = normalizeText(candidateName);
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ADMIN_KEY, {
       auth: { persistSession: false },
     });
 
@@ -215,7 +281,7 @@ serve(async (req) => {
     const { count: recentIpCount, error: recentIpError } = await supabase
       .from("nominations")
       .select("id", { count: "exact", head: true })
-      .eq("ip_address", ipAddress)
+      .eq("ip_address_hash", ipAddressHash)
       .gt("created_at", recentSince);
 
     if (recentIpError) throw recentIpError;
@@ -230,7 +296,7 @@ serve(async (req) => {
     const { count: recentCookieCount, error: recentCookieError } = await supabase
       .from("nominations")
       .select("id", { count: "exact", head: true })
-      .eq("cookie_id", cookie_id)
+      .eq("cookie_id_hash", cookieIdHash)
       .gt("created_at", recentSince);
 
     if (recentCookieError) throw recentCookieError;
@@ -335,15 +401,18 @@ serve(async (req) => {
       normalized_name: normalizedCandidateName,
       type,
       instagram: normalizeInstagram(instagram),
-      whatsapp: voter_type === "whatsapp" ? String(voter_identifier).trim() : null,
-      email: voter_type === "email" ? String(voter_identifier).trim().toLowerCase() : null,
+      whatsapp: null,
+      email: null,
       status: "pendente",
       voter_name: String(voter_name).trim(),
       voter_identifier_hash: voterIdentifierHash,
       voter_type,
-      ip_address: ipAddress,
-      user_agent: userAgent,
-      cookie_id,
+      ip_address: null,
+      user_agent: null,
+      cookie_id: null,
+      ip_address_hash: ipAddressHash,
+      user_agent_hash: userAgentHash,
+      cookie_id_hash: cookieIdHash,
       privacy_consent,
       validation_consent,
     });

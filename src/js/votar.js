@@ -1,4 +1,5 @@
-import { supabase } from './supabaseClient.js';
+import { supabase, isUsingMock } from './supabaseClient.js';
+import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
 
 // --- CONFIGURAÇÃO E ESTADO GLOBAL ---
 let state = {
@@ -13,6 +14,25 @@ let state = {
   turnstileToken: '',
   turnstileWidgetId: null
 };
+
+function getPublicFunctionHeaders() {
+  const apiKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+  const headers = {
+    'Content-Type': 'application/json'
+  };
+
+  if (apiKey) {
+    headers.apikey = apiKey;
+
+    // As chaves anon antigas são JWTs. As novas sb_publishable_ não são e
+    // devem ser enviadas somente como apikey para funções públicas.
+    if (apiKey.startsWith('eyJ')) {
+      headers.Authorization = `Bearer ${apiKey}`;
+    }
+  }
+
+  return headers;
+}
 
 // Obter ou criar Cookie ID único para identificar o navegador
 function getOrCreateCookieId() {
@@ -57,9 +77,6 @@ function goToStep(step) {
   });
 }
 
-// Expor globalmente para os botões "Voltar" inline
-window.goToStep = goToStep;
-
 // --- ASSINATURA E SELEÇÃO DE ELEMENTOS ---
 const selectCity = document.getElementById('selectCity');
 const selectCategory = document.getElementById('selectCategory');
@@ -67,6 +84,8 @@ const btnGoToStep2 = document.getElementById('btnGoToStep2');
 const btnGoToStep3 = document.getElementById('btnGoToStep3');
 const btnSubmitVote = document.getElementById('btnSubmitVote');
 const btnBackToStep2 = document.getElementById('btnBackToStep2');
+const btnBackToStep1 = document.getElementById('btnBackToStep1');
+const btnResetVoteFlow = document.getElementById('btnResetVoteFlow');
 const candidatesList = document.getElementById('candidatesList');
 const inputSearchCandidate = document.getElementById('inputSearchCandidate');
 const searchFeedback = document.getElementById('searchFeedback');
@@ -101,7 +120,7 @@ function setupEventListeners() {
     if (state.selectedCityId) {
       await loadCategoriesForCity(state.selectedCityId);
     } else {
-      selectCategory.innerHTML = '<option value="">Selecione primeiro a cidade</option>';
+      selectCategory.innerHTML = '<option value="">Aguardando a localidade oficial</option>';
     }
   });
 
@@ -249,6 +268,12 @@ function setupEventListeners() {
     goToStep(2);
   });
 
+  btnBackToStep1.addEventListener('click', () => {
+    goToStep(1);
+  });
+
+  btnResetVoteFlow.addEventListener('click', resetVoteFlow);
+
   // Enviar Voto
   btnSubmitVote.addEventListener('click', submitVoteFlow);
 
@@ -277,16 +302,22 @@ async function loadCities() {
       
     if (error) throw error;
     
-    selectCity.innerHTML = '<option value="">Selecione uma Cidade</option>';
-    data.forEach(city => {
-      const option = document.createElement('option');
-      option.value = city.id;
-      option.textContent = city.name;
-      selectCity.appendChild(option);
-    });
+    const officialCity = findOfficialCity(data);
+    if (!officialCity) {
+      selectCity.innerHTML = `<option value="">${OFFICIAL_CITY.displayName} ainda não foi configurada</option>`;
+      selectCity.disabled = true;
+      selectCategory.innerHTML = '<option value="">Votação ainda não configurada</option>';
+      return;
+    }
+
+    selectCity.innerHTML = `<option value="${officialCity.id}">${OFFICIAL_CITY.displayName}</option>`;
+    selectCity.value = officialCity.id;
+    selectCity.disabled = true;
+    state.selectedCityId = officialCity.id;
+    await loadCategoriesForCity(officialCity.id);
   } catch (err) {
-    console.error('Erro ao carregar cidades:', err);
-    selectCity.innerHTML = '<option value="">Erro ao carregar cidades</option>';
+    console.error('Erro ao carregar a localidade oficial:', err);
+    selectCity.innerHTML = `<option value="">Erro ao carregar ${OFFICIAL_CITY.displayName}</option>`;
   }
 }
 
@@ -303,7 +334,7 @@ async function loadCategoriesForCity(cityId) {
       .single();
       
     if (electionErr || !electionData) {
-      selectCategory.innerHTML = '<option value="">Nenhuma votação aberta nesta cidade</option>';
+      selectCategory.innerHTML = `<option value="">Nenhuma votação aberta em ${OFFICIAL_CITY.displayName}</option>`;
       return;
     }
     
@@ -535,6 +566,7 @@ function initTurnstile() {
   try {
     state.turnstileWidgetId = window.turnstile.render(widget, {
       sitekey: siteKey,
+      action: 'voting',
       callback: (token) => {
         state.turnstileToken = token;
         validateStep3Form();
@@ -562,8 +594,7 @@ async function submitVoteFlow() {
   btnSubmitVote.disabled = true;
   btnSubmitVote.textContent = 'Enviando voto...';
 
-  const isMock = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('gtdrnjxjcwfmekgfvjek') || import.meta.env.VITE_ENABLE_MOCKS === 'true';
-  if (isMock) {
+  if (isUsingMock) {
     console.log("🗳️ [MOCK] Simulando registro de voto/indicação offline.");
     setTimeout(() => {
       goToStep(4);
@@ -593,10 +624,7 @@ async function submitVoteFlow() {
       const nominateFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL || ''}/functions/v1/nominate`;
       const nominationResponse = await fetch(nominateFunctionUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY || ''}`
-        },
+        headers: getPublicFunctionHeaders(),
         body: JSON.stringify({
           election_id: state.selectedElectionId,
           category_id: state.selectedCategoryId,
@@ -629,10 +657,7 @@ async function submitVoteFlow() {
     
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-      },
+      headers: getPublicFunctionHeaders(),
       body: JSON.stringify({
         election_id: state.selectedElectionId,
         category_id: state.selectedCategoryId,
@@ -691,6 +716,3 @@ function resetVoteFlow() {
 
   goToStep(1);
 }
-
-// Expor para o botão de reset
-window.resetVoteFlow = resetVoteFlow;

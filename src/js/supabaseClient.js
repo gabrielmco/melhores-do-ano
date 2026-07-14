@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { OFFICIAL_CITY } from './siteConfig.js';
 
 const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || '').trim();
 const supabaseAnonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
@@ -8,11 +9,11 @@ const hasValidSupabaseConfig = Boolean(
   supabaseUrl &&
   supabaseAnonKey &&
   !supabaseUrl.includes('sua-url-aqui') &&
-  !supabaseAnonKey.includes('sua-anon-key-aqui') &&
-  !supabaseUrl.includes('gtdrnjxjcwfmekgfvjek') // bypass the dead Supabase URL
+  !supabaseAnonKey.includes('sua-anon-key-aqui')
 );
 
 let useMock = enableMocks || !hasValidSupabaseConfig;
+export const isUsingMock = useMock;
 
 let supabaseInstance;
 
@@ -22,8 +23,7 @@ if (useMock) {
   // Banco de dados fictício em memória para simulação
   const mockDatabase = {
     cities: [
-      { id: '11111111-1111-1111-1111-111111111111', name: 'São Paulo' },
-      { id: '22222222-2222-2222-2222-222222222222', name: 'Rio de Janeiro' }
+      { id: '11111111-1111-1111-1111-111111111111', name: OFFICIAL_CITY.displayName }
     ],
     categories: [
       { id: '33333333-3333-3333-3333-333333333331', name: 'Melhor Restaurante' },
@@ -31,19 +31,17 @@ if (useMock) {
       { id: '33333333-3333-3333-3333-333333333333', name: 'Melhor Pizzaria' }
     ],
     elections: [
-      { id: 'e_sp_2026', city_id: '11111111-1111-1111-1111-111111111111', year: 2026, status: 'aberta', start_date: '2026-01-01', end_date: '2026-12-31' },
-      { id: 'e_rj_2026', city_id: '22222222-2222-2222-2222-222222222222', year: 2026, status: 'aberta', start_date: '2026-01-01', end_date: '2026-12-31' }
+      { id: 'e_bom_jardim_2026', city_id: '11111111-1111-1111-1111-111111111111', year: 2026, status: 'aberta', start_date: '2026-01-01', end_date: '2026-12-31' }
     ],
     city_categories: [
-      { election_id: 'e_sp_2026', category_id: '33333333-3333-3333-3333-333333333331' },
-      { election_id: 'e_sp_2026', category_id: '33333333-3333-3333-3333-333333333332' },
-      { election_id: 'e_rj_2026', category_id: '33333333-3333-3333-3333-333333333331' },
-      { election_id: 'e_rj_2026', category_id: '33333333-3333-3333-3333-333333333333' }
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333331' },
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333332' },
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333333' }
     ],
     candidates: [
       { 
         id: 'cand_sabor_imperial', 
-        election_id: 'e_sp_2026', 
+        election_id: 'e_bom_jardim_2026',
         category_id: '33333333-3333-3333-3333-333333333331', 
         name: 'Restaurante Sabor Imperial', 
         type: 'empresa', 
@@ -56,12 +54,12 @@ if (useMock) {
         commercial_owner_id: 'mock-comercial-id',
         commercial_owner_name: 'Comercial Teste',
         profile_id: 'mock-candidate-id',
-        description: 'Melhor restaurante tradicional da cidade.',
-        logo_url: '/assets/images/default-logo.webp'
+        description: 'Restaurante tradicional reconhecido pela comunidade de Bom Jardim.',
+        logo_url: '/assets/images/logo.webp'
       },
       { 
         id: 'cand_doce_encanto', 
-        election_id: 'e_sp_2026', 
+        election_id: 'e_bom_jardim_2026',
         category_id: '33333333-3333-3333-3333-333333333332', 
         name: 'Doce Encanto Confeitaria', 
         type: 'empresa', 
@@ -79,7 +77,7 @@ if (useMock) {
     nominations: [
       {
         id: 'nom_pizzaria_mock',
-        election_id: 'e_sp_2026',
+        election_id: 'e_bom_jardim_2026',
         category_id: '33333333-3333-3333-3333-333333333333',
         name: 'Pizzaria Bella Italia',
         type: 'empresa',
@@ -91,11 +89,11 @@ if (useMock) {
         created_at: new Date().toISOString()
       }
     ],
-    profiles: {
-      'mock-admin-id': { id: 'mock-admin-id', name: 'Admin Teste', role: 'super_admin' },
-      'mock-comercial-id': { id: 'mock-comercial-id', name: 'Comercial Teste', role: 'comercial' },
-      'mock-candidate-id': { id: 'mock-candidate-id', name: 'Candidato Teste 1', role: 'candidato' }
-    },
+    profiles: [
+      { id: 'mock-admin-id', name: 'Admin Teste', role: 'super_admin' },
+      { id: 'mock-comercial-id', name: 'Comercial Teste', role: 'comercial' },
+      { id: 'mock-candidate-id', name: 'Candidato Teste 1', role: 'candidato' }
+    ],
     admin_action_logs: [],
     winners: []
   };
