@@ -83,19 +83,25 @@
   display: flex;
   min-width: 0;
   min-height: 300px;
-  padding: 1px;
+  padding: 3px; // Borda rotativa dourada mais espessa e visível
   color: #ffffff;
   text-decoration: none;
   background-color: transparent;
-  border: none;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  // Borda externa que dá o visual de "cova" (bloco encovado na página)
+  border: 3px solid #dfded8;
+  border-radius: 16px;
+  // Sombras combinadas: sombra interna para "entrar" na página e sombra externa leve
+  box-shadow: 
+    inset 0 8px 20px rgba(0, 0, 0, 0.85),
+    0 1px 2px rgba(0, 0, 0, 0.05);
   overflow: hidden;
   z-index: 0;
   transform: translate3d(0, 0, 0);
+  // Transição super premium e amanteigada (0.65s com cubic-bezier suave)
   transition:
-    transform 0.46s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 0.65s cubic-bezier(0.25, 1, 0.33, 1),
+    box-shadow 0.65s cubic-bezier(0.25, 1, 0.33, 1),
+    border-color 0.65s cubic-bezier(0.25, 1, 0.33, 1);
 
   &::before {
     content: '';
@@ -105,13 +111,16 @@
     top: -50%;
     width: 200%;
     height: 200%;
+    // Conic gradient com facho de ouro mais forte e visível para não se camuflar no branco
     background: conic-gradient(
       from 0deg,
       #d4af37 0deg,
-      transparent 40deg,
+      #fff2cc 25deg,       // Facho 1 mais brilhante (ouro claro)
+      transparent 80deg,
       transparent 180deg,
       #d4af37 180deg,
-      transparent 220deg,
+      #fff2cc 205deg,      // Facho 2 oposto mais brilhante
+      transparent 260deg,
       transparent 360deg
     );
     animation: rotateBorder 8s linear infinite;
@@ -121,18 +130,24 @@
     content: '';
     position: absolute;
     z-index: -1;
-    left: 1px;
-    top: 1px;
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
+    left: 3px;
+    top: 3px;
+    width: calc(100% - 6px);
+    height: calc(100% - 6px);
     background: #08080a;
     border-radius: 11px;
-    transition: background-color 0.38s ease;
+    // Efeito de transição de cor de fundo também amanteigado
+    transition: background-color 0.65s cubic-bezier(0.25, 1, 0.33, 1);
   }
 
   &:hover {
-    transform: translate3d(0, -7px, 0);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    // Sai da "cova" subindo suavemente
+    transform: translate3d(0, -8px, 0);
+    // Moldura clareia levemente no hover e sombra externa expande
+    border-color: #d4af37;
+    box-shadow: 
+      inset 0 4px 10px rgba(0, 0, 0, 0.5),
+      0 20px 40px rgba(0, 0, 0, 0.65);
 
     &::after {
       background-color: #0c0c0f;
@@ -182,7 +197,7 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: clamp(27px, 3.9vw, 45px);
+  padding: calc(clamp(27px, 3.9vw, 45px) - 3px); // Ajustado para a nova espessura do card
   box-sizing: border-box;
   z-index: 1;
 }
