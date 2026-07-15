@@ -78,8 +78,12 @@
   text-decoration: none;
   background-color: #ffffff; // Cor idêntica ao fundo da section para simular relevo na mesma superfície
   
-  // Borda fina simétrica que contorna perfeitamente o card sem falhas de arredondamento no navegador
-  border: 1.5px solid rgba(27, 27, 24, 0.08);
+  // Chanfrado 3D realista: simula a sombra da cova no topo/esquerda e o brilho do corte da parede no rodapé/direita
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-top: 3px solid rgba(0, 0, 0, 0.28);
+  border-left: 3px solid rgba(0, 0, 0, 0.22);
+  border-right: 2px solid rgba(255, 255, 255, 0.95);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.98);
   border-radius: 16px;
   
   overflow: hidden;
@@ -95,9 +99,7 @@
     background-color 1.2s cubic-bezier(0.25, 1, 0.33, 1);
 
   // Pseudo-elemento que abriga a sombra interna profunda (vala/cova)
-  // z-index: 2 garante que a sombra cubra o fundo e as bordas internas do texto, dando profundidade real.
-  // Colocamos o chanfrado direcional 3D (sombra escura no topo/esquerda e luz na base/direita) aqui dentro do box-shadow,
-  // o que impede qualquer bug gráfico nas bordas externas do card!
+  // z-index: 2 garante que a sombra cubra o fundo e as bordas internas do texto, dando profundidade real
   &::before {
     content: '';
     position: absolute;
@@ -109,9 +111,9 @@
     pointer-events: none;
     border-radius: 15px;
     box-shadow: 
-      inset 0 16px 28px rgba(0, 0, 0, 0.16),           // Sombra escura no topo
-      inset 6px 0 16px rgba(0, 0, 0, 0.1),             // Sombra escura na esquerda
-      inset -6px -6px 14px rgba(255, 255, 255, 0.95);  // Luz/brilho branco na base/direita
+      inset 0 12px 24px rgba(0, 0, 0, 0.95),
+      inset 0 -4px 12px rgba(255, 255, 255, 0.03),
+      0 1px 2px rgba(0, 0, 0, 0.04);
     opacity: 1;
     // Transição de opacidade acelerada por hardware (extremamente suave!)
     transition: opacity 1.2s cubic-bezier(0.25, 1, 0.33, 1);
