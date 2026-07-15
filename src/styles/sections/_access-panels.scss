@@ -76,7 +76,7 @@
   min-height: 300px;
   color: #1b1b18;
   text-decoration: none;
-  background-color: #fbfbfa; // Fundo ligeiramente cinza quente para dar contraste de rebaixo
+  background-color: #ffffff; // Cor idêntica ao fundo da section para simular relevo na mesma superfície
   
   // Chanfrado 3D realista na parede branca: sombra interna no topo/esquerda e luz no rodapé/direita
   border: 1px solid #dfded8;
@@ -161,7 +161,7 @@
 .access-panel-card--candidate {
   grid-column: 1 / -1;
   min-height: 286px;
-  background-color: #f3f2ec; // Leve tom pastel um pouco mais escuro para contraste inicial
+  background-color: #ffffff; // Cor da section para que as sombras desenhem o rebaixo 3D
 
   &:hover {
     background-color: #ffffff;
