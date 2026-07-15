@@ -91,12 +91,12 @@
   transform: translate3d(0, 0, 0);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.01);
   
-  // Transição super premium, amanteigada e lenta (1.2s) para a translação e sombras
+  // Transição super premium na saída (mouse out): 1.6s bem lenta, amortecida e gradual
   transition:
-    transform 1.2s cubic-bezier(0.25, 1, 0.33, 1),
-    box-shadow 1.2s cubic-bezier(0.25, 1, 0.33, 1),
-    border-color 1.2s cubic-bezier(0.25, 1, 0.33, 1),
-    background-color 1.2s cubic-bezier(0.25, 1, 0.33, 1);
+    transform 1.6s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 1.6s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 1.6s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 1.6s cubic-bezier(0.16, 1, 0.3, 1);
 
   // Pseudo-elemento que abriga a sombra interna profunda (vala/cova)
   // z-index: 2 garante que a sombra cubra o fundo e as bordas internas do texto, dando profundidade real
@@ -115,8 +115,8 @@
       inset 0 -4px 12px rgba(255, 255, 255, 0.03),
       0 1px 2px rgba(0, 0, 0, 0.04);
     opacity: 1;
-    // Transição de opacidade acelerada por hardware (extremamente suave!)
-    transition: opacity 1.2s cubic-bezier(0.25, 1, 0.33, 1);
+    // Transição de opacidade na saída (1.6s)
+    transition: opacity 1.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &:hover {
@@ -127,8 +127,16 @@
     box-shadow: 0 28px 56px rgba(27, 27, 24, 0.12);
     background-color: #ffffff; // Sobe para o nível do chão e fica branco puro
 
+    // Transição na entrada (mouse in): 1.2s
+    transition:
+      transform 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+      box-shadow 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+      border-color 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+      background-color 1.2s cubic-bezier(0.25, 1, 0.33, 1);
+
     &::before {
       opacity: 0; // A sombra interna esvazia de forma perfeitamente suave (1.2s)
+      transition: opacity 1.2s cubic-bezier(0.25, 1, 0.33, 1);
     }
 
     .access-panel-icon {
@@ -136,6 +144,17 @@
       background-color: #d4af37;
       border-color: #d4af37;
       transform: translate3d(0, -2px, 0) rotate(3deg);
+      box-shadow: 
+        inset 0 0 0 rgba(0, 0, 0, 0),
+        0 4px 8px rgba(212, 175, 55, 0.35);
+      
+      // Transição do ícone na entrada (mouse in): 1.2s
+      transition:
+        transform 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+        color 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+        background-color 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+        border-color 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+        box-shadow 1.2s cubic-bezier(0.25, 1, 0.33, 1);
     }
 
     .access-panel-arrow {
@@ -206,15 +225,30 @@
   flex: 0 0 44px;
   place-items: center;
   color: #242421;
-  background-color: transparent;
-  border: 1px solid #cfcdc5;
+  background-color: #f7f6f2; // fundo cinza suave do rebaixo do ícone
+  
+  // Chanfrado 3D circular realista
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: 2px solid rgba(0, 0, 0, 0.16);
+  border-left: 2.5px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.85);
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.95);
   border-radius: 50%;
+  
+  // Sombra interna de rebaixo
+  box-shadow: 
+    inset 0 3px 6px rgba(27, 27, 24, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.9);
+    
   transform: translate3d(0, 0, 0) rotate(0);
+  
+  // Transição na saída (mouse out): 1.6s lenta, amortecida e luxuosa
   transition:
-    transform 0.46s cubic-bezier(0.16, 1, 0.3, 1),
-    color 0.34s ease,
-    background-color 0.34s ease,
-    border-color 0.34s ease;
+    transform 1.6s cubic-bezier(0.16, 1, 0.3, 1),
+    color 1.6s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 1.6s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 1.6s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 1.6s cubic-bezier(0.16, 1, 0.3, 1);
 
   svg {
     width: 19px;
