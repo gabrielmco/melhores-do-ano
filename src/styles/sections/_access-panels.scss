@@ -80,27 +80,28 @@
   
   // Chanfrado 3D realista na parede branca: sombra interna no topo/esquerda e luz no rodapé/direita
   border: 1px solid #dfded8;
-  border-top: 3px solid rgba(27, 27, 24, 0.08);
-  border-left: 2.5px solid rgba(27, 27, 24, 0.05);
-  border-right: 1px solid rgba(255, 255, 255, 0.8);
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-top: 3.5px solid rgba(27, 27, 24, 0.12);
+  border-left: 3px solid rgba(27, 27, 24, 0.08);
+  border-right: 1px solid rgba(255, 255, 255, 0.85);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 16px;
   
-  // Sombra interna cinza suave para parecer afundado (vala/cova) no fundo branco do site
+  // Sombra interna muito mais profunda e escura para simular terreno elevado ao redor
   box-shadow: 
-    inset 0 10px 20px rgba(27, 27, 24, 0.05),
-    inset 0 -2px 6px rgba(27, 27, 24, 0.01),
-    0 1px 2px rgba(27, 27, 24, 0.01);
+    inset 0 16px 36px rgba(27, 27, 24, 0.12),
+    inset 0 4px 12px rgba(27, 27, 24, 0.08),
+    inset 0 -8px 24px rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.02);
   
   overflow: hidden;
   z-index: 0;
   transform: translate3d(0, 0, 0);
-  // Transição super premium e amanteigada (0.65s com cubic-bezier suave)
+  // Transição super premium, amanteigada e mais lenta (0.95s tanto na entrada quanto na saída)
   transition:
-    transform 0.65s cubic-bezier(0.25, 1, 0.33, 1),
-    box-shadow 0.65s cubic-bezier(0.25, 1, 0.33, 1),
-    border-color 0.65s cubic-bezier(0.25, 1, 0.33, 1),
-    background-color 0.65s cubic-bezier(0.25, 1, 0.33, 1);
+    transform 0.95s cubic-bezier(0.25, 1, 0.33, 1),
+    box-shadow 0.95s cubic-bezier(0.25, 1, 0.33, 1),
+    border-color 0.95s cubic-bezier(0.25, 1, 0.33, 1),
+    background-color 0.95s cubic-bezier(0.25, 1, 0.33, 1);
 
   &:hover {
     // Sai da "cova" subindo suavemente
@@ -109,7 +110,7 @@
     border-color: #d4af37;
     box-shadow: 
       inset 0 0 0 rgba(0, 0, 0, 0), // A sombra interna some por completo ao flutuar
-      0 22px 45px rgba(27, 27, 24, 0.09);
+      0 26px 52px rgba(27, 27, 24, 0.12);
     background-color: #ffffff;
 
     .access-panel-icon {
@@ -148,11 +149,11 @@
     background-color: #ffffff;
   }
 
+  // Removido o display grid para empilhar verticalmente alinhado à esquerda igual aos demais
   .access-panel-content {
-    display: grid;
-    grid-template-columns: minmax(190px, 0.7fr) minmax(0, 1.3fr);
-    column-gap: clamp(44px, 8vw, 120px);
-    align-items: end;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
   }
 }
 
@@ -206,10 +207,6 @@
 .access-panel-copy {
   margin-top: auto;
   padding-top: clamp(56px, 8vw, 88px);
-}
-
-.access-panel-card--candidate .access-panel-copy {
-  padding-top: 0;
 }
 
 .access-panel-status {
