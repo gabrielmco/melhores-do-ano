@@ -76,42 +76,60 @@
   min-height: 300px;
   color: #1b1b18;
   text-decoration: none;
-  background-color: #ffffff; // Cards brancos!
+  background-color: #fbfbfa; // Fundo ligeiramente cinza quente para dar contraste de rebaixo
   
   // Chanfrado 3D realista na parede branca: sombra interna no topo/esquerda e luz no rodapé/direita
   border: 1px solid #dfded8;
   border-top: 3.5px solid rgba(27, 27, 24, 0.12);
   border-left: 3px solid rgba(27, 27, 24, 0.08);
-  border-right: 1px solid rgba(255, 255, 255, 0.85);
+  border-right: 1.5px solid rgba(255, 255, 255, 0.9);
   border-bottom: 2px solid rgba(255, 255, 255, 0.95);
   border-radius: 16px;
-  
-  // Sombra interna muito mais profunda e escura para simular terreno elevado ao redor
-  box-shadow: 
-    inset 0 16px 36px rgba(27, 27, 24, 0.12),
-    inset 0 4px 12px rgba(27, 27, 24, 0.08),
-    inset 0 -8px 24px rgba(255, 255, 255, 0.9),
-    0 1px 2px rgba(0, 0, 0, 0.02);
   
   overflow: hidden;
   z-index: 0;
   transform: translate3d(0, 0, 0);
-  // Transição super premium, amanteigada e mais lenta (0.95s tanto na entrada quanto na saída)
+  box-shadow: 0 1px 2px rgba(27, 27, 24, 0.01);
+  
+  // Transição super premium, amanteigada e lenta (1.2s) para a translação e sombras
   transition:
-    transform 0.95s cubic-bezier(0.25, 1, 0.33, 1),
-    box-shadow 0.95s cubic-bezier(0.25, 1, 0.33, 1),
-    border-color 0.95s cubic-bezier(0.25, 1, 0.33, 1),
-    background-color 0.95s cubic-bezier(0.25, 1, 0.33, 1);
+    transform 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+    box-shadow 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+    border-color 1.2s cubic-bezier(0.25, 1, 0.33, 1),
+    background-color 1.2s cubic-bezier(0.25, 1, 0.33, 1);
+
+  // Pseudo-elemento que abriga a sombra interna profunda (vala/cova)
+  // z-index: 2 garante que a sombra cubra o fundo e as bordas internas do texto, dando profundidade real
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: 15px;
+    box-shadow: 
+      inset 0 18px 36px rgba(27, 27, 24, 0.14),
+      inset 0 4px 12px rgba(27, 27, 24, 0.1),
+      inset 0 -8px 24px rgba(255, 255, 255, 0.9);
+    opacity: 1;
+    // Transição de opacidade acelerada por hardware (extremamente suave!)
+    transition: opacity 1.2s cubic-bezier(0.25, 1, 0.33, 1);
+  }
 
   &:hover {
     // Sai da "cova" subindo suavemente
-    transform: translate3d(0, -8px, 0);
+    transform: translate3d(0, -12px, 0);
     // Borda destaca com dourado premium e ganha uma sombra projetada (drop shadow) flutuante
     border-color: #d4af37;
-    box-shadow: 
-      inset 0 0 0 rgba(0, 0, 0, 0), // A sombra interna some por completo ao flutuar
-      0 26px 52px rgba(27, 27, 24, 0.12);
-    background-color: #ffffff;
+    box-shadow: 0 28px 56px rgba(27, 27, 24, 0.12);
+    background-color: #ffffff; // Sobe para o nível do chão e fica branco puro
+
+    &::before {
+      opacity: 0; // A sombra interna esvazia de forma perfeitamente suave (1.2s)
+    }
 
     .access-panel-icon {
       color: #ffffff;
@@ -143,7 +161,7 @@
 .access-panel-card--candidate {
   grid-column: 1 / -1;
   min-height: 286px;
-  background-color: #f7f6f2; // Leve tom pastel para manter o contraste elegante
+  background-color: #f3f2ec; // Leve tom pastel um pouco mais escuro para contraste inicial
 
   &:hover {
     background-color: #ffffff;
