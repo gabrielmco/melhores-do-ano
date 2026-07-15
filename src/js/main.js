@@ -2,6 +2,7 @@ import { lenis } from './modules/smoothScroll.js';
 import { initNavbar } from './modules/navbar.js';
 import { initHero } from './modules/hero.js';
 import { initAbout } from './modules/about.js';
+import { initAccessPanels } from './modules/access.js';
 import { initGallery } from './modules/gallery.js';
 import { initMethodology } from './modules/methodology.js';
 import { initCTA } from './modules/cta.js';
@@ -21,6 +22,7 @@ function initAll() {
   initNavbar();
   initHero();
   initAbout();
+  initAccessPanels();
   initGallery();
   initMethodology();
   initCTA();
