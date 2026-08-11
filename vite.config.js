@@ -24,6 +24,7 @@ export default defineConfig({
         candidato: resolve(__dirname, 'candidato.html'),
         comercial: resolve(__dirname, 'comercial.html'),
         admin: resolve(__dirname, 'admin.html'),
+        definirSenha: resolve(__dirname, 'definir-senha.html'),
         termos: resolve(__dirname, 'termos.html'),
         privacidade: resolve(__dirname, 'privacidade.html')
       }

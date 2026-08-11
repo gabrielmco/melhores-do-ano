@@ -235,6 +235,12 @@ function setupEventListeners() {
     });
   }
 
+  // Ouvir input de Instagram da indicação em tempo real
+  const nomInstagramEl = document.getElementById('nomInstagram');
+  if (nomInstagramEl) {
+    nomInstagramEl.addEventListener('input', validateStep3Form);
+  }
+
   // Avançar para Etapa 3
   btnGoToStep3.addEventListener('click', () => {
     if (state.selectedCandidateId) {
@@ -339,6 +345,42 @@ async function loadCategoriesForCity(cityId) {
     }
     
     state.selectedElectionId = electionData.id;
+
+    // Verificar fase atual do evento
+    const { data: phaseData } = await supabase
+      .from('event_config')
+      .select('value')
+      .eq('key', 'current_phase')
+      .single();
+    
+    const currentPhase = phaseData ? phaseData.value : 'voting';
+
+    if (currentPhase === 'registration') {
+      // Bloquear votação e mostrar banner
+      const panel1 = document.getElementById('panel1');
+      if (panel1) {
+        panel1.innerHTML = `
+          <div style="text-align: center; padding: 12px 0;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">⏳</div>
+            <h2 style="color: #d4af37; font-size: 1.4rem; margin-bottom: 12px; font-weight: 600;">Votação em Breve</h2>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px;">
+              A votação oficial de Bom Jardim ainda não começou! No momento, as empresas e concorrentes estão cadastrando seus perfis na plataforma.
+            </p>
+            <a href="/candidato.html" class="btn-submit" style="display: block; text-decoration: none; text-align: center; line-height: 48px; background: linear-gradient(135deg, #f5d788 0%, #d4af37 100%); color: #070708; font-weight: 700; border-radius: 6px; margin-bottom: 12px;">
+              Cadastrar Minha Empresa
+            </a>
+            <a href="/resultados.html" style="display: inline-block; color: rgba(255,255,255,0.45); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.3s;" onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='rgba(255,255,255,0.45)'">
+              Ver concorrentes confirmados →
+            </a>
+          </div>
+        `;
+      }
+      
+      const stepIndicator = document.querySelector('.step-indicator');
+      if (stepIndicator) stepIndicator.style.display = 'none';
+
+      return;
+    }
 
     // 2. Obter as categorias ativas desta eleição
     const { data: catData, error: catErr } = await supabase
@@ -530,11 +572,13 @@ function validateStep3Form() {
     isContactOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
   }
 
-  // Se for indicação, valida se o nome do indicado foi preenchido com pelo menos 2 caracteres
+  // Se for indicação, valida se o nome e o Instagram foram preenchidos
   const isNomination = !state.selectedCandidateId;
   const nomNameEl = document.getElementById('nomName');
+  const nomInstagramEl = document.getElementById('nomInstagram');
   const finalNomName = nomNameEl ? nomNameEl.value.trim() : state.nominatedName;
-  const isNominationOk = !isNomination || (finalNomName && finalNomName.length >= 2);
+  const finalNomInstagram = nomInstagramEl ? nomInstagramEl.value.trim() : '';
+  const isNominationOk = !isNomination || (finalNomName && finalNomName.length >= 2 && finalNomInstagram.length >= 2);
 
   btnSubmitVote.disabled = !(name.length > 3 && isContactOk && hasPrivacy && hasValidation && isTurnstileOk && isNominationOk);
 }

@@ -190,6 +190,9 @@ async function initStaffDashboard() {
     // 2. Aplicar controle RBAC no painel de abas
     applyRolePermissions(currentStaff.role);
 
+    // 3. Carregar a fase atual do evento
+    await loadEventPhase();
+
   } catch (err) {
     console.error('Falha ao inicializar o painel:', err);
     showToast('Erro ao carregar painel corporativo: ' + err.message, 'error');
@@ -309,6 +312,10 @@ function setupEventListeners() {
   }
 
   if (formResolveTie) formResolveTie.addEventListener('submit', handleResolveTie);
+
+  // Controle de Fases do Evento
+  const btnSavePhase = document.getElementById('btnSavePhase');
+  if (btnSavePhase) btnSavePhase.addEventListener('click', saveEventPhase);
 
   const subTabBtns = document.querySelectorAll('.sub-tab-btn');
   const subTabPanels = document.querySelectorAll('.sub-tab-panel');
@@ -1593,5 +1600,52 @@ async function handleDeleteCandidate(candidateId, name) {
   } catch (err) {
     console.error(err);
     showToast('Erro ao remover: ' + err.message, 'error');
+  }
+}
+
+// ============================================================================
+// CONTROLE DE FASES DO EVENTO (CADASTRO VS VOTAÇÃO)
+// ============================================================================
+
+async function loadEventPhase() {
+  const selectEventPhase = document.getElementById('selectEventPhase');
+  if (!selectEventPhase) return;
+  try {
+    const { data, error } = await supabase
+      .from('event_config')
+      .select('value')
+      .eq('key', 'current_phase')
+      .single();
+    if (!error && data) {
+      selectEventPhase.value = data.value;
+    }
+  } catch (err) {
+    console.error('Erro ao carregar fase do evento:', err);
+  }
+}
+
+async function saveEventPhase() {
+  const selectEventPhase = document.getElementById('selectEventPhase');
+  const btnSavePhase = document.getElementById('btnSavePhase');
+  if (!selectEventPhase || !btnSavePhase) return;
+
+  btnSavePhase.disabled = true;
+  btnSavePhase.textContent = 'Salvando...';
+
+  const phaseValue = selectEventPhase.value;
+
+  try {
+    const { error } = await supabase
+      .from('event_config')
+      .upsert({ key: 'current_phase', value: phaseValue });
+
+    if (error) throw error;
+    showToast('Fase do evento atualizada com sucesso!', 'success');
+  } catch (err) {
+    console.error('Erro ao salvar fase do evento:', err);
+    showToast('Falha ao salvar fase: ' + err.message, 'error');
+  } finally {
+    btnSavePhase.disabled = false;
+    btnSavePhase.textContent = 'Salvar Fase';
   }
 }

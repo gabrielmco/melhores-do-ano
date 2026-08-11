@@ -95,7 +95,14 @@ if (useMock) {
       { id: 'mock-candidate-id', name: 'Candidato Teste 1', role: 'candidato' }
     ],
     admin_action_logs: [],
-    winners: []
+    winners: [],
+    event_config: [
+      { key: 'current_phase', value: 'voting' }
+    ],
+    candidate_votes_summary: [
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333331', candidate_id: 'cand_sabor_imperial', vote_count: 145 },
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333332', candidate_id: 'cand_doce_encanto', vote_count: 89 }
+    ]
   };
 
   const mockProfiles = {
@@ -199,6 +206,25 @@ if (useMock) {
           }
         };
       },
+      async signUp({ email, password, options = {} }) {
+        const userId = `mock-user-${Date.now()}`;
+        const name = options.data?.name || 'Novo Candidato';
+        const role = 'candidato';
+        
+        mockProfiles[email] = { name, role, id: userId };
+        mockDatabase.profiles.push({ id: userId, name, role });
+        
+        currentSession = {
+          access_token: 'mock-token-session',
+          user: {
+            id: userId,
+            email: email,
+            user_metadata: { name }
+          }
+        };
+        authCallbacks.forEach(cb => cb('SIGNED_IN', currentSession));
+        return { data: { session: currentSession, user: currentSession.user }, error: null };
+      },
       async signInWithPassword({ email, password }) {
         if (password === '123456') {
           const profile = mockProfiles[email] || { name: 'Candidato Teste', role: 'candidato', id: 'mock-candidate-id' };
@@ -227,6 +253,8 @@ if (useMock) {
       let actualTable = table;
       if (table === 'public_candidates') actualTable = 'candidates';
       if (table === 'public_winners') actualTable = 'winners';
+      if (table === 'candidate_votes_summary') actualTable = 'candidate_votes_summary';
+      if (table === 'event_config') actualTable = 'event_config';
       const data = mockDatabase[actualTable] || [];
       const cloned = JSON.parse(JSON.stringify(data));
       return new MockQueryBuilder(cloned);

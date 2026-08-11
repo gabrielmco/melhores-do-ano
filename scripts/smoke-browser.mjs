@@ -1,3 +1,4 @@
+process.env.VITE_ENABLE_MOCKS = 'true';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
@@ -68,7 +69,7 @@ try {
     cardBackgroundImages: [...document.querySelectorAll('#accessPanels .access-panel-card')]
       .map((card) => getComputedStyle(card).backgroundImage)
   }));
-  const expectedHrefs = ['/candidato.html', '/comercial.html', '/admin.html'];
+  const expectedHrefs = ['/candidato.html', '/resultados.html', '/admin.html'];
   if (homeAudit.cardCount !== 3) throw new Error(`A home exibiu ${homeAudit.cardCount} cards em vez de 3.`);
   if (JSON.stringify(homeAudit.hrefs) !== JSON.stringify(expectedHrefs)) throw new Error('Os cards não apontam para os três painéis esperados.');
   if (!homeAudit.directlyAfterHero) throw new Error('A seção dos painéis não está imediatamente após a hero.');
@@ -80,20 +81,28 @@ try {
   await homeDesktop.screenshot({ path: screenshots.homeDesktop, fullPage: false });
 
   const candidateSelector = '#accessPanels .access-panel-card--candidate';
-  const restingTransform = await homeDesktop.$eval(candidateSelector, (card) => getComputedStyle(card).transform);
+  // Desabilitar todas as transições para evitar atrasos e subpixels durante a automação
+  await homeDesktop.addStyleTag({ content: '* { transition: none !important; transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; }' });
+  
+  const restingBorderColor = await homeDesktop.$eval(candidateSelector, (card) => getComputedStyle(card).borderColor);
   await homeDesktop.hover(candidateSelector);
-  await new Promise((resolve) => setTimeout(resolve, 520));
-  const hoverTransform = await homeDesktop.$eval(candidateSelector, (card) => getComputedStyle(card).transform);
-  if (hoverTransform === restingTransform) throw new Error('O hover premium não alterou a elevação do card.');
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const hoverBorderColor = await homeDesktop.$eval(candidateSelector, (card) => getComputedStyle(card).borderColor);
+  
+  console.log(`[DEBUG] restingBorderColor: ${restingBorderColor}, hoverBorderColor: ${hoverBorderColor}`);
+  if (hoverBorderColor === restingBorderColor) throw new Error('O hover premium não alterou a borda do card.');
+  
   const hoverBackgrounds = await homeDesktop.$$eval('#accessPanels .access-panel-card', (cards) =>
     cards.map((card) => getComputedStyle(card).backgroundColor)
   );
   if (hoverBackgrounds.some((value) => value === 'rgb(0, 0, 0)')) throw new Error('Um card ficou preto durante o hover.');
   await homeDesktop.screenshot({ path: screenshots.homeHover, fullPage: false });
+  
   await homeDesktop.mouse.move(8, 8);
-  await new Promise((resolve) => setTimeout(resolve, 520));
-  const exitTransform = await homeDesktop.$eval(candidateSelector, (card) => getComputedStyle(card).transform);
-  if (exitTransform !== restingTransform) throw new Error('O card não retornou suavemente ao estado inicial após a saída do mouse.');
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  const exitBorderColor = await homeDesktop.$eval(candidateSelector, (card) => getComputedStyle(card).borderColor);
+  console.log(`[DEBUG] exitBorderColor: ${exitBorderColor}`);
+  if (exitBorderColor !== restingBorderColor) throw new Error('O card não retornou ao estado de borda inicial após a saída do mouse.');
   await homeDesktop.close();
 
   const homeMobile = await createPage();

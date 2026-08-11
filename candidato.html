@@ -322,6 +322,56 @@
         </div>
         <button type="submit" class="btn-action" id="btnLoginSubmit" style="justify-content: center;">Entrar</button>
       </form>
+      
+      <p style="margin-top: 24px; font-size: 0.88rem; color: rgba(255,255,255,0.4);">
+        Quer indicar ou concorrer com sua empresa? 
+        <a href="javascript:void(0)" id="linkGoToRegister" style="color: #d4af37; text-decoration: none; font-weight: 600; margin-top: 4px; display: block;">Cadastrar Minha Empresa</a>
+      </p>
+
+      <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
+        <a href="/#footer" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Voltar para o Site Principal
+        </a>
+      </div>
+    </div>
+
+    <!-- TELA 1B: CADASTRO DO CANDIDATO -->
+    <div class="auth-card" id="registerScreen" style="display: none;">
+      <h2>Cadastrar Empresa</h2>
+      <p>Registre sua empresa instantaneamente com seu Instagram para concorrer no prêmio.</p>
+      
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="registerName">Nome da Empresa / Profissional</label>
+          <input type="text" id="registerName" class="form-control" placeholder="Ex: Padaria Bella Vista" required>
+        </div>
+        <div class="form-group">
+          <label for="registerInstagram">Instagram Oficial (Obrigatório)</label>
+          <input type="text" id="registerInstagram" class="form-control" placeholder="Ex: @padariabellavista" required>
+        </div>
+        <div class="form-group">
+          <label for="registerCategory">Categoria</label>
+          <select id="registerCategory" class="form-control" style="background: #0f0f11; color: #ffffff;" required>
+            <option value="">Selecione a categoria...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="registerEmail">Seu E-mail para Login</label>
+          <input type="email" id="registerEmail" class="form-control" placeholder="voce@empresa.com.br" required>
+        </div>
+        <div class="form-group">
+          <label for="registerPassword">Senha de Acesso</label>
+          <input type="password" id="registerPassword" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
+        </div>
+        <button type="submit" class="btn-action" id="btnRegisterSubmit" style="justify-content: center;">Criar Conta e Entrar</button>
+      </form>
+      
+      <p style="margin-top: 24px; font-size: 0.88rem; color: rgba(255,255,255,0.4);">
+        Já possui cadastro? 
+        <a href="javascript:void(0)" id="linkGoToLogin" style="color: #d4af37; text-decoration: none; font-weight: 600; display: inline-block;">Entrar no Painel</a>
+      </p>
+
       <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
         <a href="/#footer" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>

@@ -541,6 +541,20 @@
           </form>
         </div>
 
+        <div class="panel-card" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+          <div>
+            <h3 style="color: #d4af37; font-size: 1.05rem; margin: 0 0 6px 0;">Fase Atual do Evento</h3>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin: 0;">Determine se o portal está na fase de registros/indicações ou na fase de votação oficial ativa.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <select id="selectEventPhase" class="form-control" style="width: 220px; background: #0f0f11; color: #ffffff;">
+              <option value="registration">Fase 1: Indicações & Cadastros</option>
+              <option value="voting">Fase 2: Votação Oficial Ativa</option>
+            </select>
+            <button id="btnSavePhase" class="btn" style="padding: 10px 16px;">Salvar Fase</button>
+          </div>
+        </div>
+
         <div class="table-container">
           <table>
             <thead>
