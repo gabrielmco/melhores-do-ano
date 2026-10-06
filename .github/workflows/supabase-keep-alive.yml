@@ -4,6 +4,9 @@ on:
   schedule:
     # Executa 2 vezes ao dia (06:00 e 18:00 UTC) para garantir que nunca atinja 7 dias de inatividade
     - cron: '0 6,18 * * *'
+  push:
+    branches:
+      - main
   workflow_dispatch: # Permite disparo manual na aba Actions do GitHub
 
 jobs:
