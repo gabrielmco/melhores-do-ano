@@ -407,6 +407,21 @@
     <!-- Área de Conteúdo da Aba Ativa -->
     <main class="content">
       
+      <!-- SELETOR RÁPIDO DE VISÃO: ADMIN GERAL vs CRM VENDAS -->
+      <div class="panel-mode-switcher" style="display: flex; justify-content: space-between; align-items: center; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 10px; padding: 14px 20px; margin-bottom: 32px; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 1.4rem;">⚡</span>
+          <div>
+            <div style="font-size: 0.9rem; font-weight: 700; color: #d4af37; text-transform: uppercase; letter-spacing: 0.04em;">Acesso Rápido Unificado</div>
+            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Alterne entre a moderação da eleição e o fechamento de vendas de placas no WhatsApp com 1 clique</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-primary" id="btnQuickModeAdmin" style="padding: 10px 18px; font-size: 0.85rem; font-weight: 600;">👑 Gestão & Moderação</button>
+          <button type="button" class="btn btn-secondary" id="btnQuickModeCrm" style="padding: 10px 18px; font-size: 0.85rem; font-weight: 600;">💼 CRM Vendas & WhatsApp</button>
+        </div>
+      </div>
+
       <!-- ABA 1: MODERAÇÃO DE INDICAÇÕES -->
       <section class="tab-panel active" id="tab-moderacao">
         <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Fila de Indicações</h2>

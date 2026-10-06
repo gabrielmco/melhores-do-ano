@@ -248,6 +248,22 @@ function setupEventListeners() {
     await supabase.auth.signOut();
   });
 
+  // Alternador Rápido Dinâmico: Admin Geral ⇄ CRM Vendas
+  const btnQuickModeAdmin = document.getElementById('btnQuickModeAdmin');
+  const btnQuickModeCrm = document.getElementById('btnQuickModeCrm');
+
+  if (btnQuickModeAdmin) {
+    btnQuickModeAdmin.addEventListener('click', () => {
+      switchTab('tab-moderacao');
+    });
+  }
+
+  if (btnQuickModeCrm) {
+    btnQuickModeCrm.addEventListener('click', () => {
+      switchTab('tab-crm');
+    });
+  }
+
   // Alternar abas
   navItems.forEach(item => {
     item.addEventListener('click', () => {
@@ -399,6 +415,19 @@ function switchTab(tabId) {
       panel.classList.remove('active');
     }
   });
+
+  // Sincronizar botões do alternador rápido
+  const btnQuickModeAdmin = document.getElementById('btnQuickModeAdmin');
+  const btnQuickModeCrm = document.getElementById('btnQuickModeCrm');
+  if (btnQuickModeAdmin && btnQuickModeCrm) {
+    if (tabId === 'tab-crm') {
+      btnQuickModeCrm.className = 'btn btn-primary';
+      btnQuickModeAdmin.className = 'btn btn-secondary';
+    } else {
+      btnQuickModeAdmin.className = 'btn btn-primary';
+      btnQuickModeCrm.className = 'btn btn-secondary';
+    }
+  }
 
   // Chamar carregador específico de dados da aba
   if (tabId === 'tab-moderacao') loadNominations();

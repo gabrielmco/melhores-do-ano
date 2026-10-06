@@ -373,63 +373,95 @@ serve(async (req) => {
 
     if (existingCandidateError) throw existingCandidateError;
 
+    // Se o candidato já existir nesta categoria, computa o voto diretamente nele
     if (existingCandidates && existingCandidates.length > 0) {
-      return new Response(JSON.stringify({ error: "Este candidato ja existe nesta categoria." }), {
-        status: 409,
+      const existingCandidateId = existingCandidates[0].id;
+      const { data: voteData, error: voteError } = await supabase.rpc("cast_vote_secure", {
+        p_election_id: election_id,
+        p_category_id: category_id,
+        p_candidate_id: existingCandidateId,
+        p_voter_name: String(voter_name).trim(),
+        p_voter_identifier: voterIdentifierHash,
+        p_voter_type: voter_type,
+        p_ip_address_hash: ipAddressHash,
+        p_user_agent_hash: userAgentHash,
+        p_cookie_id_hash: cookieIdHash,
+        p_privacy_consent: privacy_consent,
+        p_validation_consent: validation_consent,
+      });
+
+      if (voteError) {
+        console.error("Erro ao votar em candidato existente via indicação:", voteError);
+        return new Response(JSON.stringify({ error: "Erro ao computar voto no candidato existente" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const voteResult = voteData as { success?: boolean; reason?: string } | null;
+      if (!voteResult || !voteResult.success) {
+        const isDuplicate = voteResult?.reason === "duplicate_vote";
+        return new Response(JSON.stringify({
+          error: isDuplicate ? "Você já registrou seu voto nesta categoria!" : "Falha ao processar voto",
+          reason: voteResult?.reason
+        }), {
+          status: isDuplicate ? 409 : 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, candidate_id: existingCandidateId }), {
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const { data: existingNominations, error: existingNominationError } = await supabase
+    // Se não existir, cadastra a indicação e auto-aprova instantaneamente para dinamismo total
+    const { data: insertedNomination, error: insertError } = await supabase
       .from("nominations")
+      .insert({
+        election_id,
+        category_id,
+        name: candidateName,
+        normalized_name: normalizedCandidateName,
+        type,
+        instagram: normalizeInstagram(instagram),
+        whatsapp: null,
+        email: null,
+        status: "pendente",
+        voter_name: String(voter_name).trim(),
+        voter_identifier_hash: voterIdentifierHash,
+        voter_type,
+        ip_address: null,
+        user_agent: null,
+        cookie_id: null,
+        ip_address_hash: ipAddressHash,
+        user_agent_hash: userAgentHash,
+        cookie_id_hash: cookieIdHash,
+        privacy_consent,
+        validation_consent,
+      })
       .select("id")
-      .eq("election_id", election_id)
-      .eq("category_id", category_id)
-      .eq("normalized_name", normalizedCandidateName)
-      .in("status", ["pendente", "aprovado"])
-      .limit(1);
+      .single();
 
-    if (existingNominationError) throw existingNominationError;
-
-    if (existingNominations && existingNominations.length > 0) {
-      return new Response(JSON.stringify({ error: "Esta indicacao ja esta na fila de moderacao." }), {
-        status: 409,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const { error } = await supabase.from("nominations").insert({
-      election_id,
-      category_id,
-      name: candidateName,
-      normalized_name: normalizedCandidateName,
-      type,
-      instagram: normalizeInstagram(instagram),
-      whatsapp: null,
-      email: null,
-      status: "pendente",
-      voter_name: String(voter_name).trim(),
-      voter_identifier_hash: voterIdentifierHash,
-      voter_type,
-      ip_address: null,
-      user_agent: null,
-      cookie_id: null,
-      ip_address_hash: ipAddressHash,
-      user_agent_hash: userAgentHash,
-      cookie_id_hash: cookieIdHash,
-      privacy_consent,
-      validation_consent,
-    });
-
-    if (error) {
-      console.error("Erro ao registrar indicação:", error);
+    if (insertError) {
+      console.error("Erro ao registrar indicação:", insertError);
       return new Response(JSON.stringify({ error: "Erro interno ao registrar indicação" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Auto-aprovação instantânea via RPC (cria candidato como aprovado e computa o voto imediatamente)
+    const { data: approveResult, error: approveError } = await supabase.rpc("approve_nomination", {
+      p_nomination_id: insertedNomination.id
+    });
+
+    if (approveError) {
+      console.warn("Aviso ao auto-aprovar indicação (permanecerá para moderação manual):", approveError);
+    }
+
+    return new Response(JSON.stringify({ success: true, instant_approved: !approveError }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

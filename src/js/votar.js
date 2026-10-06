@@ -249,23 +249,42 @@ function setupEventListeners() {
     }
   });
 
-  // Alteração do tipo de contato
-  voterType.addEventListener('change', () => {
+  // Alternador amigável de tipo de contato (Padrão: WhatsApp)
+  const btnToggleContactType = document.getElementById('btnToggleContactType');
+  if (btnToggleContactType) {
+    btnToggleContactType.addEventListener('click', () => {
+      if (voterType.value === 'whatsapp') {
+        voterType.value = 'email';
+        lblVoterIdentifier.textContent = 'Seu E-mail';
+        btnToggleContactType.textContent = 'Prefere usar WhatsApp?';
+        voterIdentifier.placeholder = 'email@exemplo.com';
+        voterIdentifier.type = 'email';
+      } else {
+        voterType.value = 'whatsapp';
+        lblVoterIdentifier.textContent = 'Seu WhatsApp (com DDD)';
+        btnToggleContactType.textContent = 'Prefere usar E-mail?';
+        voterIdentifier.placeholder = '(32) 99999-9999';
+        voterIdentifier.type = 'tel';
+      }
+      voterIdentifier.value = '';
+      validateStep3Form();
+    });
+  }
+
+  // Máscara inteligente e amigável para WhatsApp (leigos)
+  voterIdentifier.addEventListener('input', (e) => {
     if (voterType.value === 'whatsapp') {
-      lblVoterIdentifier.textContent = 'Seu Número de WhatsApp';
-      voterIdentifier.placeholder = '(00) 00000-0000';
-      voterIdentifier.type = 'text';
-    } else {
-      lblVoterIdentifier.textContent = 'Seu E-mail';
-      voterIdentifier.placeholder = 'email@exemplo.com';
-      voterIdentifier.type = 'email';
+      let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+      if (digits.length > 6) {
+        e.target.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+      } else if (digits.length > 2) {
+        e.target.value = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      } else if (digits.length > 0) {
+        e.target.value = `(${digits}`;
+      }
     }
     validateStep3Form();
   });
-
-  // Validação em tempo real dos campos de contato e consentimento
-  voterName.addEventListener('input', validateStep3Form);
-  voterIdentifier.addEventListener('input', validateStep3Form);
   privacyConsent.addEventListener('change', validateStep3Form);
   validationConsent.addEventListener('change', validateStep3Form);
 
