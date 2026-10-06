@@ -35,8 +35,11 @@ function loadEnv() {
 
 loadEnv();
 
-const supabaseUrl = (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '').replace(/\/$/, '');
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+const defaultUrl = 'https://xjgkjkmxuhbhkdhaxxey.supabase.co';
+const defaultAnon = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqZ2tqa214dWhiaGtkaGF4eGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMDMyNTQsImV4cCI6MjEwNjg3OTI1NH0.LK61XYNcY5PEKt7kQmXGzenSoUFz763-B3tAqqTUHDA';
+
+const supabaseUrl = (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || defaultUrl).replace(/\/$/, '');
+const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || defaultAnon;
 const supabaseAccessToken = process.env.SUPABASE_ACCESS_TOKEN || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
