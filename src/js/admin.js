@@ -230,7 +230,8 @@ function setupEventListeners() {
   // Enviar formulário de Login
   adminLoginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = adminEmail.value.trim();
+    const rawEmail = adminEmail.value.trim();
+    const email = rawEmail.includes('@') ? rawEmail : `${rawEmail}@gmail.com`;
     const password = adminPassword.value;
 
     try {
