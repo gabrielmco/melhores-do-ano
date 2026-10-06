@@ -29,6 +29,3 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           node scripts/supabase-keep-alive.mjs
-
-      - name: Keep GitHub Actions Active (Prevents 60-day auto-pause)
-        uses: gautamkrishnar/keepalive-workflow@v1
