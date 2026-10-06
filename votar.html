@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
@@ -532,9 +532,17 @@
       <div class="step-panel" id="panel3">
         <h2 style="font-size: 1.3rem; font-weight: 500; margin-bottom: 24px; text-align: center;">Confirmação de Voto</h2>
         
-        <div id="selectedCandidateSummary" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; padding: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+        <div id="selectedCandidateSummary" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
           <!-- Resumo do candidato escolhido -->
           <span id="nominationSummaryName" style="display:none;"></span>
+        </div>
+
+        <!-- Dica amigável sobre retificação/mudança de voto -->
+        <div style="background: rgba(212, 175, 55, 0.06); border: 1px dashed rgba(212, 175, 55, 0.25); border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.15rem;">💡</span>
+          <span style="font-size: 0.82rem; color: rgba(255, 255, 255, 0.8); line-height: 1.4;">
+            <strong>Votou errado ou quer trocar de opção?</strong> Fique tranquilo! Se você já tiver votado nesta categoria antes, confirmar aqui atualizará automaticamente seu voto para este candidato.
+          </span>
         </div>
 
         <!-- Se for indicação de novo candidato, mostrar campos extras -->
@@ -593,8 +601,11 @@
       <!-- ETAPA 4: Sucesso e Compartilhamento -->
       <div class="step-panel success-screen" id="panel4">
         <div class="success-icon"><img src="/assets/images/logo-emporio-excelencia.webp" alt="Selo Oficial de Excelência"></div>
-        <h2 style="font-size: 1.5rem; color: #d4af37; margin-bottom: 12px;">Voto Registrado com Sucesso!</h2>
-        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.6;">Obrigado por participar! Seu voto foi computado com segurança e já conta na apuração de Bom Jardim.</p>
+        <div id="voteStatusBadge" style="display: none; margin: 0 auto 12px auto; width: fit-content; padding: 4px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd;">
+          🔄 Voto Atualizado com Sucesso
+        </div>
+        <h2 id="successTitle" style="font-size: 1.5rem; color: #d4af37; margin-bottom: 12px;">Voto Registrado com Sucesso!</h2>
+        <p id="successMessage" style="color: rgba(255, 255, 255, 0.7); font-size: 0.95rem; line-height: 1.6;">Obrigado por participar! Seu voto foi computado com segurança e já conta na apuração de Bom Jardim.</p>
         
         <!-- Botão Direto para Apuração Pública ao Vivo -->
         <a href="/resultados.html" class="btn-submit" style="text-decoration: none; margin: 20px 0 16px 0; display: flex; align-items: center; justify-content: center; gap: 8px;">

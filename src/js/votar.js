@@ -711,6 +711,7 @@ async function submitVoteFlow() {
       }
       
       // Mostrar tela de sucesso diretamente
+      renderSuccessScreen(Boolean(nominationResult.updated), nominationResult.message);
       goToStep(4);
       return;
     }
@@ -742,6 +743,7 @@ async function submitVoteFlow() {
     }
 
     // Sucesso
+    renderSuccessScreen(Boolean(result.updated), result.message);
     goToStep(4);
   } catch (err) {
     console.error('Erro na votação:', err);
@@ -756,11 +758,42 @@ async function submitVoteFlow() {
   }
 }
 
+// Customizar texto e avisos da tela de sucesso conforme novo voto ou retificação
+function renderSuccessScreen(isUpdated = false, customMessage = '') {
+  const successTitle = document.getElementById('successTitle');
+  const successMessage = document.getElementById('successMessage');
+  const voteStatusBadge = document.getElementById('voteStatusBadge');
+
+  if (isUpdated) {
+    if (voteStatusBadge) {
+      voteStatusBadge.style.display = 'inline-block';
+      voteStatusBadge.textContent = '🔄 Voto Atualizado com Sucesso';
+    }
+    if (successTitle) {
+      successTitle.textContent = 'Voto Retificado com Sucesso!';
+    }
+    if (successMessage) {
+      successMessage.textContent = customMessage || 'Sua escolha anterior nesta categoria foi substituída com sucesso pelo novo candidato selecionado. Seu voto único já está atualizado na apuração oficial de Bom Jardim!';
+    }
+  } else {
+    if (voteStatusBadge) {
+      voteStatusBadge.style.display = 'none';
+    }
+    if (successTitle) {
+      successTitle.textContent = 'Voto Registrado com Sucesso!';
+    }
+    if (successMessage) {
+      successMessage.textContent = customMessage || 'Obrigado por participar! Seu voto foi computado com segurança e já conta na apuração oficial de Bom Jardim.';
+    }
+  }
+}
+
 // Resetar o fluxo para votar em outra categoria
 function resetVoteFlow() {
   state.selectedCandidateId = '';
   state.nominatedName = '';
   state.turnstileToken = '';
+  renderSuccessScreen(false);
   
   // Limpar formulário de contato
   voterName.value = '';

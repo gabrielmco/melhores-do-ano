@@ -264,7 +264,12 @@ serve(async (req) => {
     }
 
     // Traduzir a resposta estruturada JSONB do banco em respostas HTTP corretas
-    const voteResult = data as { success?: boolean; reason?: string } | null;
+    const voteResult = data as {
+      success?: boolean;
+      reason?: string;
+      action?: string;
+      message?: string;
+    } | null;
 
     if (!voteResult || !voteResult.success) {
       let status = 400;
@@ -276,7 +281,7 @@ serve(async (req) => {
         msg = "Muitas tentativas de voto vindas deste dispositivo. Aguarde 5 minutos.";
       } else if (reason === "duplicate_vote") {
         status = 409;
-        msg = "Você já registrou seu voto nesta categoria!";
+        msg = voteResult?.message || "Você já confirmou seu voto neste candidato nesta categoria! Se desejar mudar seu voto, basta escolher outro candidato.";
       } else if (reason === "lgpd_consent_missing") {
         status = 400;
         msg = "Consentimento LGPD obrigatório ausente.";
@@ -294,7 +299,14 @@ serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({
+      success: true,
+      updated: voteResult.action === "updated",
+      action: voteResult.action || "created",
+      message: voteResult.message || (voteResult.action === "updated"
+        ? "Seu voto foi retificado com sucesso! Sua nova escolha substituiu o voto anterior."
+        : "Voto registrado com sucesso!")
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

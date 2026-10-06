@@ -398,11 +398,18 @@ serve(async (req) => {
         });
       }
 
-      const voteResult = voteData as { success?: boolean; reason?: string } | null;
+      const voteResult = voteData as {
+        success?: boolean;
+        reason?: string;
+        action?: string;
+        message?: string;
+      } | null;
       if (!voteResult || !voteResult.success) {
         const isDuplicate = voteResult?.reason === "duplicate_vote";
         return new Response(JSON.stringify({
-          error: isDuplicate ? "Você já registrou seu voto nesta categoria!" : "Falha ao processar voto",
+          error: isDuplicate
+            ? (voteResult?.message || "Você já confirmou seu voto neste candidato nesta categoria! Se desejar mudar seu voto, escolha outro candidato.")
+            : "Falha ao processar voto",
           reason: voteResult?.reason
         }), {
           status: isDuplicate ? 409 : 400,
@@ -410,7 +417,15 @@ serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ success: true, candidate_id: existingCandidateId }), {
+      return new Response(JSON.stringify({
+        success: true,
+        candidate_id: existingCandidateId,
+        updated: voteResult.action === "updated",
+        action: voteResult.action || "created",
+        message: voteResult.message || (voteResult.action === "updated"
+          ? "Seu voto foi retificado com sucesso para este candidato!"
+          : "Voto registrado com sucesso!")
+      }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -461,7 +476,16 @@ serve(async (req) => {
       console.warn("Aviso ao auto-aprovar indicação (permanecerá para moderação manual):", approveError);
     }
 
-    return new Response(JSON.stringify({ success: true, instant_approved: !approveError }), {
+    const isUpdatedVote = (approveResult as any)?.initial_vote_skipped_reason === "vote_updated";
+
+    return new Response(JSON.stringify({
+      success: true,
+      instant_approved: !approveError,
+      updated: isUpdatedVote,
+      message: isUpdatedVote
+        ? "Novo candidato indicado e seu voto foi retificado para ele com sucesso!"
+        : "Novo candidato indicado e seu voto computado com sucesso!"
+    }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
