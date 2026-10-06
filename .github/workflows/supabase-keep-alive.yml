@@ -2,26 +2,30 @@ name: Supabase Auto Keep-Alive 24/7 (Melhores do Ano)
 
 on:
   schedule:
-    # Executa a cada 3 dias às 12:00 UTC (evita a pausa de 7 dias do Supabase)
-    - cron: '0 12 */3 * *'
+    # Executa 2 vezes ao dia (06:00 e 18:00 UTC) para garantir que nunca atinja 7 dias de inatividade
+    - cron: '0 6,18 * * *'
   workflow_dispatch: # Permite disparo manual na aba Actions do GitHub
 
 jobs:
   keep-alive:
-    name: Keep Supabase Active
+    name: Keep Supabase Active & Auto-Restore
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST API
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Supabase Keep-Alive & Diagnostic Engine
         env:
-          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
-          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
-            echo "🚀 Enviando ping de atividade para o Supabase (Melhores do Ano)..."
-            RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$SUPABASE_URL/rest/v1/" \
-              -H "apikey: $SUPABASE_ANON_KEY" \
-              -H "Authorization: Bearer $SUPABASE_ANON_KEY")
-            echo "✅ Resposta do Supabase: HTTP $RESPONSE_CODE"
-          else
-            echo "⚠️ Variáveis VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY não encontradas no GitHub Secrets."
-          fi
+          node scripts/supabase-keep-alive.mjs
+
+      - name: Keep GitHub Actions Active (Prevents 60-day auto-pause)
+        uses: gautamkrishnar/keepalive-workflow@v1
