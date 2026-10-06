@@ -467,7 +467,7 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("Erro na Edge Function nominate:", err);
-    return new Response(JSON.stringify({ error: "Erro interno no servidor" }), {
+    return new Response(JSON.stringify({ error: "Erro interno no servidor", details: String((err as any)?.message || err) }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
