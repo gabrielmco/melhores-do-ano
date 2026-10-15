@@ -578,7 +578,29 @@ function refreshProgressUI() {
 // Carregar candidatos para a categoria selecionada usando a VIEW pública
 async function loadCandidates() {
   try {
-    candidatesList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.4);">Carregando candidatos...</p>';
+    candidatesList.innerHTML = `
+      <div class="skeleton-candidate-card" aria-hidden="true">
+        <div class="skeleton skeleton-avatar"></div>
+        <div style="flex: 1;">
+          <div class="skeleton skeleton-text" style="width: 70%;"></div>
+          <div class="skeleton skeleton-text short" style="width: 40%; margin-bottom: 0;"></div>
+        </div>
+      </div>
+      <div class="skeleton-candidate-card" aria-hidden="true">
+        <div class="skeleton skeleton-avatar"></div>
+        <div style="flex: 1;">
+          <div class="skeleton skeleton-text" style="width: 60%;"></div>
+          <div class="skeleton skeleton-text short" style="width: 35%; margin-bottom: 0;"></div>
+        </div>
+      </div>
+      <div class="skeleton-candidate-card" aria-hidden="true">
+        <div class="skeleton skeleton-avatar"></div>
+        <div style="flex: 1;">
+          <div class="skeleton skeleton-text" style="width: 75%;"></div>
+          <div class="skeleton skeleton-text short" style="width: 50%; margin-bottom: 0;"></div>
+        </div>
+      </div>
+    `;
     btnGoToStep3.disabled = true;
 
     const data = await api.getCandidates(state.selectedElectionId, state.selectedCategoryId);

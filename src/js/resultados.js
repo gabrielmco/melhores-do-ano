@@ -156,7 +156,30 @@ async function loadResults(electionId) {
       // -------------------------------------------------------------
       // EXIBIÇÃO DE RESULTADOS FINAIS OFICIAIS (ELEIÇÃO FECHADA)
       // -------------------------------------------------------------
-      resultsList.innerHTML = '<div class="status-msg">Buscando resultados oficiais...</div>';
+      resultsList.innerHTML = `
+        <div class="category-results-group" aria-hidden="true">
+          <div class="skeleton skeleton-text title" style="width: 280px; margin-bottom: 24px;"></div>
+          <div class="winners-grid">
+            <div class="skeleton-candidate-card" style="min-height: 140px; padding: 24px;">
+              <div class="skeleton skeleton-avatar" style="width: 80px; height: 80px;"></div>
+              <div style="flex: 1;">
+                <div class="skeleton skeleton-text" style="width: 70%; height: 20px;"></div>
+                <div class="skeleton skeleton-text short" style="width: 40%;"></div>
+                <div class="skeleton skeleton-text" style="width: 50%; height: 26px; border-radius: 20px; margin-top: 10px;"></div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="skeleton-candidate-card" style="padding: 16px;">
+                <div class="skeleton skeleton-avatar" style="width: 44px; height: 44px;"></div>
+                <div style="flex: 1;">
+                  <div class="skeleton skeleton-text" style="width: 65%;"></div>
+                  <div class="skeleton skeleton-text short" style="width: 35%; margin-bottom: 0;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
 
       const { data, error } = await supabase
         .from('public_winners')
@@ -278,7 +301,30 @@ async function loadResults(electionId) {
       // -------------------------------------------------------------
       // APURAÇÃO EM TEMPO REAL OU PERÍODO DE REGISTROS (ELEIÇÃO ABERTA)
       // -------------------------------------------------------------
-      resultsList.innerHTML = '<div class="status-msg">Carregando dados da apuração em tempo real...</div>';
+      resultsList.innerHTML = `
+        <div class="category-results-group" aria-hidden="true">
+          <div class="skeleton skeleton-text title" style="width: 280px; margin-bottom: 24px;"></div>
+          <div class="winners-grid">
+            <div class="skeleton-candidate-card" style="min-height: 140px; padding: 24px;">
+              <div class="skeleton skeleton-avatar" style="width: 80px; height: 80px;"></div>
+              <div style="flex: 1;">
+                <div class="skeleton skeleton-text" style="width: 70%; height: 20px;"></div>
+                <div class="skeleton skeleton-text short" style="width: 40%;"></div>
+                <div class="skeleton skeleton-text" style="width: 50%; height: 26px; border-radius: 20px; margin-top: 10px;"></div>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="skeleton-candidate-card" style="padding: 16px;">
+                <div class="skeleton skeleton-avatar" style="width: 44px; height: 44px;"></div>
+                <div style="flex: 1;">
+                  <div class="skeleton skeleton-text" style="width: 65%;"></div>
+                  <div class="skeleton skeleton-text short" style="width: 35%; margin-bottom: 0;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
 
       // 1. Obter a fase do evento
       const { data: configData, error: configErr } = await supabase
