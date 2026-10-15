@@ -565,6 +565,18 @@
           </div>
         </div>
 
+        <!-- Banner de Sessão Ativa do Eleitor -->
+        <div id="voterSessionBanner" style="display: none; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; align-items: center; justify-content: space-between; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2rem;">🔒</span>
+            <div>
+              <div style="font-size: 0.82rem; font-weight: 600; color: #93c5fd;">Identidade Verificada</div>
+              <div id="voterSessionText" style="font-size: 0.78rem; color: rgba(255, 255, 255, 0.75);">Nome (Contato)</div>
+            </div>
+          </div>
+          <button type="button" id="btnClearVoterSession" style="background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; border-radius: 4px; padding: 4px 8px; cursor: pointer;">Trocar</button>
+        </div>
+
         <div class="form-group">
           <label for="voterName">Seu Nome Completo</label>
           <input type="text" id="voterName" class="form-control" placeholder="Digite seu nome e sobrenome" autocomplete="name" required>
@@ -577,7 +589,7 @@
           </div>
           <input type="tel" id="voterIdentifier" class="form-control" placeholder="(32) 99999-9999" autocomplete="tel" required>
           <input type="hidden" id="voterType" value="whatsapp">
-          <small style="color: rgba(255,255,255,0.45); font-size: 0.75rem; margin-top: 4px; display: block;">Usado exclusivamente para garantir que seu voto seja único e legítimo.</small>
+          <small id="voterContactFeedback" style="color: rgba(255,255,255,0.45); font-size: 0.75rem; margin-top: 4px; display: block;">Usado exclusivamente para garantir que seu voto seja único e legítimo.</small>
         </div>
 
         <!-- Checkboxes LGPD com área de toque acessível -->

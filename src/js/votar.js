@@ -1,5 +1,8 @@
 import { supabase, isUsingMock } from './supabaseClient.js';
 import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
+import { validateWhatsapp, validateEmail, maskContact } from './modules/voterValidation.js';
+
+const VOTER_SESSION_KEY = 'voter_session_bom_jardim';
 
 // --- CONFIGURAÇÃO E ESTADO GLOBAL ---
 let state = {
@@ -12,8 +15,62 @@ let state = {
   candidates: [],
   currentStep: 1,
   turnstileToken: '',
-  turnstileWidgetId: null
+  turnstileWidgetId: null,
+  voterSessionToken: '',
+  voterMasked: ''
 };
+
+function loadVoterSession() {
+  try {
+    const raw = sessionStorage.getItem(VOTER_SESSION_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (session && session.token && session.name && session.identifier) {
+      return session;
+    }
+  } catch (e) {}
+  return null;
+}
+
+function saveVoterSession(sessionData) {
+  try {
+    sessionStorage.setItem(VOTER_SESSION_KEY, JSON.stringify(sessionData));
+    state.voterSessionToken = sessionData.token;
+    state.voterMasked = sessionData.masked;
+  } catch (e) {}
+}
+
+function clearVoterSession() {
+  sessionStorage.removeItem(VOTER_SESSION_KEY);
+  state.voterSessionToken = '';
+  state.voterMasked = '';
+  voterName.value = '';
+  voterIdentifier.value = '';
+  privacyConsent.checked = false;
+  validationConsent.checked = false;
+  updateVoterSessionBanner();
+  validateStep3Form();
+}
+
+function updateVoterSessionBanner() {
+  const banner = document.getElementById('voterSessionBanner');
+  const textEl = document.getElementById('voterSessionText');
+  const session = loadVoterSession();
+
+  if (session && banner && textEl) {
+    banner.style.display = 'flex';
+    textEl.textContent = `${session.name} • ${session.masked}`;
+    voterName.value = session.name;
+    voterType.value = session.type || 'whatsapp';
+    voterIdentifier.value = session.identifier;
+    privacyConsent.checked = true;
+    validationConsent.checked = true;
+    state.voterSessionToken = session.token;
+    state.voterMasked = session.masked;
+  } else if (banner) {
+    banner.style.display = 'none';
+  }
+}
 
 function getPublicFunctionHeaders() {
   const apiKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
@@ -47,6 +104,11 @@ function getOrCreateCookieId() {
 // Inicializar
 window.addEventListener('DOMContentLoaded', async () => {
   state.cookieId = getOrCreateCookieId();
+  const session = loadVoterSession();
+  if (session) {
+    state.voterSessionToken = session.token;
+    state.voterMasked = session.masked;
+  }
   setupEventListeners();
   await loadCities();
   initTurnstile();
@@ -285,8 +347,14 @@ function setupEventListeners() {
     }
     validateStep3Form();
   });
+  voterName.addEventListener('input', validateStep3Form);
   privacyConsent.addEventListener('change', validateStep3Form);
   validationConsent.addEventListener('change', validateStep3Form);
+
+  const btnClearVoterSession = document.getElementById('btnClearVoterSession');
+  if (btnClearVoterSession) {
+    btnClearVoterSession.addEventListener('click', clearVoterSession);
+  }
 
   // Voltar da Etapa 3 para a 2
   btnBackToStep2.addEventListener('click', () => {
@@ -546,6 +614,7 @@ function filterCandidates() {
 
 // Configurar a tela de confirmação (Etapa 3)
 function showConfirmationScreen(isNomination) {
+  updateVoterSessionBanner();
   if (isNomination) {
     nominationFields.style.display = 'block';
     selectedCandidateSummary.innerHTML = `
@@ -579,16 +648,40 @@ function validateStep3Form() {
   const contact = voterIdentifier.value.trim();
   const hasPrivacy = privacyConsent.checked;
   const hasValidation = validationConsent.checked;
-  const isTurnstileOk = !!state.turnstileToken;
+  const session = loadVoterSession();
+  const isSessionVerified = Boolean(session && session.token && state.voterSessionToken);
+  const isTurnstileOk = isSessionVerified || !!state.turnstileToken;
+
+  const contactFeedback = document.getElementById('voterContactFeedback');
 
   let isContactOk = false;
+  let contactErrorMsg = '';
+
   if (voterType.value === 'whatsapp') {
-    // Validar WhatsApp (apenas números, mínimo 10 dígitos)
-    const cleanNumbers = contact.replace(/\D/g, '');
-    isContactOk = cleanNumbers.length >= 10;
+    const res = validateWhatsapp(contact);
+    isContactOk = res.valid;
+    if (!res.valid && contact.length > 2) {
+      contactErrorMsg = res.reason;
+    }
   } else {
-    // Validar E-mail básico
-    isContactOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact);
+    const res = validateEmail(contact);
+    isContactOk = res.valid;
+    if (!res.valid && contact.length > 2) {
+      contactErrorMsg = res.reason;
+    }
+  }
+
+  if (contactFeedback) {
+    if (contactErrorMsg) {
+      contactFeedback.textContent = `⚠️ ${contactErrorMsg}`;
+      contactFeedback.style.color = '#f87171';
+    } else if (isContactOk) {
+      contactFeedback.textContent = '✓ Contato verificado com sucesso.';
+      contactFeedback.style.color = '#4ade80';
+    } else {
+      contactFeedback.textContent = 'Usado exclusivamente para garantir que seu voto seja único e legítimo.';
+      contactFeedback.style.color = 'rgba(255,255,255,0.45)';
+    }
   }
 
   // Se for indicação, valida se o nome e o Instagram foram preenchidos
@@ -599,7 +692,7 @@ function validateStep3Form() {
   const finalNomInstagram = nomInstagramEl ? nomInstagramEl.value.trim() : '';
   const isNominationOk = !isNomination || (finalNomName && finalNomName.length >= 2 && finalNomInstagram.length >= 2);
 
-  btnSubmitVote.disabled = !(name.length > 3 && isContactOk && hasPrivacy && hasValidation && isTurnstileOk && isNominationOk);
+  btnSubmitVote.disabled = !(name.length >= 3 && isContactOk && hasPrivacy && hasValidation && isTurnstileOk && isNominationOk);
 }
 
 // Inicializar widget Cloudflare Turnstile
@@ -666,6 +759,13 @@ async function submitVoteFlow() {
   }
 
   const isNomination = !state.selectedCandidateId;
+  const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : ('idemp_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now());
+
+  const headers = getPublicFunctionHeaders();
+  headers['X-Idempotency-Key'] = idempotencyKey;
+  if (state.voterSessionToken) {
+    headers['X-Voter-Session'] = state.voterSessionToken;
+  }
 
   try {
     let targetCandidateId = state.selectedCandidateId;
@@ -687,7 +787,7 @@ async function submitVoteFlow() {
       const nominateFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL || ''}/functions/v1/nominate`;
       const nominationResponse = await fetch(nominateFunctionUrl, {
         method: 'POST',
-        headers: getPublicFunctionHeaders(),
+        headers: headers,
         body: JSON.stringify({
           election_id: state.selectedElectionId,
           category_id: state.selectedCategoryId,
@@ -700,7 +800,9 @@ async function submitVoteFlow() {
           cookie_id: state.cookieId,
           privacy_consent: privacyConsent.checked,
           validation_consent: validationConsent.checked,
-          turnstile_token: state.turnstileToken
+          turnstile_token: state.turnstileToken || 'session_authenticated',
+          voter_session_token: state.voterSessionToken || null,
+          idempotency_key: idempotencyKey
         })
       });
 
@@ -708,6 +810,16 @@ async function submitVoteFlow() {
 
       if (!nominationResponse.ok) {
         throw new Error(nominationResult.error || 'Erro ao registrar indicação.');
+      }
+
+      if (nominationResult.voter_session_token) {
+        saveVoterSession({
+          token: nominationResult.voter_session_token,
+          name: voterName.value.trim(),
+          identifier: voterIdentifier.value.trim(),
+          type: voterType.value,
+          masked: nominationResult.voter_masked || maskContact(voterIdentifier.value.trim(), voterType.value)
+        });
       }
       
       // Mostrar tela de sucesso diretamente
@@ -721,7 +833,7 @@ async function submitVoteFlow() {
     
     const response = await fetch(edgeFunctionUrl, {
       method: 'POST',
-      headers: getPublicFunctionHeaders(),
+      headers: headers,
       body: JSON.stringify({
         election_id: state.selectedElectionId,
         category_id: state.selectedCategoryId,
@@ -732,7 +844,9 @@ async function submitVoteFlow() {
         cookie_id: state.cookieId,
         privacy_consent: privacyConsent.checked,
         validation_consent: validationConsent.checked,
-        turnstile_token: state.turnstileToken
+        turnstile_token: state.turnstileToken || 'session_authenticated',
+        voter_session_token: state.voterSessionToken || null,
+        idempotency_key: idempotencyKey
       })
     });
 
@@ -740,6 +854,16 @@ async function submitVoteFlow() {
 
     if (!response.ok) {
       throw new Error(result.error || 'Erro ao registrar voto.');
+    }
+
+    if (result.voter_session_token) {
+      saveVoterSession({
+        token: result.voter_session_token,
+        name: voterName.value.trim(),
+        identifier: voterIdentifier.value.trim(),
+        type: voterType.value,
+        masked: result.voter_masked || maskContact(voterIdentifier.value.trim(), voterType.value)
+      });
     }
 
     // Sucesso
@@ -795,11 +919,14 @@ function resetVoteFlow() {
   state.turnstileToken = '';
   renderSuccessScreen(false);
   
-  // Limpar formulário de contato
-  voterName.value = '';
-  voterIdentifier.value = '';
-  privacyConsent.checked = false;
-  validationConsent.checked = false;
+  // Se não houver sessão ativa, limpa os campos de contato
+  const session = loadVoterSession();
+  if (!session) {
+    voterName.value = '';
+    voterIdentifier.value = '';
+    privacyConsent.checked = false;
+    validationConsent.checked = false;
+  }
 
   if (window.turnstile && state.turnstileWidgetId !== null) {
     window.turnstile.reset(state.turnstileWidgetId);

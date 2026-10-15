@@ -29,6 +29,19 @@ const TURNSTILE_EXPECTED_HOSTNAMES = (Deno.env.get("TURNSTILE_EXPECTED_HOSTNAMES
   .filter(Boolean);
 const TURNSTILE_EXPECTED_ACTION = Deno.env.get("TURNSTILE_EXPECTED_ACTION") ?? "voting";
 
+// 67 DDDs legítimos reconhecidos pela Anatel no Brasil
+const VALID_BRAZILIAN_DDDS = new Set([
+  "11", "12", "13", "14", "15", "16", "17", "18", "19",
+  "21", "22", "24", "27", "28",
+  "31", "32", "33", "34", "35", "37", "38",
+  "41", "42", "43", "44", "45", "46", "47", "48", "49",
+  "51", "53", "54", "55",
+  "61", "62", "63", "64", "65", "66", "67", "68", "69",
+  "71", "73", "74", "75", "77", "79",
+  "81", "82", "83", "84", "85", "86", "87", "88", "89",
+  "91", "92", "93", "94", "95", "96", "97", "98", "99"
+]);
+
 function buildCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
   const allowOrigin =
@@ -38,7 +51,7 @@ function buildCorsHeaders(req: Request) {
 
   return {
     "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-idempotency-key, x-voter-session",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Vary": "Origin",
   };
@@ -82,6 +95,137 @@ async function hmacValue(namespace: string, value: string) {
     .join("");
 }
 
+function validateBrazilianPhone(phone: string): { valid: boolean; reason?: string; normalized?: string } {
+  if (!phone || typeof phone !== "string") {
+    return { valid: false, reason: "Informe o número do WhatsApp." };
+  }
+
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("55") && (digits.length === 12 || digits.length === 13)) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.length !== 10 && digits.length !== 11) {
+    return { valid: false, reason: "O WhatsApp deve conter DDD + número (10 ou 11 dígitos)." };
+  }
+
+  const ddd = digits.slice(0, 2);
+  if (!VALID_BRAZILIAN_DDDS.has(ddd)) {
+    return { valid: false, reason: `DDD (${ddd}) não é válido no Brasil.` };
+  }
+
+  if (digits.length === 11 && digits[2] !== "9") {
+    return { valid: false, reason: "Celular brasileiro deve iniciar com o dígito 9 após o DDD." };
+  }
+
+  if (/^(\d)\1+$/.test(digits)) {
+    return { valid: false, reason: "Número inválido (dígitos todos repetidos)." };
+  }
+
+  const localPart = digits.slice(2);
+  if (/^(\d)\1+$/.test(localPart)) {
+    return { valid: false, reason: "Número fictício com dígitos locais repetidos." };
+  }
+
+  const obviousSequences = [
+    "0123456789", "1234567890", "2345678901",
+    "9876543210", "0987654321", "12345678901",
+    "98765432109"
+  ];
+  if (obviousSequences.some((seq) => digits.includes(seq) || localPart.includes(seq))) {
+    return { valid: false, reason: "Número sequencial não permitido." };
+  }
+
+  return { valid: true, normalized: digits };
+}
+
+function validateEmail(email: string): { valid: boolean; reason?: string; normalized?: string } {
+  if (!email || typeof email !== "string") {
+    return { valid: false, reason: "Informe o endereço de e-mail." };
+  }
+  const trimmed = email.trim().toLowerCase();
+  if (trimmed.length < 5 || trimmed.length > 254) {
+    return { valid: false, reason: "Tamanho de e-mail inválido." };
+  }
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  if (!emailRegex.test(trimmed)) {
+    return { valid: false, reason: "Formato de e-mail inválido." };
+  }
+  const dummyEmails = ["test@test.com", "teste@teste.com", "a@a.com", "admin@admin.com"];
+  if (dummyEmails.includes(trimmed)) {
+    return { valid: false, reason: "E-mail genérico/fictício não permitido." };
+  }
+  return { valid: true, normalized: trimmed };
+}
+
+function maskIdentifier(identifier: string, type: string): string {
+  if (type === "whatsapp") {
+    const digits = identifier.replace(/\D/g, "");
+    if (digits.length === 11) {
+      return `(${digits.slice(0, 2)}) 9****-${digits.slice(7)}`;
+    }
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 2)}) ****-${digits.slice(6)}`;
+    }
+    return identifier;
+  }
+  const parts = identifier.split("@");
+  if (parts.length === 2) {
+    const name = parts[0];
+    const domain = parts[1];
+    const maskedName = name.length > 2 ? `${name[0]}***${name[name.length - 1]}` : `${name[0]}***`;
+    return `${maskedName}@${domain}`;
+  }
+  return identifier;
+}
+
+async function createVoterSessionToken(
+  voterHash: string,
+  voterName: string,
+  voterType: string,
+  voterMasked: string
+): Promise<string> {
+  const payloadObj = {
+    sub: voterHash,
+    name: voterName,
+    type: voterType,
+    masked: voterMasked,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (2 * 60 * 60) // 2 horas de validade
+  };
+  const payloadStr = JSON.stringify(payloadObj);
+  const payloadB64 = btoa(payloadStr);
+  const sig = await hmacValue("voter_session", payloadStr);
+  return `${payloadB64}.${sig}`;
+}
+
+async function verifyVoterSessionToken(token: string): Promise<{
+  sub: string;
+  name: string;
+  type: string;
+  masked: string;
+} | null> {
+  if (!token || typeof token !== "string" || !token.includes(".")) return null;
+  try {
+    const [payloadB64, sig] = token.split(".");
+    if (!payloadB64 || !sig) return null;
+    const payloadStr = atob(payloadB64);
+    const expectedSig = await hmacValue("voter_session", payloadStr);
+    if (sig !== expectedSig) return null;
+    const data = JSON.parse(payloadStr);
+    const now = Math.floor(Date.now() / 1000);
+    if (typeof data.exp !== "number" || now > data.exp) return null;
+    return {
+      sub: String(data.sub || ""),
+      name: String(data.name || ""),
+      type: String(data.type || ""),
+      masked: String(data.masked || "")
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function turnstileIsValid(token: string, ipAddress: string) {
   if (TURNSTILE_SECRET.startsWith("1x000000") && (token === "dummy_token" || token.startsWith("XXXX.DUMMY") || token === "1x00000000000000000000AA")) {
     return true;
@@ -115,13 +259,13 @@ serve(async (req) => {
   const corsHeaders = buildCorsHeaders(req);
 
   if (!originIsAllowed(req)) {
-    return new Response(JSON.stringify({ error: "Origem nao permitida" }), {
+    return new Response(JSON.stringify({ error: "Origem não permitida" }), {
       status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
-  // Tratar requisição OPTIONS (Preflight check do CORS)
+  // Preflight CORS
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -148,12 +292,14 @@ serve(async (req) => {
       category_id,
       candidate_id,
       voter_name,
-      voter_identifier, // WhatsApp ou E-mail cru do frontend
-      voter_type, // 'email' ou 'whatsapp'
+      voter_identifier,
+      voter_type,
       cookie_id,
       privacy_consent,
       validation_consent,
       turnstile_token,
+      voter_session_token,
+      idempotency_key
     } = body;
 
     // 1. Validar preenchimento dos campos obrigatórios
@@ -166,8 +312,7 @@ serve(async (req) => {
       !voter_type ||
       !cookie_id ||
       !privacy_consent ||
-      !validation_consent ||
-      !turnstile_token
+      !validation_consent
     ) {
       return new Response(JSON.stringify({ error: "Campos obrigatórios ausentes" }), {
         status: 400,
@@ -182,11 +327,22 @@ serve(async (req) => {
       typeof voter_identifier !== "string" ||
       voter_identifier.length > 254 ||
       typeof cookie_id !== "string" ||
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cookie_id) ||
-      typeof turnstile_token !== "string" ||
-      turnstile_token.length > 2048
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cookie_id)
     ) {
       return new Response(JSON.stringify({ error: "Formato dos dados inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validação de chave de idempotência (se fornecida, deve ser UUID válido)
+    const headerIdempotency = req.headers.get("x-idempotency-key");
+    const effectiveIdempotencyKey = idempotency_key || headerIdempotency;
+    if (
+      effectiveIdempotencyKey &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(effectiveIdempotencyKey)
+    ) {
+      return new Response(JSON.stringify({ error: "Chave de idempotência em formato inválido" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -199,54 +355,71 @@ serve(async (req) => {
       });
     }
 
-    if (voter_type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(voter_identifier.trim())) {
-      return new Response(JSON.stringify({ error: "E-mail inválido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const whatsappDigits = voter_identifier.replace(/\D/g, "");
-    if (voter_type === "whatsapp" && (whatsappDigits.length < 10 || whatsappDigits.length > 15)) {
-      return new Response(JSON.stringify({ error: "WhatsApp inválido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let normalizedIdentifier = "";
+    if (voter_type === "whatsapp") {
+      const phoneValidation = validateBrazilianPhone(voter_identifier);
+      if (!phoneValidation.valid) {
+        return new Response(JSON.stringify({ error: phoneValidation.reason }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      normalizedIdentifier = phoneValidation.normalized!;
+    } else {
+      const emailValidation = validateEmail(voter_identifier);
+      if (!emailValidation.valid) {
+        return new Response(JSON.stringify({ error: emailValidation.reason }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      normalizedIdentifier = emailValidation.normalized!;
     }
 
     const ipAddress = getClientIp(req);
-    if (!await turnstileIsValid(String(turnstile_token), ipAddress)) {
-      return new Response(JSON.stringify({ error: "Validação anti-bot (Turnstile) falhou" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    // Validação de Sessão Criptografada vs Anti-bot Turnstile
+    const incomingSessionToken = voter_session_token || req.headers.get("x-voter-session");
+    let verifiedSession = incomingSessionToken ? await verifyVoterSessionToken(incomingSessionToken) : null;
+
+    const hmacVoterHash = await hmacValue("", normalizedIdentifier);
+
+    // Se houver sessão assinada válida e pertencer ao mesmo eleitor, aceita sessão pré-autenticada
+    const hasValidSessionForVoter = verifiedSession && verifiedSession.sub === hmacVoterHash;
+
+    if (!hasValidSessionForVoter) {
+      if (!turnstile_token || typeof turnstile_token !== "string" || turnstile_token.length > 2048) {
+        return new Response(JSON.stringify({ error: "Token de validação anti-bot ausente ou inválido" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!await turnstileIsValid(String(turnstile_token), ipAddress)) {
+        return new Response(JSON.stringify({ error: "Validação anti-bot (Turnstile) falhou" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const userAgent = (req.headers.get("user-agent") || "").slice(0, 512);
-    let normalizedIdentifier = String(voter_identifier).trim().toLowerCase();
-    if (voter_type === "whatsapp") {
-      // Deixar apenas números para WhatsApp
-      normalizedIdentifier = normalizedIdentifier.replace(/\D/g, "");
-    }
-
-    // O contato mantém o formato legado para preservar a trava de duplicidade existente.
-    const hmacVoterHash = await hmacValue("", normalizedIdentifier);
     const ipAddressHash = await hmacValue("ip", ipAddress);
     const userAgentHash = await hmacValue("user-agent", userAgent);
     const cookieIdHash = await hmacValue("device", String(cookie_id));
 
-    // 6. Conectar ao Supabase via Service Role (Bypass RLS para executar a RPC privada)
+    // Conectar ao Supabase via Service Role para executar RPC atômica
     const supabase = createClient(SUPABASE_URL, SUPABASE_ADMIN_KEY, {
       auth: { persistSession: false },
     });
 
-    // 7. Chamar a RPC cast_vote no banco de dados
+    // Chamar RPC cast_vote_secure com dados sanitizados e hashes seguros
     const { data, error } = await supabase.rpc("cast_vote_secure", {
       p_election_id: election_id,
       p_category_id: category_id,
       p_candidate_id: candidate_id,
-      p_voter_name: voter_name,
-      p_voter_identifier: hmacVoterHash, // Envia o hash assinado
+      p_voter_name: voter_name.trim(),
+      p_voter_identifier: hmacVoterHash,
       p_voter_type: voter_type,
       p_ip_address_hash: ipAddressHash,
       p_user_agent_hash: userAgentHash,
@@ -263,7 +436,6 @@ serve(async (req) => {
       });
     }
 
-    // Traduzir a resposta estruturada JSONB do banco em respostas HTTP corretas
     const voteResult = data as {
       success?: boolean;
       reason?: string;
@@ -275,7 +447,7 @@ serve(async (req) => {
       let status = 400;
       let msg = "Falha ao processar voto";
       const reason = voteResult?.reason || "unknown";
-      
+
       if (reason === "rate_limit") {
         status = 429;
         msg = "Muitas tentativas de voto vindas deste dispositivo. Aguarde 5 minutos.";
@@ -299,10 +471,22 @@ serve(async (req) => {
       });
     }
 
+    // Gerar token de sessão assinado HMAC para votação contínua fluida
+    const maskedContact = maskIdentifier(normalizedIdentifier, voter_type);
+    const newSessionToken = await createVoterSessionToken(
+      hmacVoterHash,
+      voter_name.trim(),
+      voter_type,
+      maskedContact
+    );
+
     return new Response(JSON.stringify({
       success: true,
       updated: voteResult.action === "updated",
       action: voteResult.action || "created",
+      voter_session_token: newSessionToken,
+      voter_masked: maskedContact,
+      idempotency_key: effectiveIdempotencyKey || null,
       message: voteResult.message || (voteResult.action === "updated"
         ? "Seu voto foi retificado com sucesso! Sua nova escolha substituiu o voto anterior."
         : "Voto registrado com sucesso!")
@@ -311,7 +495,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
-    console.error("Erro na Edge Function:", err);
+    console.error("Erro na Edge Function vote:", err);
     return new Response(JSON.stringify({ error: "Erro interno no servidor" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

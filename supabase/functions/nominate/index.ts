@@ -29,6 +29,19 @@ const TURNSTILE_EXPECTED_HOSTNAMES = (Deno.env.get("TURNSTILE_EXPECTED_HOSTNAMES
   .filter(Boolean);
 const TURNSTILE_EXPECTED_ACTION = Deno.env.get("TURNSTILE_EXPECTED_ACTION") ?? "voting";
 
+// 67 DDDs legítimos reconhecidos pela Anatel no Brasil
+const VALID_BRAZILIAN_DDDS = new Set([
+  "11", "12", "13", "14", "15", "16", "17", "18", "19",
+  "21", "22", "24", "27", "28",
+  "31", "32", "33", "34", "35", "37", "38",
+  "41", "42", "43", "44", "45", "46", "47", "48", "49",
+  "51", "53", "54", "55",
+  "61", "62", "63", "64", "65", "66", "67", "68", "69",
+  "71", "73", "74", "75", "77", "79",
+  "81", "82", "83", "84", "85", "86", "87", "88", "89",
+  "91", "92", "93", "94", "95", "96", "97", "98", "99"
+]);
+
 function buildCorsHeaders(req: Request) {
   const origin = req.headers.get("origin") ?? "";
   const allowOrigin =
@@ -38,7 +51,7 @@ function buildCorsHeaders(req: Request) {
 
   return {
     "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-idempotency-key, x-voter-session",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Vary": "Origin",
   };
@@ -76,19 +89,135 @@ function normalizeInstagram(value: unknown) {
   return `@${cleaned}`;
 }
 
-function normalizeIdentifier(value: string, type: string) {
-  const trimmed = value.trim().toLowerCase();
-  if (type === "whatsapp") return trimmed.replace(/\D/g, "");
-  return trimmed;
+function validateBrazilianPhone(phone: string): { valid: boolean; reason?: string; normalized?: string } {
+  if (!phone || typeof phone !== "string") {
+    return { valid: false, reason: "Informe o número do WhatsApp." };
+  }
+
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("55") && (digits.length === 12 || digits.length === 13)) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.length !== 10 && digits.length !== 11) {
+    return { valid: false, reason: "O WhatsApp deve conter DDD + número (10 ou 11 dígitos)." };
+  }
+
+  const ddd = digits.slice(0, 2);
+  if (!VALID_BRAZILIAN_DDDS.has(ddd)) {
+    return { valid: false, reason: `DDD (${ddd}) não é válido no Brasil.` };
+  }
+
+  if (digits.length === 11 && digits[2] !== "9") {
+    return { valid: false, reason: "Celular brasileiro deve iniciar com o dígito 9 após o DDD." };
+  }
+
+  if (/^(\d)\1+$/.test(digits)) {
+    return { valid: false, reason: "Número inválido (dígitos todos repetidos)." };
+  }
+
+  const localPart = digits.slice(2);
+  if (/^(\d)\1+$/.test(localPart)) {
+    return { valid: false, reason: "Número fictício com dígitos locais repetidos." };
+  }
+
+  const obviousSequences = [
+    "0123456789", "1234567890", "2345678901",
+    "9876543210", "0987654321", "12345678901",
+    "98765432109"
+  ];
+  if (obviousSequences.some((seq) => digits.includes(seq) || localPart.includes(seq))) {
+    return { valid: false, reason: "Número sequencial não permitido." };
+  }
+
+  return { valid: true, normalized: digits };
 }
 
-function isValidEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+function validateEmail(email: string): { valid: boolean; reason?: string; normalized?: string } {
+  if (!email || typeof email !== "string") {
+    return { valid: false, reason: "Informe o endereço de e-mail." };
+  }
+  const trimmed = email.trim().toLowerCase();
+  if (trimmed.length < 5 || trimmed.length > 254) {
+    return { valid: false, reason: "Tamanho de e-mail inválido." };
+  }
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  if (!emailRegex.test(trimmed)) {
+    return { valid: false, reason: "Formato de e-mail inválido." };
+  }
+  const dummyEmails = ["test@test.com", "teste@teste.com", "a@a.com", "admin@admin.com"];
+  if (dummyEmails.includes(trimmed)) {
+    return { valid: false, reason: "E-mail genérico/fictício não permitido." };
+  }
+  return { valid: true, normalized: trimmed };
 }
 
-function isValidWhatsapp(value: string) {
-  const digits = value.replace(/\D/g, "");
-  return digits.length >= 10 && digits.length <= 15;
+function maskIdentifier(identifier: string, type: string): string {
+  if (type === "whatsapp") {
+    const digits = identifier.replace(/\D/g, "");
+    if (digits.length === 11) {
+      return `(${digits.slice(0, 2)}) 9****-${digits.slice(7)}`;
+    }
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 2)}) ****-${digits.slice(6)}`;
+    }
+    return identifier;
+  }
+  const parts = identifier.split("@");
+  if (parts.length === 2) {
+    const name = parts[0];
+    const domain = parts[1];
+    const maskedName = name.length > 2 ? `${name[0]}***${name[name.length - 1]}` : `${name[0]}***`;
+    return `${maskedName}@${domain}`;
+  }
+  return identifier;
+}
+
+async function createVoterSessionToken(
+  voterHash: string,
+  voterName: string,
+  voterType: string,
+  voterMasked: string
+): Promise<string> {
+  const payloadObj = {
+    sub: voterHash,
+    name: voterName,
+    type: voterType,
+    masked: voterMasked,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + (2 * 60 * 60) // 2 horas
+  };
+  const payloadStr = JSON.stringify(payloadObj);
+  const payloadB64 = btoa(payloadStr);
+  const sig = await hmacValue("voter_session", payloadStr);
+  return `${payloadB64}.${sig}`;
+}
+
+async function verifyVoterSessionToken(token: string): Promise<{
+  sub: string;
+  name: string;
+  type: string;
+  masked: string;
+} | null> {
+  if (!token || typeof token !== "string" || !token.includes(".")) return null;
+  try {
+    const [payloadB64, sig] = token.split(".");
+    if (!payloadB64 || !sig) return null;
+    const payloadStr = atob(payloadB64);
+    const expectedSig = await hmacValue("voter_session", payloadStr);
+    if (sig !== expectedSig) return null;
+    const data = JSON.parse(payloadStr);
+    const now = Math.floor(Date.now() / 1000);
+    if (typeof data.exp !== "number" || now > data.exp) return null;
+    return {
+      sub: String(data.sub || ""),
+      name: String(data.name || ""),
+      type: String(data.type || ""),
+      masked: String(data.masked || "")
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function hmacValue(namespace: string, value: string) {
@@ -146,7 +275,7 @@ serve(async (req) => {
   const corsHeaders = buildCorsHeaders(req);
 
   if (!originIsAllowed(req)) {
-    return new Response(JSON.stringify({ error: "Origem nao permitida" }), {
+    return new Response(JSON.stringify({ error: "Origem não permitida" }), {
       status: 403,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
@@ -186,6 +315,8 @@ serve(async (req) => {
       privacy_consent,
       validation_consent,
       turnstile_token,
+      voter_session_token,
+      idempotency_key
     } = body;
 
     if (
@@ -198,8 +329,7 @@ serve(async (req) => {
       !voter_type ||
       !cookie_id ||
       !privacy_consent ||
-      !validation_consent ||
-      !turnstile_token
+      !validation_consent
     ) {
       return new Response(JSON.stringify({ error: "Campos obrigatórios ausentes" }), {
         status: 400,
@@ -214,11 +344,21 @@ serve(async (req) => {
       typeof voter_identifier !== "string" ||
       voter_identifier.length > 254 ||
       typeof cookie_id !== "string" ||
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cookie_id) ||
-      typeof turnstile_token !== "string" ||
-      turnstile_token.length > 2048
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(cookie_id)
     ) {
       return new Response(JSON.stringify({ error: "Formato dos dados inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const headerIdempotency = req.headers.get("x-idempotency-key");
+    const effectiveIdempotencyKey = idempotency_key || headerIdempotency;
+    if (
+      effectiveIdempotencyKey &&
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(effectiveIdempotencyKey)
+    ) {
+      return new Response(JSON.stringify({ error: "Chave de idempotência em formato inválido" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -246,32 +386,53 @@ serve(async (req) => {
       });
     }
 
-    if (voter_type === "email" && !isValidEmail(String(voter_identifier).trim())) {
-      return new Response(JSON.stringify({ error: "E-mail inválido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    if (voter_type === "whatsapp" && !isValidWhatsapp(String(voter_identifier))) {
-      return new Response(JSON.stringify({ error: "WhatsApp inválido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let normalizedIdentifier = "";
+    if (voter_type === "whatsapp") {
+      const phoneValidation = validateBrazilianPhone(voter_identifier);
+      if (!phoneValidation.valid) {
+        return new Response(JSON.stringify({ error: phoneValidation.reason }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      normalizedIdentifier = phoneValidation.normalized!;
+    } else {
+      const emailValidation = validateEmail(voter_identifier);
+      if (!emailValidation.valid) {
+        return new Response(JSON.stringify({ error: emailValidation.reason }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      normalizedIdentifier = emailValidation.normalized!;
     }
 
     const ipAddress = getClientIp(req);
-    if (!await turnstileIsValid(String(turnstile_token), ipAddress)) {
-      return new Response(JSON.stringify({ error: "Validação anti-bot falhou" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+
+    // Validação de Sessão Criptografada vs Anti-bot Turnstile
+    const incomingSessionToken = voter_session_token || req.headers.get("x-voter-session");
+    let verifiedSession = incomingSessionToken ? await verifyVoterSessionToken(incomingSessionToken) : null;
+
+    const voterIdentifierHash = await hmacValue("", normalizedIdentifier);
+    const hasValidSessionForVoter = verifiedSession && verifiedSession.sub === voterIdentifierHash;
+
+    if (!hasValidSessionForVoter) {
+      if (!turnstile_token || typeof turnstile_token !== "string" || turnstile_token.length > 2048) {
+        return new Response(JSON.stringify({ error: "Token de validação anti-bot ausente ou inválido" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!await turnstileIsValid(String(turnstile_token), ipAddress)) {
+        return new Response(JSON.stringify({ error: "Validação anti-bot falhou" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     const userAgent = (req.headers.get("user-agent") || "").slice(0, 512);
-    const normalizedIdentifier = normalizeIdentifier(String(voter_identifier), String(voter_type));
-    // O contato mantém o formato legado para preservar a trava de duplicidade existente.
-    const voterIdentifierHash = await hmacValue("", normalizedIdentifier);
     const ipAddressHash = await hmacValue("ip", ipAddress);
     const userAgentHash = await hmacValue("user-agent", userAgent);
     const cookieIdHash = await hmacValue("device", String(cookie_id));
@@ -291,7 +452,7 @@ serve(async (req) => {
     if (recentIpError) throw recentIpError;
 
     if ((recentIpCount ?? 0) >= 5) {
-      return new Response(JSON.stringify({ error: "Muitas indicacoes recentes. Aguarde alguns minutos." }), {
+      return new Response(JSON.stringify({ error: "Muitas indicações recentes. Aguarde alguns minutos." }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -306,7 +467,7 @@ serve(async (req) => {
     if (recentCookieError) throw recentCookieError;
 
     if ((recentCookieCount ?? 0) >= 3) {
-      return new Response(JSON.stringify({ error: "Muitas indicacoes recentes neste dispositivo." }), {
+      return new Response(JSON.stringify({ error: "Muitas indicações recentes neste dispositivo." }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -321,7 +482,7 @@ serve(async (req) => {
     if (recentVoterError) throw recentVoterError;
 
     if ((recentVoterCount ?? 0) >= 3) {
-      return new Response(JSON.stringify({ error: "Muitas indicacoes recentes para este contato." }), {
+      return new Response(JSON.stringify({ error: "Muitas indicações recentes para este contato." }), {
         status: 429,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -361,6 +522,14 @@ serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const maskedContact = maskIdentifier(normalizedIdentifier, voter_type);
+    const newSessionToken = await createVoterSessionToken(
+      voterIdentifierHash,
+      String(voter_name).trim(),
+      voter_type,
+      maskedContact
+    );
 
     const { data: existingCandidates, error: existingCandidateError } = await supabase
       .from("candidates")
@@ -422,6 +591,9 @@ serve(async (req) => {
         candidate_id: existingCandidateId,
         updated: voteResult.action === "updated",
         action: voteResult.action || "created",
+        voter_session_token: newSessionToken,
+        voter_masked: maskedContact,
+        idempotency_key: effectiveIdempotencyKey || null,
         message: voteResult.message || (voteResult.action === "updated"
           ? "Seu voto foi retificado com sucesso para este candidato!"
           : "Voto registrado com sucesso!")
@@ -431,7 +603,7 @@ serve(async (req) => {
       });
     }
 
-    // Se não existir, cadastra a indicação e auto-aprova instantaneamente para dinamismo total
+    // Se não existir, cadastra a indicação e auto-aprova instantaneamente
     const { data: insertedNomination, error: insertError } = await supabase
       .from("nominations")
       .insert({
@@ -467,7 +639,7 @@ serve(async (req) => {
       });
     }
 
-    // Auto-aprovação instantânea via RPC (cria candidato como aprovado e computa o voto imediatamente)
+    // Auto-aprovação instantânea via RPC
     const { data: approveResult, error: approveError } = await supabase.rpc("approve_nomination", {
       p_nomination_id: insertedNomination.id
     });
@@ -482,6 +654,9 @@ serve(async (req) => {
       success: true,
       instant_approved: !approveError,
       updated: isUpdatedVote,
+      voter_session_token: newSessionToken,
+      voter_masked: maskedContact,
+      idempotency_key: effectiveIdempotencyKey || null,
       message: isUpdatedVote
         ? "Novo candidato indicado e seu voto foi retificado para ele com sucesso!"
         : "Novo candidato indicado e seu voto computado com sucesso!"
