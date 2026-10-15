@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient.js';
 import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
+import { exportCrmLeadsToCsv } from './modules/csvExporter.js';
 
 // DOM Elements
 const comercialLoginScreen = document.getElementById('comercialLoginScreen');
@@ -8,6 +9,7 @@ const comercialLoginForm = document.getElementById('comercialLoginForm');
 const comercialEmail = document.getElementById('comercialEmail');
 const comercialPassword = document.getElementById('comercialPassword');
 const btnComercialLoginSubmit = document.getElementById('btnComercialLoginSubmit');
+const btnExportCrmComercialCsv = document.getElementById('btnExportCrmComercialCsv');
 
 const txtComercialUser = document.getElementById('txtComercialUser');
 const txtComercialRole = document.getElementById('txtComercialRole');
@@ -18,6 +20,7 @@ const crmTableBody = document.getElementById('crmTableBody');
 
 // State
 let currentAgent = null;
+let cachedLeads = [];
 
 function escapeHtml(value) {
   return String(value || '')
@@ -163,6 +166,33 @@ function setupEventListeners() {
       await loadCrmData(cityId);
     }
   });
+
+  // Exportação CSV do CRM Comercial
+  if (btnExportCrmComercialCsv) {
+    btnExportCrmComercialCsv.addEventListener('click', () => {
+      if (!cachedLeads || cachedLeads.length === 0) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Nenhum lead comercial disponível para exportação.', 'warning');
+        }
+        return;
+      }
+
+      const rows = cachedLeads.map(l => ({
+        name: l.name,
+        category_name: l.category_name,
+        whatsapp: l.whatsapp || l.phone,
+        stage: l.commercial_status || 'não contatado',
+        package: l.commercial_package || 'Nenhum',
+        contract_value: l.commercial_value_estimate || 0,
+        notes: `FollowUp: ${l.commercial_follow_up_date || 'N/A'} | Ação: ${l.commercial_next_action || 'N/A'} | ${l.commercial_notes || ''}`
+      }));
+
+      exportCrmLeadsToCsv(rows, `crm_leads_comercial_${new Date().toISOString().slice(0, 10)}.csv`);
+      if (typeof window.showToast === 'function') {
+        window.showToast('Planilha de leads exportada com sucesso!', 'success');
+      }
+    });
+  }
 }
 
 async function initCrmDropdown() {
@@ -207,6 +237,7 @@ async function loadCrmData(cityId) {
 
     if (error) throw error;
 
+    cachedLeads = data || [];
     crmTableBody.innerHTML = '';
 
     if (data.length === 0) {
