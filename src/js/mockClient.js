@@ -1,0 +1,487 @@
+/* ============================================================================
+   PROJETOS MELHORES DO ANO - CLIENTE MOCK ISOLADO
+   Ambiente de demonstração/testes offline desacoplado do bundle de produção.
+   ============================================================================ */
+
+import { OFFICIAL_CITY } from './siteConfig.js';
+
+export function createMockClient() {
+  console.warn('⚠️ [SISTEMA] Inicializando em MODO MOCK/OFFLINE. Nenhuma conexão real com o Supabase será feita.');
+
+  const mockDatabase = {
+    cities: [
+      { id: '11111111-1111-1111-1111-111111111111', name: OFFICIAL_CITY.displayName }
+    ],
+    categories: [
+      { id: '33333333-3333-3333-3333-333333333331', name: 'Melhor Restaurante' },
+      { id: '33333333-3333-3333-3333-333333333332', name: 'Melhor Confeitaria' },
+      { id: '33333333-3333-3333-3333-333333333333', name: 'Melhor Pizzaria' }
+    ],
+    elections: [
+      { id: 'e_bom_jardim_2026', city_id: '11111111-1111-1111-1111-111111111111', year: 2026, status: 'aberta', start_date: '2026-01-01', end_date: '2026-12-31' }
+    ],
+    city_categories: [
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333331' },
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333332' },
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333333' }
+    ],
+    candidates: [
+      { 
+        id: 'cand_sabor_imperial', 
+        election_id: 'e_bom_jardim_2026',
+        category_id: '33333333-3333-3333-3333-333333333331', 
+        name: 'Restaurante Sabor Imperial', 
+        type: 'empresa', 
+        instagram: 'saborimperial', 
+        whatsapp: '11999999991', 
+        email: 'contato@saborimperial.com.br', 
+        status: 'aprovado', 
+        commercial_status: 'chamou no WhatsApp', 
+        commercial_package: 'kit_premium',
+        commercial_owner_id: 'mock-comercial-id',
+        commercial_owner_name: 'Comercial Teste',
+        profile_id: 'mock-candidate-id',
+        description: 'Restaurante tradicional reconhecido pela comunidade de Bom Jardim.',
+        logo_url: '/assets/images/logo.webp'
+      },
+      { 
+        id: 'cand_doce_encanto', 
+        election_id: 'e_bom_jardim_2026',
+        category_id: '33333333-3333-3333-3333-333333333332', 
+        name: 'Doce Encanto Confeitaria', 
+        type: 'empresa', 
+        instagram: 'doceencanto', 
+        whatsapp: '11999999993', 
+        email: 'contato@doceencanto.com.br', 
+        status: 'aprovado', 
+        commercial_status: 'não contatado', 
+        commercial_package: 'nao_definido',
+        profile_id: null,
+        description: 'Bolos e doces finos para festas e eventos.',
+        logo_url: null
+      }
+    ],
+    nominations: [
+      {
+        id: 'nom_pizzaria_mock',
+        election_id: 'e_bom_jardim_2026',
+        category_id: '33333333-3333-3333-3333-333333333333',
+        name: 'Pizzaria Bella Italia',
+        type: 'empresa',
+        instagram: 'bellaitalia',
+        whatsapp: '11977777777',
+        email: 'contato@bellaitalia.com.br',
+        voter_name: 'Gabriel',
+        status: 'pendente',
+        created_at: new Date().toISOString()
+      }
+    ],
+    profiles: [
+      { id: 'mock-admin-id', name: 'Admin Teste', role: 'super_admin' },
+      { id: 'mock-comercial-id', name: 'Comercial Teste', role: 'comercial' },
+      { id: 'mock-candidate-id', name: 'Candidato Teste 1', role: 'candidato' }
+    ],
+    admin_action_logs: [],
+    winners: [],
+    event_config: [
+      { key: 'current_phase', value: 'voting' }
+    ],
+    candidate_votes_summary: [
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333331', candidate_id: 'cand_sabor_imperial', vote_count: 145 },
+      { election_id: 'e_bom_jardim_2026', category_id: '33333333-3333-3333-3333-333333333332', candidate_id: 'cand_doce_encanto', vote_count: 89 }
+    ]
+  };
+
+  const mockProfiles = {
+    'admin@teste.com': { name: 'Admin Teste', role: 'super_admin', id: 'mock-admin-id' },
+    'comercial@teste.com': { name: 'Comercial Teste', role: 'comercial', id: 'mock-comercial-id' },
+    'candidato@teste.com': { name: 'Candidato Teste 1', role: 'candidato', id: 'mock-candidate-id' }
+  };
+
+  let currentSession = null;
+  let authCallbacks = [];
+
+  class MockQueryBuilder {
+    constructor(data, error = null) {
+      this._data = data;
+      this._error = error;
+    }
+    select(fields = '*') {
+      if (Array.isArray(this._data)) {
+        this._data = this._data.map(item => {
+          const newItem = { ...item };
+          if (newItem.city_id && !newItem.cities) {
+            const city = mockDatabase.cities.find(c => c.id === newItem.city_id);
+            if (city) newItem.cities = { name: city.name };
+          }
+          if (newItem.category_id && !newItem.categories) {
+            const cat = mockDatabase.categories.find(c => c.id === newItem.category_id);
+            if (cat) newItem.categories = { id: cat.id, name: cat.name };
+          }
+          return newItem;
+        });
+      }
+      return this;
+    }
+    eq(field, value) {
+      if (this._error) return this;
+      if (Array.isArray(this._data)) {
+        this._data = this._data.filter(item => {
+          if (field.includes('.')) return true;
+          return item[field] === value;
+        });
+      }
+      return this;
+    }
+    neq(field, value) {
+      if (this._error) return this;
+      if (Array.isArray(this._data)) {
+        this._data = this._data.filter(item => item[field] !== value);
+      }
+      return this;
+    }
+    order(field, { ascending = true } = {}) {
+      if (Array.isArray(this._data)) {
+        this._data.sort((a, b) => {
+          if (a[field] < b[field]) return ascending ? -1 : 1;
+          if (a[field] > b[field]) return ascending ? 1 : -1;
+          return 0;
+        });
+      }
+      return this;
+    }
+    limit(n) {
+      if (Array.isArray(this._data)) {
+        this._data = this._data.slice(0, n);
+      }
+      return this;
+    }
+    single() {
+      if (Array.isArray(this._data)) {
+        this._data = this._data[0] || null;
+      }
+      return this;
+    }
+    then(onfulfilled, onrejected) {
+      return Promise.resolve({ data: this._data, error: this._error }).then(onfulfilled, onrejected);
+    }
+  }
+
+  return {
+    auth: {
+      async getSession() {
+        return { data: { session: currentSession }, error: null };
+      },
+      async getUser() {
+        return { data: { user: currentSession ? currentSession.user : null }, error: null };
+      },
+      onAuthStateChange(callback) {
+        authCallbacks.push(callback);
+        setTimeout(() => {
+          callback(currentSession ? 'SIGNED_IN' : 'SIGNED_OUT', currentSession);
+        }, 0);
+        return {
+          data: {
+            subscription: {
+              unsubscribe: () => {
+                authCallbacks = authCallbacks.filter(c => c !== callback);
+              }
+            }
+          }
+        };
+      },
+      async signUp({ email, password, options = {} }) {
+        const userId = `mock-user-${Date.now()}`;
+        const name = options.data?.name || 'Novo Candidato';
+        const role = 'candidato';
+        
+        mockProfiles[email] = { name, role, id: userId };
+        mockDatabase.profiles.push({ id: userId, name, role });
+        
+        currentSession = {
+          access_token: 'mock-token-session',
+          user: {
+            id: userId,
+            email: email,
+            user_metadata: { name }
+          }
+        };
+        authCallbacks.forEach(cb => cb('SIGNED_IN', currentSession));
+        return { data: { session: currentSession, user: currentSession.user }, error: null };
+      },
+      async signInWithPassword({ email, password }) {
+        if (password === '123456') {
+          const profile = mockProfiles[email] || { name: 'Candidato Teste', role: 'candidato', id: 'mock-candidate-id' };
+          currentSession = {
+            access_token: 'mock-token-session',
+            user: {
+              id: profile.id,
+              email: email,
+              user_metadata: {}
+            }
+          };
+          authCallbacks.forEach(cb => cb('SIGNED_IN', currentSession));
+          return { data: { session: currentSession, user: currentSession.user }, error: null };
+        } else {
+          return { data: { session: null, user: null }, error: new Error('Credenciais de teste inválidas. Use a senha "123456" com e-mails definidos (admin@teste.com, comercial@teste.com ou candidato@teste.com).') };
+        }
+      },
+      async signOut() {
+        currentSession = null;
+        authCallbacks.forEach(cb => cb('SIGNED_OUT', null));
+        return { error: null };
+      }
+    },
+    
+    from(table) {
+      let actualTable = table;
+      if (table === 'public_candidates') actualTable = 'candidates';
+      if (table === 'public_winners') actualTable = 'winners';
+      if (table === 'candidate_votes_summary') actualTable = 'candidate_votes_summary';
+      if (table === 'event_config') actualTable = 'event_config';
+      const data = mockDatabase[actualTable] || [];
+      const cloned = JSON.parse(JSON.stringify(data));
+      return new MockQueryBuilder(cloned);
+    },
+
+    rpc(name, params = {}) {
+      console.log(`[MOCK RPC] Chamando RPC "${name}" com parâmetros:`, params);
+      let data = null;
+      let error = null;
+
+      try {
+        switch (name) {
+          case 'get_my_candidate_profile': {
+            const userId = currentSession ? currentSession.user.id : null;
+            data = mockDatabase.candidates.filter(c => c.profile_id === userId);
+            break;
+          }
+          case 'update_candidate_profile': {
+            const { p_candidate_id, p_instagram, p_whatsapp, p_email, p_logo_url, p_description } = params;
+            const cand = mockDatabase.candidates.find(c => c.id === p_candidate_id);
+            if (cand) {
+              if (p_instagram !== undefined) cand.instagram = p_instagram;
+              if (p_whatsapp !== undefined) cand.whatsapp = p_whatsapp;
+              if (p_email !== undefined) cand.email = p_email;
+              if (p_logo_url !== undefined) cand.logo_url = p_logo_url;
+              if (p_description !== undefined) cand.description = p_description;
+            }
+            data = true;
+            break;
+          }
+          case 'get_crm_candidates_v2': {
+            data = mockDatabase.candidates.map(c => {
+              const cat = mockDatabase.categories.find(cat => cat.id === c.category_id);
+              return {
+                id: c.id,
+                name: c.name,
+                category_name: cat ? cat.name : 'N/A',
+                whatsapp: c.whatsapp,
+                email: c.email,
+                commercial_status: c.commercial_status,
+                commercial_package: c.commercial_package,
+                commercial_next_action: c.commercial_next_action || '',
+                commercial_follow_up_date: c.commercial_follow_up_date || null,
+                commercial_value_estimate: c.commercial_value_estimate || 0,
+                commercial_owner_name: c.commercial_owner_name || 'Sem responsável'
+              };
+            });
+            break;
+          }
+          case 'update_candidate_commercial_status_v2': {
+            const { p_candidate_id, p_commercial_status, p_commercial_notes, p_commercial_package, p_commercial_next_action, p_commercial_follow_up_date, p_commercial_value_estimate } = params;
+            const cand = mockDatabase.candidates.find(c => c.id === p_candidate_id);
+            if (cand) {
+              if (p_commercial_status !== undefined) cand.commercial_status = p_commercial_status;
+              if (p_commercial_notes !== undefined) cand.commercial_notes = p_commercial_notes;
+              if (p_commercial_package !== undefined) cand.commercial_package = p_commercial_package;
+              if (p_commercial_next_action !== undefined) cand.commercial_next_action = p_commercial_next_action;
+              if (p_commercial_follow_up_date !== undefined) cand.commercial_follow_up_date = p_commercial_follow_up_date;
+              if (p_commercial_value_estimate !== undefined) cand.commercial_value_estimate = p_commercial_value_estimate;
+            }
+            data = true;
+            break;
+          }
+          case 'approve_nomination': {
+            const { p_nomination_id } = params;
+            const nom = mockDatabase.nominations.find(n => n.id === p_nomination_id);
+            if (nom) {
+              nom.status = 'aprovado';
+              const newCand = {
+                id: `cand_${Date.now()}`,
+                election_id: nom.election_id,
+                category_id: nom.category_id,
+                name: nom.name,
+                type: nom.type,
+                instagram: nom.instagram,
+                whatsapp: nom.whatsapp || 'N/A',
+                email: nom.email || 'N/A',
+                status: 'aprovado',
+                commercial_status: 'não contatado',
+                commercial_package: 'nao_definido',
+                profile_id: null,
+                description: 'Candidato indicado pelo público.'
+              };
+              mockDatabase.candidates.push(newCand);
+              nom.candidate_id = newCand.id;
+            }
+            data = true;
+            break;
+          }
+          case 'reject_nomination': {
+            const { p_nomination_id } = params;
+            const nom = mockDatabase.nominations.find(n => n.id === p_nomination_id);
+            if (nom) nom.status = 'rejeitado';
+            data = true;
+            break;
+          }
+          case 'merge_candidates': {
+            const { p_target_candidate_id, p_duplicate_candidate_id } = params;
+            const target = mockDatabase.candidates.find(c => c.id === p_target_candidate_id);
+            const duplicate = mockDatabase.candidates.find(c => c.id === p_duplicate_candidate_id);
+            if (target && duplicate) {
+              duplicate.status = 'mesclado';
+              duplicate.merged_into_candidate_id = target.id;
+            }
+            data = true;
+            break;
+          }
+          case 'close_election': {
+            const { p_election_id } = params;
+            const elect = mockDatabase.elections.find(e => e.id === p_election_id);
+            if (elect) elect.status = 'encerrada';
+            data = true;
+            break;
+          }
+          case 'publish_results': {
+            const { p_election_id } = params;
+            const elect = mockDatabase.elections.find(e => e.id === p_election_id);
+            if (elect) {
+              elect.status = 'publicada';
+              mockDatabase.candidates.forEach((cand, idx) => {
+                if (cand.election_id === p_election_id) {
+                  mockDatabase.winners.push({
+                    id: `win_${idx}_${Date.now()}`,
+                    election_id: p_election_id,
+                    category_id: cand.category_id,
+                    candidate_id: cand.id,
+                    vote_count_snapshot: 150 - idx * 20,
+                    position: idx === 0 ? 1 : 2,
+                    is_public: true,
+                    published_at: new Date().toISOString(),
+                    candidates: {
+                      name: cand.name,
+                      instagram: cand.instagram,
+                      logo_url: cand.logo_url
+                    }
+                  });
+                }
+              });
+            }
+            data = true;
+            break;
+          }
+          case 'admin_create_city': {
+            const { p_name } = params;
+            const newCity = { id: `city_${Date.now()}`, name: p_name };
+            mockDatabase.cities.push(newCity);
+            data = true;
+            break;
+          }
+          case 'admin_delete_city': {
+            const { p_city_id } = params;
+            mockDatabase.cities = mockDatabase.cities.filter(c => c.id !== p_city_id);
+            data = true;
+            break;
+          }
+          case 'admin_create_category': {
+            const { p_name } = params;
+            const newCat = { id: `cat_${Date.now()}`, name: p_name };
+            mockDatabase.categories.push(newCat);
+            data = true;
+            break;
+          }
+          case 'admin_delete_category': {
+            const { p_category_id } = params;
+            mockDatabase.categories = mockDatabase.categories.filter(c => c.id !== p_category_id);
+            data = true;
+            break;
+          }
+          case 'admin_create_election': {
+            const { p_city_id, p_year, p_start_date, p_end_date } = params;
+            const newElect = {
+              id: `elect_${Date.now()}`,
+              city_id: p_city_id,
+              year: parseInt(p_year),
+              status: 'rascunho',
+              start_date: p_start_date,
+              end_date: p_end_date
+            };
+            mockDatabase.elections.push(newElect);
+            data = true;
+            break;
+          }
+          case 'admin_save_election_categories': {
+            const { p_election_id, p_category_ids } = params;
+            mockDatabase.city_categories = mockDatabase.city_categories.filter(cc => cc.election_id !== p_election_id);
+            p_category_ids.forEach(catId => {
+              mockDatabase.city_categories.push({
+                election_id: p_election_id,
+                category_id: catId
+              });
+            });
+            data = true;
+            break;
+          }
+          case 'admin_upsert_candidate': {
+            const { p_id, p_election_id, p_category_id, p_name, p_type, p_instagram, p_whatsapp, p_email, p_logo_url, p_description } = params;
+            if (p_id) {
+              const cand = mockDatabase.candidates.find(c => c.id === p_id);
+              if (cand) {
+                cand.name = p_name;
+                cand.type = p_type;
+                cand.instagram = p_instagram;
+                cand.whatsapp = p_whatsapp;
+                cand.email = p_email;
+                cand.logo_url = p_logo_url;
+                cand.description = p_description;
+              }
+            } else {
+              mockDatabase.candidates.push({
+                id: `cand_${Date.now()}`,
+                election_id: p_election_id,
+                category_id: p_category_id,
+                name: p_name,
+                type: p_type,
+                instagram: p_instagram,
+                whatsapp: p_whatsapp,
+                email: p_email,
+                logo_url: p_logo_url,
+                description: p_description,
+                status: 'aprovado',
+                commercial_status: 'não contatado',
+                commercial_package: 'nao_definido'
+              });
+            }
+            data = true;
+            break;
+          }
+          case 'admin_archive_candidate': {
+            const { p_candidate_id } = params;
+            const cand = mockDatabase.candidates.find(c => c.id === p_candidate_id);
+            if (cand) cand.status = 'mesclado';
+            data = true;
+            break;
+          }
+          default:
+            console.warn(`RPC "${name}" não implementada no mock. Retornando padrão.`);
+            data = true;
+        }
+      } catch (err) {
+        error = err;
+      }
+
+      return Promise.resolve({ data, error });
+    }
+  };
+}
