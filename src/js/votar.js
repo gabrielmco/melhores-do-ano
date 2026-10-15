@@ -1,6 +1,7 @@
 import { supabase, isUsingMock } from './supabaseClient.js';
 import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
 import { validateWhatsapp, validateEmail, maskContact } from './modules/voterValidation.js';
+import { api } from './services/api.js';
 
 const VOTER_SESSION_KEY = 'voter_session_bom_jardim';
 
@@ -388,13 +389,7 @@ function setupEventListeners() {
 // Carregar cidades
 async function loadCities() {
   try {
-    const { data, error } = await supabase
-      .from('cities')
-      .select('*')
-      .order('name');
-      
-    if (error) throw error;
-    
+    const data = await api.getCities();
     const officialCity = findOfficialCity(data);
     if (!officialCity) {
       selectCity.innerHTML = `<option value="">${OFFICIAL_CITY.displayName} ainda não foi configurada</option>`;
@@ -500,15 +495,7 @@ async function loadCandidates() {
     candidatesList.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.4);">Carregando candidatos...</p>';
     btnGoToStep3.disabled = true;
 
-    // Buscar da View Pública
-    const { data, error } = await supabase
-      .from('public_candidates')
-      .select('*')
-      .eq('election_id', state.selectedElectionId)
-      .eq('category_id', state.selectedCategoryId);
-
-    if (error) throw error;
-
+    const data = await api.getCandidates(state.selectedElectionId, state.selectedCategoryId);
     state.candidates = data || [];
     renderCandidates(state.candidates);
   } catch (err) {
@@ -759,18 +746,11 @@ async function submitVoteFlow() {
   }
 
   const isNomination = !state.selectedCandidateId;
-  const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : ('idemp_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now());
-
-  const headers = getPublicFunctionHeaders();
-  headers['X-Idempotency-Key'] = idempotencyKey;
-  if (state.voterSessionToken) {
-    headers['X-Voter-Session'] = state.voterSessionToken;
-  }
 
   try {
     let targetCandidateId = state.selectedCandidateId;
 
-    // 1. Se for uma indicação, cria a indicação no banco antes de computar o voto
+    // 1. Se for uma indicação, submete via api.submitNomination
     if (isNomination) {
       const nomTypeEl = document.getElementById('nomType');
       const nomInstagramEl = document.getElementById('nomInstagram');
@@ -784,33 +764,21 @@ async function submitVoteFlow() {
         return;
       }
       
-      const nominateFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL || ''}/functions/v1/nominate`;
-      const nominationResponse = await fetch(nominateFunctionUrl, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({
-          election_id: state.selectedElectionId,
-          category_id: state.selectedCategoryId,
-          name: finalNominatedName,
-          type: nomTypeEl.value,
-          instagram: nomInstagramEl.value.trim() || null,
-          voter_name: voterName.value.trim(),
-          voter_identifier: voterIdentifier.value.trim(),
-          voter_type: voterType.value,
-          cookie_id: state.cookieId,
-          privacy_consent: privacyConsent.checked,
-          validation_consent: validationConsent.checked,
-          turnstile_token: state.turnstileToken || 'session_authenticated',
-          voter_session_token: state.voterSessionToken || null,
-          idempotency_key: idempotencyKey
-        })
+      const nominationResult = await api.submitNomination({
+        election_id: state.selectedElectionId,
+        category_id: state.selectedCategoryId,
+        name: finalNominatedName,
+        type: nomTypeEl ? nomTypeEl.value : 'profissional',
+        instagram: nomInstagramEl ? nomInstagramEl.value.trim() || null : null,
+        voter_name: voterName.value.trim(),
+        voter_identifier: voterIdentifier.value.trim(),
+        voter_type: voterType.value,
+        cookie_id: state.cookieId,
+        privacy_consent: privacyConsent.checked,
+        validation_consent: validationConsent.checked,
+        turnstile_token: state.turnstileToken || 'session_authenticated',
+        voter_session_token: state.voterSessionToken || null
       });
-
-      const nominationResult = await nominationResponse.json();
-
-      if (!nominationResponse.ok) {
-        throw new Error(nominationResult.error || 'Erro ao registrar indicação.');
-      }
 
       if (nominationResult.voter_session_token) {
         saveVoterSession({
@@ -828,33 +796,20 @@ async function submitVoteFlow() {
       return;
     }
 
-    // 2. Se for voto em candidato aprovado, chamar a Edge Function
-    const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/vote`;
-    
-    const response = await fetch(edgeFunctionUrl, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        election_id: state.selectedElectionId,
-        category_id: state.selectedCategoryId,
-        candidate_id: targetCandidateId,
-        voter_name: voterName.value.trim(),
-        voter_identifier: voterIdentifier.value.trim(),
-        voter_type: voterType.value,
-        cookie_id: state.cookieId,
-        privacy_consent: privacyConsent.checked,
-        validation_consent: validationConsent.checked,
-        turnstile_token: state.turnstileToken || 'session_authenticated',
-        voter_session_token: state.voterSessionToken || null,
-        idempotency_key: idempotencyKey
-      })
+    // 2. Se for voto em candidato aprovado, submete via api.submitVote
+    const result = await api.submitVote({
+      election_id: state.selectedElectionId,
+      category_id: state.selectedCategoryId,
+      candidate_id: targetCandidateId,
+      voter_name: voterName.value.trim(),
+      voter_identifier: voterIdentifier.value.trim(),
+      voter_type: voterType.value,
+      cookie_id: state.cookieId,
+      privacy_consent: privacyConsent.checked,
+      validation_consent: validationConsent.checked,
+      turnstile_token: state.turnstileToken || 'session_authenticated',
+      voter_session_token: state.voterSessionToken || null
     });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || 'Erro ao registrar voto.');
-    }
 
     if (result.voter_session_token) {
       saveVoterSession({

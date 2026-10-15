@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { OFFICIAL_CITY } from './siteConfig.js';
 
-const supabaseUrl = String(import.meta.env.VITE_SUPABASE_URL || '').trim();
-const supabaseAnonKey = String(import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
-const enableMocks = import.meta.env.VITE_ENABLE_MOCKS === 'true';
+const env = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : (typeof process !== 'undefined' && process.env ? process.env : {});
+const supabaseUrl = String(env.VITE_SUPABASE_URL || '').trim();
+const supabaseAnonKey = String(env.VITE_SUPABASE_ANON_KEY || '').trim();
+const enableMocks = env.VITE_ENABLE_MOCKS === 'true';
 
 const hasValidSupabaseConfig = Boolean(
   supabaseUrl &&
@@ -516,7 +517,8 @@ if (useMock) {
 export const supabase = supabaseInstance;
 
 // --- GLOBAL TOAST SYSTEM FOR DASHBOARDS ---
-window.showToast = function (message, type = 'info') {
+if (typeof window !== 'undefined') {
+  window.showToast = function (message, type = 'info') {
   let container = document.querySelector('.toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -627,3 +629,5 @@ window.showConfirm = function ({
     });
   });
 };
+}
+
