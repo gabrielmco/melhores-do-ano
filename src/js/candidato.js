@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient.js';
+import { downloadStoryCard } from './modules/storyCardGenerator.js';
 
 // Elements
 const loginScreen = document.getElementById('loginScreen');
@@ -309,6 +310,34 @@ function setupEventListeners() {
   btnLogout.addEventListener('click', async () => {
     await supabase.auth.signOut();
   });
+
+  // Gerar Card para Instagram Stories
+  const btnGenerateStoryCard = document.getElementById('btnGenerateStoryCard');
+  if (btnGenerateStoryCard) {
+    btnGenerateStoryCard.addEventListener('click', async () => {
+      if (!currentCandidate) {
+        window.showToast('Perfil do candidato não identificado.', 'error');
+        return;
+      }
+      btnGenerateStoryCard.disabled = true;
+      btnGenerateStoryCard.textContent = 'Gerando...';
+      try {
+        await downloadStoryCard({
+          candidateName: currentCandidate.name,
+          categoryName: currentCandidate.category_name || 'Categoria Oficial',
+          cityName: 'Bom Jardim – MG',
+          year: '2026'
+        });
+        window.showToast('Card para Instagram Stories baixado com sucesso!', 'success');
+      } catch (err) {
+        console.error('Erro ao gerar card de Stories:', err);
+        window.showToast('Não foi possível gerar a arte: ' + (err.message || err), 'error');
+      } finally {
+        btnGenerateStoryCard.disabled = false;
+        btnGenerateStoryCard.textContent = 'Gerar Card';
+      }
+    });
+  }
 }
 
 function showLogin() {

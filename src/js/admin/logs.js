@@ -5,6 +5,10 @@
 
 import { supabase } from '../supabaseClient.js';
 import { escapeHtml } from './helpers.js';
+import { exportAuditLogsToCsv } from '../modules/csvExporter.js';
+
+let cachedLogs = [];
+let cachedFlags = [];
 
 export async function loadLogsAndAudits() {
   const adminActionLogsTableBody = document.getElementById('adminActionLogsTableBody');
@@ -23,13 +27,14 @@ export async function loadLogsAndAudits() {
       .from('admin_action_logs')
       .select('*, profiles(name)')
       .order('created_at', { ascending: false })
-      .limit(30);
+      .limit(50);
 
     if (logsErr) throw logsErr;
+    cachedLogs = logs || [];
     
     if (adminActionLogsTableBody) {
       adminActionLogsTableBody.innerHTML = '';
-      (logs || []).forEach(log => {
+      cachedLogs.forEach(log => {
         const row = document.createElement('tr');
         const time = new Date(log.created_at).toLocaleString('pt-BR');
         const detailsStr = JSON.stringify(log.details);
@@ -48,9 +53,10 @@ export async function loadLogsAndAudits() {
       .from('suspicious_vote_flags')
       .select('*, votes(voter_name, ip_address, candidate:candidates(name))')
       .order('created_at', { ascending: false })
-      .limit(30);
+      .limit(50);
 
     if (flagsErr) throw flagsErr;
+    cachedFlags = flags || [];
 
     if (suspiciousVotesTableBody) {
       suspiciousVotesTableBody.innerHTML = '';
@@ -84,5 +90,54 @@ export async function loadLogsAndAudits() {
     if (suspiciousVotesTableBody) {
       suspiciousVotesTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ff5555;">Erro ao obter votos suspeitos.</td></tr>';
     }
+  }
+}
+
+export function setupLogsListeners() {
+  const btnExportAuditCsv = document.getElementById('btnExportAuditCsv');
+  if (btnExportAuditCsv) {
+    btnExportAuditCsv.addEventListener('click', () => {
+      // Combina os dados para auditoria CSV
+      const rows = [];
+
+      cachedLogs.forEach(l => {
+        rows.push({
+          created_at: l.created_at,
+          voter_name: l.profiles ? l.profiles.name : 'Admin',
+          category_name: 'Ação Administrativa',
+          candidate_name: l.action || 'Sistema',
+          status: 'Auditoria Admin',
+          ip_hashed: 'N/A',
+          user_agent: 'Console',
+          notes: JSON.stringify(l.details || {})
+        });
+      });
+
+      cachedFlags.forEach(f => {
+        const vote = f.votes || {};
+        rows.push({
+          created_at: f.created_at,
+          voter_name: vote.voter_name || 'Anônimo',
+          category_name: 'Votação Popular',
+          candidate_name: vote.candidate?.name || 'Candidato',
+          status: 'Sinalizado Suspeito',
+          ip_hashed: vote.ip_address || 'N/A',
+          user_agent: 'Votação',
+          notes: f.reason || 'Sinalizado'
+        });
+      });
+
+      if (rows.length === 0) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Nenhum log disponível para exportação no momento.', 'warning');
+        }
+        return;
+      }
+
+      exportAuditLogsToCsv(rows, `auditoria_melhores_do_ano_${new Date().toISOString().slice(0, 10)}.csv`);
+      if (typeof window.showToast === 'function') {
+        window.showToast('Relatório de auditoria CSV exportado com sucesso!', 'success');
+      }
+    });
   }
 }

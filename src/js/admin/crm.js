@@ -11,6 +11,9 @@ import {
   formatDateInput,
   formatCurrencyInput
 } from './helpers.js';
+import { exportCrmLeadsToCsv } from '../modules/csvExporter.js';
+
+let cachedLeads = [];
 
 export async function initCrmTab() {
   const crmSelectCity = document.getElementById('crmSelectCity');
@@ -70,6 +73,7 @@ export async function loadCrmData(cityId) {
 
     if (error) throw error;
 
+    cachedLeads = data || [];
     crmTableBody.innerHTML = '';
 
     if (!data || data.length === 0) {
@@ -175,6 +179,7 @@ export async function loadCrmData(cityId) {
 export function setupCrmListeners() {
   const crmSelectCity = document.getElementById('crmSelectCity');
   const crmTableBody = document.getElementById('crmTableBody');
+  const btnExportCrmCsv = document.getElementById('btnExportCrmCsv');
 
   if (crmSelectCity) {
     crmSelectCity.addEventListener('change', async () => {
@@ -184,6 +189,32 @@ export function setupCrmListeners() {
       }
       if (cityId) {
         await loadCrmData(cityId);
+      }
+    });
+  }
+
+  if (btnExportCrmCsv) {
+    btnExportCrmCsv.addEventListener('click', () => {
+      if (!cachedLeads || cachedLeads.length === 0) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('Nenhum lead comercial disponível para exportação.', 'warning');
+        }
+        return;
+      }
+
+      const rows = cachedLeads.map(l => ({
+        name: l.name,
+        category_name: l.category_name,
+        whatsapp: l.whatsapp || l.phone,
+        stage: l.commercial_status || 'não contatado',
+        package: l.commercial_package || 'Nenhum',
+        contract_value: l.commercial_value_estimate || 0,
+        notes: `FollowUp: ${l.commercial_follow_up_date || 'N/A'} | Ação: ${l.commercial_next_action || 'N/A'} | ${l.commercial_notes || ''}`
+      }));
+
+      exportCrmLeadsToCsv(rows, `crm_leads_melhores_do_ano_${new Date().toISOString().slice(0, 10)}.csv`);
+      if (typeof window.showToast === 'function') {
+        window.showToast('Planilha CRM exportada com sucesso!', 'success');
       }
     });
   }

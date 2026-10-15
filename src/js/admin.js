@@ -18,7 +18,7 @@ import {
   loadEventPhase,
   setupElectionsListeners
 } from './admin/elections.js';
-import { loadLogsAndAudits } from './admin/logs.js';
+import { loadLogsAndAudits, setupLogsListeners } from './admin/logs.js';
 import {
   loadStructureSubTabData,
   loadCategoriesForElectionSelect,
@@ -122,6 +122,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupCrmListeners();
   setupElectionsListeners(loadCategoriesForElectionSelect);
   setupStructureListeners();
+  setupLogsListeners();
 
   // Verificar se já possui sessão ativa ao carregar
   const { data: { session } } = await supabase.auth.getSession();

@@ -6,6 +6,7 @@ import { initAccessPanels } from './modules/access.js';
 import { initGallery } from './modules/gallery.js';
 import { initMethodology } from './modules/methodology.js';
 import { initCTA } from './modules/cta.js';
+import { initNetworkMonitor } from './modules/networkMonitor.js';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 function initCommercialContactLinks() {
@@ -18,6 +19,7 @@ function initCommercialContactLinks() {
 }
 
 function initAll() {
+  initNetworkMonitor();
   initCommercialContactLinks();
   initNavbar();
   initHero();

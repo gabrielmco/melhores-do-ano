@@ -13,6 +13,7 @@ import {
   copyReceiptText,
   generateAuthHash
 } from './modules/voterEngagement.js';
+import { initNetworkMonitor } from './modules/networkMonitor.js';
 
 const VOTER_SESSION_KEY = 'voter_session_bom_jardim';
 
@@ -116,6 +117,7 @@ function getOrCreateCookieId() {
 
 // Inicializar
 window.addEventListener('DOMContentLoaded', async () => {
+  initNetworkMonitor();
   state.cookieId = getOrCreateCookieId();
   const session = loadVoterSession();
   if (session) {

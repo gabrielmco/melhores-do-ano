@@ -1,10 +1,12 @@
 import { supabase } from './supabaseClient.js';
 import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
+import { exportResultsToCsv } from './modules/csvExporter.js';
 
 // Elements
 const selectCity = document.getElementById('selectCity');
 const selectElection = document.getElementById('selectElection');
 const resultsList = document.getElementById('resultsList');
+const btnExportResultsCsv = document.getElementById('btnExportResultsCsv');
 let statusMessage = document.getElementById('statusMessage');
 
 // State
@@ -13,6 +15,8 @@ let state = {
   selectedElectionId: '',
   elections: [] // Armazena as edições carregadas
 };
+
+let cachedResults = [];
 
 function escapeHtml(value) {
   return String(value || '')
@@ -70,6 +74,14 @@ function setupEventListeners() {
       clearResults();
     }
   });
+
+  // Download da Apuração em CSV
+  if (btnExportResultsCsv) {
+    btnExportResultsCsv.addEventListener('click', () => {
+      if (!cachedResults || cachedResults.length === 0) return;
+      exportResultsToCsv(cachedResults, `apuracao_melhores_do_ano_${state.selectedElectionId || 'oficial'}.csv`);
+    });
+  }
 }
 
 // Carregar Cidades
@@ -144,6 +156,8 @@ async function loadElections(cityId) {
 function clearResults() {
   resultsList.innerHTML = `<div class="status-msg" id="statusMessage">Selecione a edição de ${OFFICIAL_CITY.displayName} para conferir os resultados.</div>`;
   statusMessage = document.getElementById('statusMessage');
+  if (btnExportResultsCsv) btnExportResultsCsv.style.display = 'none';
+  cachedResults = [];
 }
 
 // Carregar e agrupar resultados da eleição selecionada (pode ser apuração ou final)
@@ -194,6 +208,16 @@ async function loadResults(electionId) {
         resultsList.innerHTML = '<div class="status-msg">Resultados não consolidados para esta edição.</div>';
         return;
       }
+
+      cachedResults = data.map(row => ({
+        category_name: row.category ? row.category.name : 'Categoria Geral',
+        position: row.position,
+        name: row.candidate_name,
+        instagram: row.candidate_instagram,
+        votes: row.vote_count_snapshot,
+        is_winner: row.position === 1
+      }));
+      if (btnExportResultsCsv) btnExportResultsCsv.style.display = 'inline-flex';
 
       const grouped = {};
       data.forEach(row => {
@@ -365,6 +389,16 @@ async function loadResults(electionId) {
           });
         }
       }
+
+      cachedResults = candidates.map(cand => ({
+        category_name: cand.category ? cand.category.name : 'Categoria Geral',
+        position: null,
+        name: cand.name,
+        instagram: cand.instagram,
+        votes: votesMap[cand.id] || 0,
+        is_winner: false
+      }));
+      if (btnExportResultsCsv) btnExportResultsCsv.style.display = 'inline-flex';
 
       // 4. Agrupar e estruturar candidatos por categoria
       const grouped = {};
