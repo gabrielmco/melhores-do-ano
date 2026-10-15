@@ -2,6 +2,17 @@ import { supabase, isUsingMock } from './supabaseClient.js';
 import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
 import { validateWhatsapp, validateEmail, maskContact } from './modules/voterValidation.js';
 import { api } from './services/api.js';
+import {
+  saveVotedCategory,
+  getVotedCategories,
+  updateVoterProgressUI,
+  initCountdownTimer,
+  openReceiptModal,
+  closeReceiptModal,
+  shareOnWhatsApp,
+  copyReceiptText,
+  generateAuthHash
+} from './modules/voterEngagement.js';
 
 const VOTER_SESSION_KEY = 'voter_session_bom_jardim';
 
@@ -14,6 +25,7 @@ let state = {
   selectedCandidateId: '', // Vazio se for indicação
   nominatedName: '',
   candidates: [],
+  categoriesList: [],
   currentStep: 1,
   turnstileToken: '',
   turnstileWidgetId: null,
@@ -382,6 +394,52 @@ function setupEventListeners() {
       }, 2000);
     });
   });
+
+  // Emitir Comprovante Oficial
+  const btnOpenReceipt = document.getElementById('btnOpenReceipt');
+  if (btnOpenReceipt) {
+    btnOpenReceipt.addEventListener('click', () => {
+      const session = loadVoterSession();
+      openReceiptModal({
+        electionId: state.selectedElectionId,
+        voterName: session?.name || voterName.value.trim() || 'Eleitor Oficial',
+        voterMasked: session?.masked || maskContact(voterIdentifier.value.trim(), voterType.value),
+        sessionToken: session?.token || state.voterSessionToken
+      });
+    });
+  }
+
+  const btnCloseReceiptModal = document.getElementById('btnCloseReceiptModal');
+  if (btnCloseReceiptModal) {
+    btnCloseReceiptModal.addEventListener('click', closeReceiptModal);
+  }
+
+  const btnShareReceiptWhatsApp = document.getElementById('btnShareReceiptWhatsApp');
+  if (btnShareReceiptWhatsApp) {
+    btnShareReceiptWhatsApp.addEventListener('click', () => {
+      shareOnWhatsApp(state.selectedElectionId);
+    });
+  }
+
+  const btnShareWhatsAppQuick = document.getElementById('btnShareWhatsAppQuick');
+  if (btnShareWhatsAppQuick) {
+    btnShareWhatsAppQuick.addEventListener('click', () => {
+      shareOnWhatsApp(state.selectedElectionId);
+    });
+  }
+
+  const btnCopyReceiptText = document.getElementById('btnCopyReceiptText');
+  if (btnCopyReceiptText) {
+    btnCopyReceiptText.addEventListener('click', () => {
+      const session = loadVoterSession();
+      const name = session?.name || voterName.value.trim() || 'Eleitor Oficial';
+      const hash = generateAuthHash(session?.token || state.voterSessionToken || name);
+      const text = copyReceiptText(state.selectedElectionId, name, hash);
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Texto do comprovante copiado com sucesso!', 'success');
+      });
+    });
+  }
 }
 
 // --- INTEGRAÇÃO COM SUPABASE E BACKEND ---
@@ -415,7 +473,7 @@ async function loadCategoriesForCity(cityId) {
     // 1. Obter a eleição aberta desta cidade
     const { data: electionData, error: electionErr } = await supabase
       .from('elections')
-      .select('id')
+      .select('id, name, year, end_date')
       .eq('city_id', cityId)
       .eq('status', 'aberta')
       .limit(1)
@@ -427,6 +485,9 @@ async function loadCategoriesForCity(cityId) {
     }
     
     state.selectedElectionId = electionData.id;
+
+    // Inicializar cronômetro oficial de contagem regressiva
+    initCountdownTimer(electionData.end_date);
 
     // Verificar fase atual do evento
     const { data: phaseData } = await supabase
@@ -473,20 +534,45 @@ async function loadCategoriesForCity(cityId) {
     if (catErr) throw catErr;
 
     selectCategory.innerHTML = '<option value="">Selecione uma Categoria</option>';
+    const categoriesList = [];
+
     catData.forEach(row => {
       if (row.categories) {
+        categoriesList.push(row.categories);
         const option = document.createElement('option');
         option.value = row.categories.id;
         option.textContent = row.categories.name;
         selectCategory.appendChild(option);
       }
     });
-    
+
+    state.categoriesList = categoriesList;
     selectCategory.disabled = false;
+
+    // Renderizar barra de progresso visual de categorias
+    refreshProgressUI();
   } catch (err) {
     console.error('Erro ao carregar categorias:', err);
     selectCategory.innerHTML = '<option value="">Erro ao carregar categorias</option>';
   }
+}
+
+function handleSelectCategoryFromChip(cat) {
+  selectCategory.value = cat.id;
+  state.selectedCategoryId = cat.id;
+  btnGoToStep2.disabled = false;
+  loadCandidates();
+  goToStep(2);
+  refreshProgressUI();
+}
+
+function refreshProgressUI() {
+  updateVoterProgressUI({
+    categoriesList: state.categoriesList,
+    selectedCategoryId: state.selectedCategoryId,
+    electionId: state.selectedElectionId,
+    onSelectCategory: handleSelectCategoryFromChip
+  });
 }
 
 // Carregar candidatos para a categoria selecionada usando a VIEW pública
@@ -739,9 +825,19 @@ async function submitVoteFlow() {
 
   if (isUsingMock) {
     console.log("🗳️ [MOCK] Simulando registro de voto/indicação offline.");
+    const catName = selectCategory.options[selectCategory.selectedIndex]?.text || 'Categoria Selecionada';
+    const candName = state.nominatedName || state.candidates.find(c => c.id === state.selectedCandidateId)?.name || 'Candidato Escolhido';
+    saveVotedCategory(state.selectedElectionId, {
+      categoryId: state.selectedCategoryId,
+      categoryName: catName,
+      candidateId: state.selectedCandidateId || 'mock-nomination',
+      candidateName: candName
+    });
+    refreshProgressUI();
     setTimeout(() => {
+      renderSuccessScreen(false, 'Seu voto foi registrado com sucesso no ambiente local!');
       goToStep(4);
-    }, 1000);
+    }, 600);
     return;
   }
 
@@ -790,6 +886,16 @@ async function submitVoteFlow() {
         });
       }
       
+      // Salvar no histórico de categorias votadas
+      const catName = selectCategory.options[selectCategory.selectedIndex]?.text || 'Categoria';
+      saveVotedCategory(state.selectedElectionId, {
+        categoryId: state.selectedCategoryId,
+        categoryName: catName,
+        candidateId: 'nomination_' + (finalNominatedName.toLowerCase().replace(/\s+/g, '_')),
+        candidateName: finalNominatedName
+      });
+      refreshProgressUI();
+
       // Mostrar tela de sucesso diretamente
       renderSuccessScreen(Boolean(nominationResult.updated), nominationResult.message);
       goToStep(4);
@@ -820,6 +926,17 @@ async function submitVoteFlow() {
         masked: result.voter_masked || maskContact(voterIdentifier.value.trim(), voterType.value)
       });
     }
+
+    // Salvar no histórico de categorias votadas
+    const catName = selectCategory.options[selectCategory.selectedIndex]?.text || 'Categoria';
+    const candName = state.candidates.find(c => c.id === targetCandidateId)?.name || 'Candidato Escolhido';
+    saveVotedCategory(state.selectedElectionId, {
+      categoryId: state.selectedCategoryId,
+      categoryName: catName,
+      candidateId: targetCandidateId,
+      candidateName: candName
+    });
+    refreshProgressUI();
 
     // Sucesso
     renderSuccessScreen(Boolean(result.updated), result.message);
