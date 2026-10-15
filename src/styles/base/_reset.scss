@@ -62,3 +62,34 @@ html.lenis body {
   /* ensures content can render cleanly in 3D perspective space */
   transform-style: flat;
 }
+
+// Acessibilidade Global (WCAG AA): Indicador nítido de foco via teclado
+:focus-visible {
+  outline: 2px solid $color-gold !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.45);
+}
+
+// Ergonomia para dispositivos de toque (área mínima 44x44px em botões e controles)
+button,
+a,
+input[type="button"],
+input[type="submit"],
+.btn {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+// Previne FOUC (Flash of Unstyled Content) antes da inicialização do JS
+.js-loading {
+  .navbar,
+  .hero-overline,
+  .hero-title-line,
+  .hero-desc,
+  .hero-cta-group,
+  #heroInfiniteBanner {
+    opacity: 0 !important;
+  }
+}
+
+
