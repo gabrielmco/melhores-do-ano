@@ -33,6 +33,14 @@ export function translateAuthError(err) {
     return 'Seu e-mail ainda não foi confirmado! Acesse sua caixa de entrada (ou pasta de Spam) e clique no link de confirmação que enviamos.';
   }
 
+  if (lower.includes('token has expired') || lower.includes('token is expired')) {
+    return 'O link ou código de confirmação expirou. Solicite um novo e-mail pelo botão de reenvio abaixo.';
+  }
+
+  if (lower.includes('invalid token') || lower.includes('otp expired') || lower.includes('invalid otp') || lower.includes('token not found')) {
+    return 'Código de confirmação incorreto ou expirado. Verifique os 6 dígitos do e-mail mais recente.';
+  }
+
   if (lower.includes('user already registered') || lower.includes('already been registered')) {
     return 'Este e-mail já possui uma conta cadastrada! Faça login na tela de entrada ou clique em "Esqueci minha senha".';
   }

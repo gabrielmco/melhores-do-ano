@@ -120,6 +120,23 @@ export function setupAuthListeners({ switchTab, onPhaseLoad } = {}) {
   const adminPassword = document.getElementById('adminPassword');
   const btnAdminLoginSubmit = document.getElementById('btnAdminLoginSubmit');
   const btnAdminLogout = document.getElementById('btnAdminLogout');
+  const btnPreFillMaster = document.getElementById('btnPreFillMaster');
+  const btnToggleAdminPassword = document.getElementById('btnToggleAdminPassword');
+
+  if (btnPreFillMaster && adminEmail) {
+    btnPreFillMaster.addEventListener('click', () => {
+      adminEmail.value = 'biel321oliveira@gmail.com';
+      if (adminPassword) adminPassword.focus();
+    });
+  }
+
+  if (btnToggleAdminPassword && adminPassword) {
+    btnToggleAdminPassword.addEventListener('click', () => {
+      const isPassword = adminPassword.type === 'password';
+      adminPassword.type = isPassword ? 'text' : 'password';
+      btnToggleAdminPassword.style.color = isPassword ? '#d4af37' : 'rgba(255,255,255,0.4)';
+    });
+  }
 
   setupForgotPasswordButton({
     buttonId: 'btnForgotPasswordAdmin',
@@ -131,8 +148,9 @@ export function setupAuthListeners({ switchTab, onPhaseLoad } = {}) {
     adminLoginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const rawEmail = adminEmail ? adminEmail.value.trim() : '';
-      const email = rawEmail.includes('@') ? rawEmail : `${rawEmail}@gmail.com`;
-      const password = adminPassword ? adminPassword.value : '';
+      const email = (rawEmail.includes('@') ? rawEmail : `${rawEmail}@gmail.com`).toLowerCase();
+      let rawPassword = adminPassword ? adminPassword.value : '';
+      const trimmedPassword = rawPassword.trim();
 
       if (btnAdminLoginSubmit) {
         btnAdminLoginSubmit.disabled = true;
@@ -140,8 +158,30 @@ export function setupAuthListeners({ switchTab, onPhaseLoad } = {}) {
       }
 
       try {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        // Tentar primeiro com a senha limpa de espaços acidentais
+        let { error } = await supabase.auth.signInWithPassword({
+          email,
+          password: trimmedPassword
+        });
+
+        // Se falhou e havia espaço antes/depois, tentar com a senha original sem trim
+        if (error && rawPassword !== trimmedPassword) {
+          const retry = await supabase.auth.signInWithPassword({
+            email,
+            password: rawPassword
+          });
+          if (!retry.error) {
+            error = null;
+          }
+        }
+
+        if (error) {
+          const lowerMsg = String(error.message || '').toLowerCase();
+          if (lowerMsg.includes('invalid login credentials') || lowerMsg.includes('invalid_credentials')) {
+            throw new Error('E-mail ou senha incorretos. Dica: A senha contém letras maiúsculas e caracteres especiais. Caso prefira, clique em "Esqueci minha senha" para criar uma nova senha.');
+          }
+          throw error;
+        }
       } catch (err) {
         if (typeof window.showToast === 'function') {
           window.showToast(translateAuthError(err), 'error');

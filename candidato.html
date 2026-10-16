@@ -37,7 +37,12 @@
         </div>
         <div class="form-group">
           <label for="loginPassword">Senha de Acesso</label>
-          <input type="password" id="loginPassword" class="form-control" placeholder="Sua senha" autocomplete="current-password" required>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="loginPassword" class="form-control" placeholder="Sua senha" autocomplete="current-password" required style="padding-right: 42px;">
+            <button type="button" id="btnToggleLoginPassword" title="Mostrar/ocultar senha" style="position: absolute; right: 8px; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
           <div class="forgot-password-row">
             <button type="button" class="forgot-password-link" id="btnForgotPasswordCandidato">Esqueci minha senha</button>
           </div>
@@ -84,7 +89,12 @@
         </div>
         <div class="form-group">
           <label for="registerPassword">Senha de Acesso</label>
-          <input type="password" id="registerPassword" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" id="registerPassword" class="form-control" placeholder="Mínimo 6 caracteres" minlength="6" required style="padding-right: 42px;">
+            <button type="button" id="btnToggleRegisterPassword" title="Mostrar/ocultar senha" style="position: absolute; right: 8px; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+          </div>
         </div>
         <button type="submit" class="btn-action" id="btnRegisterSubmit" style="justify-content: center;">Criar Conta e Entrar</button>
       </form>
@@ -98,6 +108,41 @@
         <a href="/#footer" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           Voltar para o Site Principal
+        </a>
+      </div>
+    </div>
+
+    <!-- TELA 1C: CONFIRMAÇÃO DE E-MAIL DEDICADA -->
+    <div class="auth-card" id="confirmEmailScreen" style="display: none;">
+      <div style="font-size: 2.8rem; margin-bottom: 12px;">✉️</div>
+      <h2>Confirme seu E-mail</h2>
+      <p style="margin-bottom: 8px;">Enviamos um link de confirmação para o endereço:</p>
+      <div id="txtConfirmEmailAddress" style="font-weight: 700; color: #d4af37; font-size: 1.05rem; margin-bottom: 18px; word-break: break-all;"></div>
+      
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 14px; text-align: left; font-size: 0.86rem; color: rgba(255,255,255,0.7); margin-bottom: 20px; line-height: 1.5;">
+        <p style="margin: 0 0 6px 0;">1. Abra seu e-mail e localize a mensagem do <strong>Melhores do Ano</strong>.</p>
+        <p style="margin: 0 0 6px 0;">2. Verifique também na pasta de <strong>Spam / Lixo Eletrônico</strong> caso não encontre na caixa de entrada.</p>
+        <p style="margin: 0;">3. Clique no botão de confirmação ou use o código de 6 dígitos abaixo.</p>
+      </div>
+
+      <!-- Formulário de validação por código OTP -->
+      <form id="otpConfirmForm" style="margin-bottom: 18px; text-align: left;">
+        <label for="inputOtpCode" style="font-size: 0.82rem; color: rgba(255,255,255,0.6); display: block; margin-bottom: 6px;">Código de 6 dígitos recebido no e-mail:</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="inputOtpCode" class="form-control" placeholder="123456" maxlength="8" style="text-align: center; letter-spacing: 2px; font-weight: 600;">
+          <button type="submit" class="btn-action" id="btnSubmitOtp" style="white-space: nowrap; padding: 10px 16px;">Validar</button>
+        </div>
+      </form>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button type="button" class="btn-action" id="btnGoToLoginFromConfirm" style="justify-content: center; width: 100%;">
+          Já Confirmei no E-mail — Ir para o Login
+        </button>
+        <button type="button" class="forgot-password-link" id="btnResendConfirmationEmail" style="text-align: center; margin-top: 4px;">
+          Não recebeu? Reenviar e-mail de confirmação
+        </button>
+        <a href="javascript:void(0)" id="linkBackToRegisterFromConfirm" style="color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.82rem; margin-top: 6px; text-align: center;">
+          ← Corrigir e-mail ou voltar ao cadastro
         </a>
       </div>
     </div>

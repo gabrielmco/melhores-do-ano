@@ -27,14 +27,27 @@
     <h2>Acesso Administrativo</h2>
     <p>Área restrita aos moderadores, administradores e agentes comerciais.</p>
     
+    <div style="background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.22); border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.84rem; color: rgba(255,255,255,0.85); text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+      <div>
+        <span style="font-size: 0.76rem; color: rgba(255,255,255,0.5); display: block; text-transform: uppercase; letter-spacing: 0.05em;">Conta Super Admin</span>
+        <strong style="color: #d4af37;">biel321oliveira@gmail.com</strong>
+      </div>
+      <button type="button" id="btnPreFillMaster" style="background: rgba(212,175,55,0.15); border: 1px solid #d4af37; color: #d4af37; border-radius: 4px; padding: 5px 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">Preencher</button>
+    </div>
+
     <form id="adminLoginForm">
       <div class="form-group" style="text-align: left;">
-        <label for="adminEmail">E-mail Corporativo</label>
-        <input type="email" id="adminEmail" class="form-control" placeholder="admin@seudominio.com.br" autocomplete="username" required>
+        <label for="adminEmail">E-mail ou Usuário Master</label>
+        <input type="text" id="adminEmail" class="form-control" placeholder="biel321oliveira@gmail.com" autocomplete="username" required>
       </div>
       <div class="form-group" style="text-align: left;">
         <label for="adminPassword">Senha</label>
-        <input type="password" id="adminPassword" class="form-control" placeholder="Senha" autocomplete="current-password" required>
+        <div style="position: relative; display: flex; align-items: center;">
+          <input type="password" id="adminPassword" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required style="padding-right: 42px;">
+          <button type="button" id="btnToggleAdminPassword" title="Mostrar/ocultar senha" style="position: absolute; right: 8px; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
+            <svg id="iconEyeAdmin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
         <div class="forgot-password-row">
           <button type="button" class="forgot-password-link" id="btnForgotPasswordAdmin">Esqueci minha senha</button>
         </div>

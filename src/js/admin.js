@@ -128,6 +128,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   const { data: { session } } = await supabase.auth.getSession();
   if (session) {
     await initStaffDashboard({ switchTab, onPhaseLoad: loadEventPhase });
+    const hash = window.location.hash ? window.location.hash.replace('#', '') : '';
+    if (hash && document.getElementById(hash)) {
+      switchTab(hash);
+    }
   } else {
     showLogin();
   }
