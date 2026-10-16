@@ -1,11 +1,13 @@
 /* ============================================================================
-   PROJETOS MELHORES DO ANO - MÓDULO DE ELEIÇÕES, DESEMPATE E FASES
-   Gestão do ciclo de vida das edições, desempate auditado e fases do evento.
+   PROJETOS MELHORES DO ANO - MÓDULO DE ELEIÇÕES, DESEMPATE, PRAZOS E REABERTURA
+   Gestão do ciclo de vida das edições, reabertura, prazos flexíveis e fases.
    ============================================================================ */
 
 import { supabase } from '../supabaseClient.js';
 import { isOfficialCity } from '../siteConfig.js';
 import { escapeHtml } from './helpers.js';
+
+let cachedElections = [];
 
 export async function loadElections() {
   const electionsTableBody = document.getElementById('electionsTableBody');
@@ -21,43 +23,94 @@ export async function loadElections() {
 
     if (error) throw error;
 
-    const officialElections = (data || []).filter(election => isOfficialCity(election.cities));
+    cachedElections = (data || []).filter(election => isOfficialCity(election.cities));
     electionsTableBody.innerHTML = '';
-    populateTieElectionOptions(officialElections);
+    populateTieElectionOptions(cachedElections);
     
-    officialElections.forEach(el => {
+    if (cachedElections.length === 0) {
+      electionsTableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3); padding: 24px;">Nenhuma eleição cadastrada ainda.</td></tr>';
+      return;
+    }
+
+    cachedElections.forEach(el => {
       const row = document.createElement('tr');
       const start = new Date(el.start_date).toLocaleDateString('pt-BR');
       const end = new Date(el.end_date).toLocaleDateString('pt-BR');
 
       let actionsHtml = '';
       if (el.status === 'rascunho') {
-        actionsHtml = `<button class="btn btn-open-election" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 12px;">Abrir Votação</button>`;
+        actionsHtml = `
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="btn btn-open-election" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 10px;">Abrir Votação</button>
+            <button class="btn btn-secondary btn-extend-deadline" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 10px;">Definir Prazo</button>
+          </div>
+        `;
       } else if (el.status === 'aberta') {
-        actionsHtml = `<button class="btn btn-danger btn-close-election" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 12px;">Encerrar Votação</button>`;
+        actionsHtml = `
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-extend-deadline" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 10px; color: #f5d788; border-color: rgba(212,175,55,0.3);">Mudar Prazo</button>
+            <button class="btn btn-danger btn-close-election" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 10px;">Encerrar Votação</button>
+          </div>
+        `;
       } else if (el.status === 'encerrada' || el.status === 'apuracao') {
-        actionsHtml = `<button class="btn btn-close-election" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 12px; background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);">Apurar e Publicar</button>`;
+        actionsHtml = `
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button class="btn btn-reopen-election" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 10px; background: rgba(46, 204, 113, 0.15); border: 1px solid #2ecc71; color: #2ecc71;">Reabrir Votação</button>
+            <button class="btn btn-secondary btn-extend-deadline" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 10px;">Mudar Prazo</button>
+            <button class="btn btn-publish-results" data-id="${el.id}" style="font-size: 0.75rem; padding: 6px 10px; background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%); color: #000; font-weight: 600;">Apurar & Publicar</button>
+          </div>
+        `;
       } else if (el.status === 'publicada') {
-        actionsHtml = `<span style="color: #2ecc71; font-weight:600; font-size:0.8rem; text-transform:uppercase;">Publicada</span>`;
+        actionsHtml = `
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            <span style="color: #2ecc71; font-weight:700; font-size:0.75rem; text-transform:uppercase;">Publicada Oficial</span>
+            <button class="btn btn-secondary btn-reopen-election" data-id="${el.id}" style="font-size: 0.72rem; padding: 4px 8px; color: rgba(255,255,255,0.6);">Reabrir se Necessário</button>
+          </div>
+        `;
       } else {
         actionsHtml = `<span style="color: rgba(255,255,255,0.3); font-size:0.8rem;">Rascunho</span>`;
       }
 
       row.innerHTML = `
-        <td style="font-weight: 600;">Melhores do Ano ${escapeHtml(el.cities ? el.cities.name : 'N/A')}</td>
+        <td style="font-weight: 600;">
+          Melhores do Ano ${escapeHtml(el.cities ? el.cities.name : 'N/A')}
+        </td>
         <td>${escapeHtml(el.year)}</td>
-        <td style="font-size:0.8rem; color: rgba(255,255,255,0.6);">${start} até ${end}</td>
+        <td style="font-size:0.8rem; color: rgba(255,255,255,0.75);">
+          <div>De: <strong>${start}</strong></div>
+          <div>Até: <strong style="color: #d4af37;">${end}</strong></div>
+        </td>
         <td>
-          <span style="font-size: 0.75rem; font-weight:700; padding: 2px 6px; border-radius:4px; text-transform: uppercase;" 
+          <span style="font-size: 0.75rem; font-weight:700; padding: 3px 8px; border-radius:4px; text-transform: uppercase;" 
                 class="status-badge status-${escapeHtml(el.status.toLowerCase())}">${escapeHtml(el.status)}</span>
         </td>
         <td>${actionsHtml}</td>
       `;
 
-      // Evento de Clique das Ações
-      const btn = row.querySelector('.btn-close-election, .btn-open-election');
-      if (btn) {
-        btn.addEventListener('click', () => handleElectionAction(el));
+      // Eventos de Botões
+      const btnOpen = row.querySelector('.btn-open-election');
+      if (btnOpen) {
+        btnOpen.addEventListener('click', () => handleElectionAction(el));
+      }
+
+      const btnClose = row.querySelector('.btn-close-election');
+      if (btnClose) {
+        btnClose.addEventListener('click', () => handleElectionAction(el));
+      }
+
+      const btnPublish = row.querySelector('.btn-publish-results');
+      if (btnPublish) {
+        btnPublish.addEventListener('click', () => handlePublishResults(el));
+      }
+
+      const btnReopen = row.querySelector('.btn-reopen-election');
+      if (btnReopen) {
+        btnReopen.addEventListener('click', () => handleReopenElection(el));
+      }
+
+      const btnExtend = row.querySelector('.btn-extend-deadline');
+      if (btnExtend) {
+        btnExtend.addEventListener('click', () => handleChangeElectionDeadline(el));
       }
 
       electionsTableBody.appendChild(row);
@@ -73,10 +126,10 @@ export async function handleElectionAction(election) {
   if (election.status === 'rascunho') {
     if (typeof window.showConfirm === 'function') {
       const confirmed = await window.showConfirm({
-        eyebrow: 'Abertura',
-        title: 'Abrir votação',
-        message: `Deseja abrir a votação do prêmio "${election.year}"? A página pública passará a aceitar votos dentro do período configurado.`,
-        confirmText: 'Abrir votação'
+        eyebrow: 'Abertura da Votação',
+        title: 'Abrir votação ao público?',
+        message: `Deseja abrir oficialmente a votação do prêmio "${election.year}"? A página pública passará a aceitar votos imediatamente dentro do prazo configurado.`,
+        confirmText: 'Sim, Abrir Votação'
       });
       if (!confirmed) return;
     }
@@ -89,7 +142,7 @@ export async function handleElectionAction(election) {
       if (error) throw error;
 
       if (typeof window.showToast === 'function') {
-        window.showToast('Votação aberta com sucesso!', 'success');
+        window.showToast('Votação aberta com sucesso! O público já pode votar.', 'success');
       }
       await loadElections();
     } catch (err) {
@@ -101,10 +154,10 @@ export async function handleElectionAction(election) {
   } else if (election.status === 'aberta') {
     if (typeof window.showConfirm === 'function') {
       const confirmed = await window.showConfirm({
-        eyebrow: 'Encerramento',
-        title: 'Encerrar votação',
-        message: `Deseja encerrar definitivamente a votação do prêmio "${election.year}"? Ninguém mais poderá votar.`,
-        confirmText: 'Encerrar votação',
+        eyebrow: 'Encerramento de Votação',
+        title: 'Encerrar votação agora?',
+        message: `Atenção: Ao encerrar, os eleitores não poderão mais votar na edição "${election.year}". (Caso tenha clicado sem querer, você poderá reabrir a qualquer momento).`,
+        confirmText: 'Sim, Encerrar Votação',
         variant: 'danger'
       });
       if (!confirmed) return;
@@ -118,41 +171,141 @@ export async function handleElectionAction(election) {
       if (error) throw error;
       
       if (typeof window.showToast === 'function') {
-        window.showToast('Votação encerrada com sucesso!', 'success');
+        window.showToast('Votação encerrada com sucesso! Você pode apurar os resultados ou reabrir se necessário.', 'success');
       }
       await loadElections();
     } catch (err) {
       if (typeof window.showToast === 'function') {
-        window.showToast('Erro ao fechar: ' + err.message, 'error');
+        window.showToast('Erro ao fechar votação: ' + err.message, 'error');
       }
     }
-  } else if (election.status === 'encerrada' || election.status === 'apuracao') {
-    if (typeof window.showConfirm === 'function') {
-      const confirmed = await window.showConfirm({
-        eyebrow: 'Publicação',
-        title: 'Apurar e publicar resultados',
-        message: 'O sistema verificará empates, calculará os rankings oficiais e publicará a lista final no site.',
-        confirmText: 'Publicar resultados'
-      });
-      if (!confirmed) return;
+  }
+}
+
+// Reabertura segura caso o administrador tenha encerrado sem querer
+export async function handleReopenElection(election) {
+  if (typeof window.showConfirm === 'function') {
+    const confirmed = await window.showConfirm({
+      eyebrow: 'Reabertura de Votação',
+      title: 'Reabrir votação ao público?',
+      message: `Deseja reabrir a votação da edição "${election.year}"? Ela voltará ao status 'aberta' e os eleitores poderão votar normalmente.`,
+      confirmText: 'Sim, Reabrir Votação'
+    });
+    if (!confirmed) return;
+  }
+
+  try {
+    // Se a data de fim for anterior à atual, prorroga automaticamente em 7 dias para que votos sejam válidos
+    const now = new Date();
+    const currentEnd = new Date(election.end_date);
+    let newEnd = election.end_date;
+    if (currentEnd <= now) {
+      const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      newEnd = nextWeek.toISOString();
     }
 
-    try {
-      const { error } = await supabase.rpc('publish_results', {
-        p_election_id: election.id
+    const { error } = await supabase
+      .from('elections')
+      .update({
+        status: 'aberta',
+        end_date: newEnd
+      })
+      .eq('id', election.id);
+
+    if (error) throw error;
+
+    // Registrar no log de auditoria
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('admin_action_logs').insert({
+        profile_id: user.id,
+        action: 'reabriu_eleicao',
+        details: { election_id: election.id, new_status: 'aberta', end_date: newEnd }
       });
+    }
 
-      if (error) throw error;
+    if (typeof window.showToast === 'function') {
+      window.showToast('Votação reaberta com sucesso! O público já pode votar novamente.', 'success');
+    }
+    await loadElections();
+  } catch (err) {
+    console.error('Erro ao reabrir eleição:', err);
+    if (typeof window.showToast === 'function') {
+      window.showToast('Erro ao reabrir votação: ' + err.message, 'error');
+    }
+  }
+}
 
-      if (typeof window.showToast === 'function') {
-        window.showToast('Resultados consolidados e publicados com sucesso no website público!', 'success');
-      }
-      await loadElections();
-    } catch (err) {
-      console.error(err);
-      if (typeof window.showToast === 'function') {
-        window.showToast('Erro na publicação/empate: ' + err.message, 'error');
-      }
+// Prorrogação e determinação de prazo da votação
+export async function handleChangeElectionDeadline(election) {
+  const currentFormatted = election.end_date ? new Date(election.end_date).toISOString().slice(0, 10) : '';
+  const inputDate = prompt('Informe a nova data final (prazo) da votação no formato AAAA-MM-DD (ex: 2026-12-31):', currentFormatted);
+  if (!inputDate || !inputDate.trim()) return;
+
+  const cleanDate = inputDate.trim();
+  const parsedDate = new Date(`${cleanDate}T23:59:59`);
+  if (isNaN(parsedDate.getTime())) {
+    if (typeof window.showToast === 'function') {
+      window.showToast('Data inválida. Use o formato AAAA-MM-DD.', 'error');
+    }
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from('elections')
+      .update({ end_date: parsedDate.toISOString() })
+      .eq('id', election.id);
+
+    if (error) throw error;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      await supabase.from('admin_action_logs').insert({
+        profile_id: user.id,
+        action: 'alterou_prazo_eleicao',
+        details: { election_id: election.id, new_end_date: parsedDate.toISOString() }
+      });
+    }
+
+    if (typeof window.showToast === 'function') {
+      window.showToast(`Prazo da votação atualizado para ${parsedDate.toLocaleDateString('pt-BR')} com sucesso!`, 'success');
+    }
+    await loadElections();
+  } catch (err) {
+    console.error('Erro ao atualizar prazo:', err);
+    if (typeof window.showToast === 'function') {
+      window.showToast('Erro ao alterar prazo: ' + err.message, 'error');
+    }
+  }
+}
+
+export async function handlePublishResults(election) {
+  if (typeof window.showConfirm === 'function') {
+    const confirmed = await window.showConfirm({
+      eyebrow: 'Publicação Oficial',
+      title: 'Apurar e publicar resultados?',
+      message: 'O sistema verificará empates, calculará os vencedores oficiais e publicará a lista final no site.',
+      confirmText: 'Apurar e Publicar'
+    });
+    if (!confirmed) return;
+  }
+
+  try {
+    const { error } = await supabase.rpc('publish_results', {
+      p_election_id: election.id
+    });
+
+    if (error) throw error;
+
+    if (typeof window.showToast === 'function') {
+      window.showToast('Resultados consolidados e publicados com sucesso no website público!', 'success');
+    }
+    await loadElections();
+  } catch (err) {
+    console.error(err);
+    if (typeof window.showToast === 'function') {
+      window.showToast('Erro na publicação/empate: ' + err.message, 'error');
     }
   }
 }

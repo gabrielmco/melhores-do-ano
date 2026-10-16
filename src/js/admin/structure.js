@@ -446,10 +446,15 @@ export async function loadCandidatesForStructureList(electionId) {
 
     data.forEach(cand => {
       const row = document.createElement('tr');
+      const originBadge = cand.profile_id
+        ? '<span style="display:inline-block; font-size:0.7rem; background:rgba(212,175,55,0.18); color:#f5d788; border:1px solid rgba(212,175,55,0.3); padding:2px 6px; border-radius:4px; margin-top:4px;">Autocadastrado</span>'
+        : '<span style="display:inline-block; font-size:0.7rem; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5); padding:2px 6px; border-radius:4px; margin-top:4px;">Staff</span>';
+
       row.innerHTML = `
         <td>
           <div style="font-weight:600; color: #ffffff;">${escapeHtml(cand.name)}</div>
           <div style="font-size:0.75rem; color: #d4af37;">${escapeHtml(cand.instagram || 'Sem Instagram')}</div>
+          ${originBadge}
         </td>
         <td><span style="font-size:0.8rem; color: rgba(255,255,255,0.6);">${escapeHtml(cand.categories ? cand.categories.name : 'N/A')}</span></td>
         <td style="font-size:0.8rem; color: rgba(255,255,255,0.45);">${escapeHtml(cand.elections && cand.elections.cities ? cand.elections.cities.name : 'N/A')} (${escapeHtml(cand.elections ? cand.elections.year : 'N/A')})</td>

@@ -85,7 +85,17 @@ export async function loadCrmData(cityId) {
       const row = document.createElement('tr');
       row.dataset.id = lead.id;
 
-      const contactInfo = `WA: ${escapeHtml(lead.whatsapp || 'N/A')}<br/>Email: ${escapeHtml(lead.email || 'N/A')}<br/>Resp.: ${escapeHtml(lead.commercial_owner_name || 'Sem responsável')}`;
+      const cleanWa = String(lead.whatsapp || '').replace(/\D/g, '');
+      const waUrl = cleanWa ? `https://wa.me/${cleanWa.startsWith('55') ? cleanWa : '55' + cleanWa}?text=${encodeURIComponent(`Olá, ${lead.name}! Parabéns pela participação no Melhores do Ano. Estamos entrando em contato para apresentar a sua Placa Oficial de Homenagem.`)}` : null;
+      
+      const waButton = waUrl ? `
+        <a href="${waUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 4px; color: #2ecc71; text-decoration: none; font-size: 0.75rem; margin-top: 4px; font-weight: 600;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          Chamar no WhatsApp
+        </a>
+      ` : '';
+
+      const contactInfo = `WA: ${escapeHtml(lead.whatsapp || 'N/A')}<br/>Email: ${escapeHtml(lead.email || 'N/A')}<br/>${waButton}`;
       const selectedStage = lead.commercial_status || 'não contatado';
       const followUpDate = formatDateInput(lead.commercial_follow_up_date);
       const valueEstimate = formatCurrencyInput(lead.commercial_value_estimate);
@@ -95,22 +105,22 @@ export async function loadCrmData(cityId) {
         <td><span style="font-size:0.8rem; color: rgba(255,255,255,0.5);">${escapeHtml(lead.category_name)}</span></td>
         <td style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">${contactInfo}</td>
         <td>
-          <select class="form-control select-crm-stage" style="padding: 6px; font-size: 0.8rem; width: 150px;">
+          <select class="form-control select-crm-stage" style="padding: 6px; font-size: 0.8rem; width: 160px;">
             <option value="não contatado" ${selectedStage === 'não contatado' ? 'selected' : ''}>Não Contatado</option>
             <option value="chamou no WhatsApp" ${selectedStage === 'chamou no WhatsApp' ? 'selected' : ''}>Chamou no WhatsApp</option>
             <option value="interessado" ${selectedStage === 'interessado' ? 'selected' : ''}>Interessado</option>
-            <option value="comprou" ${selectedStage === 'comprou' ? 'selected' : ''}>Comprou</option>
+            <option value="comprou" ${selectedStage === 'comprou' ? 'selected' : ''}>Comprou (Placa Fechada)</option>
             <option value="recusou" ${selectedStage === 'recusou' ? 'selected' : ''}>Recusou</option>
           </select>
-          <select class="form-control select-crm-package" style="padding: 6px; font-size: 0.8rem; width: 150px; margin-top: 6px;">
+          <select class="form-control select-crm-package" style="padding: 6px; font-size: 0.8rem; width: 160px; margin-top: 6px;">
             ${renderCrmPackageOptions(lead.commercial_package)}
           </select>
-          <input type="number" class="form-control input-crm-value" value="${valueEstimate}" placeholder="Valor estimado" min="0" step="0.01" style="padding: 6px; font-size: 0.8rem; width: 150px; margin-top: 6px;">
+          <input type="number" class="form-control input-crm-value" value="${valueEstimate}" placeholder="Valor da Placa (R$)" min="0" step="0.01" style="padding: 6px; font-size: 0.8rem; width: 160px; margin-top: 6px;">
         </td>
         <td>
           <input type="date" class="form-control input-crm-followup" value="${followUpDate}" style="padding: 6px; font-size: 0.8rem; min-width: 150px; margin-bottom: 6px;">
           <input type="text" class="form-control input-crm-next-action" value="${escapeHtml(lead.commercial_next_action || '')}" placeholder="Próxima ação..." style="padding: 6px; font-size: 0.8rem; min-width: 150px; margin-bottom: 6px;">
-          <input type="text" class="form-control input-crm-notes" value="${escapeHtml(lead.commercial_notes || '')}" placeholder="Observações..." style="padding: 6px; font-size: 0.8rem; min-width: 150px;">
+          <input type="text" class="form-control input-crm-notes" value="${escapeHtml(lead.commercial_notes || '')}" placeholder="Observações do fechamento..." style="padding: 6px; font-size: 0.8rem; min-width: 150px;">
         </td>
         <td>
           <button class="btn btn-save-crm" style="font-size:0.75rem; padding: 6px 12px;">Salvar</button>

@@ -442,6 +442,41 @@ tr:hover td {
   }
 }
 
+.auth-card-nav {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.btn-back-clean {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 40px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    color: #d4af37;
+    border-color: rgba(212, 175, 55, 0.35);
+    background: rgba(212, 175, 55, 0.08);
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+}
+
 .btn-back-floating {
   min-height: 44px;
 
@@ -449,6 +484,57 @@ tr:hover td {
     color: #d4af37 !important;
     border-color: rgba(212, 175, 55, 0.35) !important;
     background: rgba(212, 175, 55, 0.06) !important;
+  }
+}
+
+.panel-guide-card {
+  background: rgba(212, 175, 55, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+
+  .guide-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    color: #d4af37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .guide-content {
+    flex: 1;
+
+    h4 {
+      margin: 0 0 6px 0;
+      color: #d4af37;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+  }
+}
+
+.mod-tab-btn {
+  &.active {
+    background: #d4af37;
+    color: #070708;
+    font-weight: 700;
   }
 }
 

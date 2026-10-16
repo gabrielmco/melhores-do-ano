@@ -20,11 +20,15 @@
   <div class="panel-container">
     
     <!-- TELA 1: LOGIN DO CANDIDATO -->
-    <div class="auth-card" id="loginScreen" style="position: relative;">
-      <a href="/" class="btn-back-floating" style="position: absolute; top: -16px; left: 0; display: inline-flex; align-items: center; gap: 8px; color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.82rem; transition: all 0.3s; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 6px 14px; border-radius: 50px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-        Voltar ao Início
-      </a>
+    <div class="auth-card" id="loginScreen">
+      <!-- Botão Voltar integrado dentro do fluxo do card -->
+      <div class="auth-card-nav">
+        <a href="/#categorias" data-safe-back class="btn-back-clean">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Voltar
+        </a>
+      </div>
+
       <h2>Painel do Candidato</h2>
       <p>Acesse seu perfil oficial do prêmio para atualizar suas informações e obter os selos de marketing.</p>
       
@@ -54,7 +58,7 @@
       </p>
 
       <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
-        <a href="/#footer" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
+        <a href="/#categorias" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           Voltar para o Site Principal
         </a>
@@ -63,6 +67,13 @@
 
     <!-- TELA 1B: CADASTRO DO CANDIDATO -->
     <div class="auth-card" id="registerScreen" style="display: none;">
+      <div class="auth-card-nav">
+        <a href="javascript:void(0)" id="linkBackToLoginFromRegister" class="btn-back-clean">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Voltar ao Login
+        </a>
+      </div>
+
       <h2>Cadastrar Empresa</h2>
       <p>Registre sua empresa instantaneamente com seu Instagram para concorrer no prêmio.</p>
       
@@ -103,7 +114,7 @@
       </p>
 
       <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
-        <a href="/#footer" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
+        <a href="/#categorias" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           Voltar para o Site Principal
         </a>
@@ -112,7 +123,11 @@
 
     <!-- TELA 1C: CONFIRMAÇÃO DE E-MAIL DEDICADA -->
     <div class="auth-card" id="confirmEmailScreen" style="display: none;">
-      <div style="font-size: 2.8rem; margin-bottom: 12px;">✉️</div>
+      <!-- Ícone profissional SVG em vez de emoji -->
+      <div style="width: 64px; height: 64px; margin: 0 auto 16px; background: rgba(212, 175, 55, 0.12); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #d4af37;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+      </div>
+
       <h2>Confirme seu E-mail</h2>
       <p style="margin-bottom: 8px;">Enviamos um link de confirmação para o endereço:</p>
       <div id="txtConfirmEmailAddress" style="font-weight: 700; color: #d4af37; font-size: 1.05rem; margin-bottom: 18px; word-break: break-all;"></div>
@@ -154,10 +169,12 @@
         </div>
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
           <a href="/votar.html" class="btn btn-secondary" style="font-size: 0.85rem; padding: 10px 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-            🗳️ Ir para a Votação
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            Ir para a Votação
           </a>
-          <a href="/" class="btn btn-secondary" style="font-size: 0.85rem; padding: 10px 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-            🏠 Voltar ao Início
+          <a href="/#categorias" data-safe-back class="btn btn-secondary" style="font-size: 0.85rem; padding: 10px 18px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Voltar ao Site
           </a>
           <button class="btn-logout" id="btnLogout">Sair</button>
         </div>
@@ -214,28 +231,35 @@
           <!-- Selo: Card Personalizado Instagram Stories -->
           <div class="kit-item" style="border: 1px solid rgba(212, 175, 55, 0.4); background: rgba(212, 175, 55, 0.05); flex-direction: column; align-items: stretch; gap: 14px; padding: 18px;">
             <div style="display: flex; align-items: center; gap: 14px;">
-              <div class="kit-thumb kit-thumb-label" style="background: rgba(212, 175, 55, 0.2); color: #f5d788; border-color: #d4af37;">ST</div>
+              <div class="kit-thumb" style="background: rgba(212, 175, 55, 0.15); border: 1px solid #d4af37; color: #f5d788;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+              </div>
               <div class="kit-info">
                 <div class="kit-title" style="color: #f5d788; font-size: 1.05rem;">Card Instagram Stories (1080x1920)</div>
                 <div class="kit-desc">Arte profissional em alta resolução com sua marca e categoria oficial</div>
               </div>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button type="button" class="btn-action" id="btnGenerateStoryCard" style="flex: 1; min-width: 140px; padding: 12px 18px; font-size: 0.9rem; justify-content: center;">
-                📥 Gerar Card Story
+              <button type="button" class="btn-action" id="btnGenerateStoryCard" style="flex: 1; min-width: 140px; padding: 12px 18px; font-size: 0.9rem; justify-content: center; gap: 8px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Gerar Card Story
               </button>
-              <button type="button" class="btn btn-secondary" id="btnCopyVotingLink" style="padding: 12px 16px; font-size: 0.85rem; font-weight: 600; white-space: nowrap;">
-                📋 Copiar Link de Voto
+              <button type="button" class="btn btn-secondary" id="btnCopyVotingLink" style="padding: 12px 16px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar Link de Voto
               </button>
-              <a href="/votar.html" class="btn btn-secondary" style="padding: 12px 16px; font-size: 0.85rem; font-weight: 600; text-decoration: none; white-space: nowrap;">
-                🗳️ Votar
+              <a href="/votar.html" class="btn btn-secondary" style="padding: 12px 16px; font-size: 0.85rem; font-weight: 600; text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                Votar
               </a>
             </div>
           </div>
 
           <!-- Selo: Vencedor Oficial (Exibido apenas para campeões) -->
           <div class="kit-item" id="winnerKitItem" style="display: none;">
-            <div class="kit-thumb kit-thumb-label">DA</div>
+            <div class="kit-thumb" style="background: rgba(212, 175, 55, 0.15); border: 1px solid #d4af37; color: #f5d788;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+            </div>
             <div class="kit-info">
               <div class="kit-title">Selo Destaque do Ano</div>
               <div class="kit-desc">Instagram Feed (1080x1080)</div>
@@ -243,14 +267,16 @@
             <a href="/assets/images/trophy.webp" class="btn-download" download>Baixar</a>
           </div>
 
-          <!-- Solicitação Comercial -->
+          <!-- Solicitação Comercial da Placa Oficial -->
           <div class="kit-item" style="margin-top: 16px;">
-            <div class="kit-thumb kit-thumb-label">PR</div>
-            <div class="kit-info">
-              <div class="kit-title">Placa e Certificado Premium</div>
-              <div class="kit-desc">Solicitação comercial oficial de homenagem</div>
+            <div class="kit-thumb" style="background: rgba(212, 175, 55, 0.15); border: 1px solid #d4af37; color: #f5d788;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7"></path><path d="M14 14.66V17c0 .55.45 1 1 1h2"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
             </div>
-            <a href="mailto:comercial@melhoresdoano.com.br" class="btn-download" id="commercialRequestLink" target="_blank" rel="noopener noreferrer">Solicitar</a>
+            <div class="kit-info">
+              <div class="kit-title">Placa Oficial com Certificado</div>
+              <div class="kit-desc">Solicitação oficial de homenagem e premiação física</div>
+            </div>
+            <a href="mailto:comercial@melhoresdoano.com.br" class="btn-download" id="commercialRequestLink" target="_blank" rel="noopener noreferrer">Solicitar Placa</a>
           </div>
 
         </div>

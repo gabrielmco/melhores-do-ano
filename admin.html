@@ -19,13 +19,15 @@
 
   <!-- 1. TELA DE AUTENTICAÇÃO DO STAFF -->
   <div class="auth-card" id="adminLoginScreen">
-    <!-- Botão Voltar Flutuante no Canto Superior Esquerdo -->
-    <a href="/#footer" data-safe-back class="btn-back-floating" style="position: absolute; top: 24px; left: 24px; display: inline-flex; align-items: center; gap: 8px; color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.85rem; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 8px 16px; border-radius: 50px; z-index: 1000;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-      Voltar
-    </a>
+    <div class="auth-card-nav">
+      <a href="/#categorias" data-safe-back class="btn-back-clean">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Voltar ao Site
+      </a>
+    </div>
+
     <h2>Acesso Administrativo</h2>
-    <p>Área restrita aos moderadores, administradores e agentes comerciais.</p>
+    <p>Área restrita aos moderadores, administradores e equipe comercial.</p>
     
     <div style="background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.22); border-radius: 8px; padding: 10px 14px; margin-bottom: 20px; font-size: 0.84rem; color: rgba(255,255,255,0.85); text-align: left; display: flex; justify-content: space-between; align-items: center; gap: 8px;">
       <div>
@@ -41,7 +43,7 @@
         <input type="text" id="adminEmail" class="form-control" placeholder="biel321oliveira@gmail.com" autocomplete="username" required>
       </div>
       <div class="form-group" style="text-align: left;">
-        <label for="adminPassword">Senha</label>
+        <label for="adminPassword">Senha de Acesso</label>
         <div style="position: relative; display: flex; align-items: center;">
           <input type="password" id="adminPassword" class="form-control" placeholder="Digite sua senha" autocomplete="current-password" required style="padding-right: 42px;">
           <button type="button" id="btnToggleAdminPassword" title="Mostrar/ocultar senha" style="position: absolute; right: 8px; background: none; border: none; color: rgba(255,255,255,0.4); cursor: pointer; padding: 6px; display: inline-flex; align-items: center; justify-content: center;">
@@ -54,8 +56,9 @@
       </div>
       <button type="submit" class="btn" id="btnAdminLoginSubmit" style="width: 100%; padding: 14px; justify-content: center;">Entrar no Painel</button>
     </form>
+
     <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
-      <a href="/#footer" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
+      <a href="/#categorias" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         Voltar para o Site Principal
       </a>
@@ -65,43 +68,54 @@
   <!-- 2. LAYOUT DO PAINEL PRINCIPAL -->
   <div class="admin-container" id="adminDashboardLayout" style="display: none;">
     
-    <!-- Sidebar de Navegação -->
+    <!-- Sidebar de Navegação com Ícones SVG Profissionais e Nomes Autoexplicativos -->
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <span class="nav-mark">AD</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
         <span>ADMINISTRAÇÃO</span>
       </div>
       
       <nav style="flex: 1; overflow-y: auto;">
         <div style="font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; padding: 12px 16px 6px;">
-          Gestão da Eleição
+          Gestão da Votação
         </div>
         <ul class="nav-list" style="margin-bottom: 10px;">
-          <li class="nav-item active" data-tab="tab-moderacao" id="navModeracao">
-            <span class="nav-mark">MI</span> Moderar Indicações
+          <!-- 1. Aprovar Candidatos & Indicações -->
+          <li class="nav-item active" data-tab="tab-moderacao" id="navModeracao" title="Aprovar quem vai concorrer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+            <span>Aprovar Candidatos</span>
           </li>
-          <li class="nav-item" data-tab="tab-mesclagem" id="navMesclagem">
-            <span class="nav-mark">MC</span> Mesclar Candidatos
+          <!-- 2. Juntar Nomes Repetidos (Mesclar) -->
+          <li class="nav-item" data-tab="tab-mesclagem" id="navMesclagem" title="Juntar nomes com erros de digitação">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+            <span>Juntar Nomes Duplicados</span>
           </li>
-          <li class="nav-item" data-tab="tab-eleicoes" id="navEleicoes">
-            <span class="nav-mark">CE</span> Config. Eleições
+          <!-- 3. Controle da Votação, Prazos & Status -->
+          <li class="nav-item" data-tab="tab-eleicoes" id="navEleicoes" title="Abrir, fechar, reabrir e mudar prazos">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <span>Controle da Votação & Prazo</span>
           </li>
-          <li class="nav-item" data-tab="tab-estrutura" id="navEstrutura">
-            <span class="nav-mark">GE</span> Gerenciar Estrutura
+          <!-- 4. Cidades & Categorias -->
+          <li class="nav-item" data-tab="tab-estrutura" id="navEstrutura" title="Adicionar ou remover categorias e cidades">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            <span>Cidades & Categorias</span>
           </li>
-          <li class="nav-item" data-tab="tab-logs" id="navLogs">
-            <span class="nav-mark">LA</span> Logs de Auditoria
+          <!-- 5. Segurança & Histórico de Votos -->
+          <li class="nav-item" data-tab="tab-logs" id="navLogs" title="Ver quem votou e auditoria de segurança">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            <span>Segurança & Votos</span>
           </li>
         </ul>
 
-        <!-- Divisão visual clara para o Módulo Comercial -->
-        <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 10px 12px 10px;"></div>
+        <!-- Divisão visual clara para o Módulo Comercial da Placa Oficial -->
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 14px 12px 10px;"></div>
         <div style="font-size: 0.7rem; font-weight: 700; color: #d4af37; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 16px 6px;">
-          Módulo Comercial
+          Comercial & Homenagens
         </div>
         <ul class="nav-list">
-          <li class="nav-item" data-tab="tab-crm" id="navCrm">
-            <span class="nav-mark" style="background: rgba(212,175,55,0.18); color: #f5d788; border-color: #d4af37;">CV</span> CRM Vendas
+          <li class="nav-item" data-tab="tab-crm" id="navCrm" title="Venda da Placa Oficial com Certificado">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+            <span style="color: #f5d788; font-weight: 600;">Vendas da Placa Oficial</span>
           </li>
         </ul>
       </nav>
@@ -109,8 +123,9 @@
       <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 18px;">
         <div id="txtAdminUser" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Carregando...</div>
         <div id="txtAdminRole" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 14px;">Papel</div>
-        <a href="/" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px 12px; margin-bottom: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-          ← Voltar ao Site
+        <a href="/#categorias" data-safe-back class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px 12px; margin-bottom: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Voltar ao Site
         </a>
         <button class="btn btn-secondary" id="btnAdminLogout" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px 12px;">Sair do Painel</button>
       </div>
@@ -118,109 +133,160 @@
 
     <!-- Área de Conteúdo da Aba Ativa -->
     <main class="content">
-      
-      <!-- SELETOR RÁPIDO DE VISÃO: ADMIN GERAL vs CRM VENDAS -->
-      <div class="panel-mode-switcher" style="display: flex; justify-content: space-between; align-items: center; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 10px; padding: 14px 20px; margin-bottom: 32px; flex-wrap: wrap; gap: 12px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span style="font-size: 1.4rem;">⚡</span>
-          <div>
-            <div style="font-size: 0.9rem; font-weight: 700; color: #d4af37; text-transform: uppercase; letter-spacing: 0.04em;">Acesso Rápido Unificado</div>
-            <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Alterne entre a moderação da eleição e o fechamento de vendas de placas no WhatsApp com 1 clique</div>
-          </div>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button type="button" class="btn btn-primary" id="btnQuickModeAdmin" style="padding: 10px 18px; font-size: 0.85rem; font-weight: 600;">👑 Gestão & Moderação</button>
-          <button type="button" class="btn btn-secondary" id="btnQuickModeCrm" style="padding: 10px 18px; font-size: 0.85rem; font-weight: 600;">💼 CRM Vendas & WhatsApp</button>
-        </div>
-      </div>
 
-      <!-- ABA 1: MODERAÇÃO DE INDICAÇÕES -->
+      <!-- ABA 1: APROVAR CANDIDATOS & INDICAÇÕES -->
       <section class="tab-panel active" id="tab-moderacao">
-        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Fila de Indicações</h2>
-        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Analise e aprove as indicações enviadas pelo público para que virem concorrentes oficiais.</p>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-card-title">Novas Indicações</div>
-            <div class="stat-card-value" id="statPendingNominations">0</div>
+        <div class="panel-guide-card">
+          <div class="guide-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+          </div>
+          <div class="guide-content">
+            <h4>O que fazer nesta tela?</h4>
+            <p>Aqui você confere as empresas sugeridas pelo público e as empresas que criaram cadastro sozinhas no site. Clique em <strong>Aprovar</strong> para que o concorrente passe a receber votos ou <strong>Rejeitar</strong> para retirar da lista.</p>
           </div>
         </div>
 
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Nome Indicado</th>
-                <th>Tipo</th>
-                <th>Rede Social / Instagram</th>
-                <th>Contato Eleitor</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody id="nominationsTableBody">
-              <tr>
-                <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando fila de moderação...</td>
-              </tr>
-            </tbody>
-          </table>
+        <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+          <button type="button" class="btn btn-secondary mod-tab-btn active" id="btnTabNominations" style="font-size: 0.85rem; padding: 8px 16px;">
+            Indicações do Público Pendentes (<span id="statPendingNominationsBadge">0</span>)
+          </button>
+          <button type="button" class="btn btn-secondary mod-tab-btn" id="btnTabSelfRegistered" style="font-size: 0.85rem; padding: 8px 16px;">
+            Empresas Autocadastradas pelo Site (<span id="statSelfRegisteredBadge">0</span>)
+          </button>
+        </div>
+
+        <!-- Visão 1: Indicações Populares -->
+        <div id="viewNominations">
+          <div class="stats-grid" style="margin-bottom: 18px;">
+            <div class="stat-card">
+              <div class="stat-card-title">Aguardando Sua Aprovação</div>
+              <div class="stat-card-value" id="statPendingNominations">0</div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome da Empresa Indicada</th>
+                  <th>Tipo</th>
+                  <th>Instagram Oficial</th>
+                  <th>Quem Indicou (Contato)</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="nominationsTableBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando indicações pendentes...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Visão 2: Empresas Autocadastradas -->
+        <div id="viewSelfRegistered" style="display: none;">
+          <div class="stats-grid" style="margin-bottom: 18px;">
+            <div class="stat-card">
+              <div class="stat-card-title">Empresas Cadastradas via Painel</div>
+              <div class="stat-card-value" id="statSelfRegistered">0</div>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Empresa / Negócio</th>
+                  <th>Categoria Oficial</th>
+                  <th>Instagram</th>
+                  <th>Contato (Email & WhatsApp)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="selfRegisteredTableBody">
+                <tr>
+                  <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando empresas cadastradas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
-      <!-- ABA 2: MESCLAGEM DE CONCORRENTES DUPLICADOS -->
+      <!-- ABA 2: JUNTAR NOMES DUPLICADOS (MESCLAGEM) -->
       <section class="tab-panel" id="tab-mesclagem">
-        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Mesclagem de Candidatos</h2>
-        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Agrupe concorrentes duplicados (ex: "Dr. João" e "João Advogados") para transferir votos e aliases de forma limpa.</p>
+        <div class="panel-guide-card">
+          <div class="guide-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M6 21V9a9 9 0 0 0 9 9"></path></svg>
+          </div>
+          <div class="guide-content">
+            <h4>O que fazer nesta tela?</h4>
+            <p>Se as pessoas digitaram a mesma empresa de formas diferentes (exemplo: "Padaria do João" e "Padaria João Silva"), selecione o <strong>Nome Oficial</strong> que deve ficar e o <strong>Nome Repetido</strong>. O sistema transfere todos os votos para o oficial automaticamente, sem perder nenhum voto!</p>
+          </div>
+        </div>
 
-        <div class="panel-card" style="max-width: 600px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 32px; border-radius: 10px;">
+        <div class="panel-card" style="max-width: 620px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 32px; border-radius: 10px;">
           <form id="mergeForm">
             <div class="form-group">
-              <label for="mergeCity">Localidade oficial</label>
+              <label for="mergeCity">Cidade</label>
               <select id="mergeCity" class="form-control" required>
-                <option value="">Carregando Bom Jardim - MG...</option>
+                <option value="">Carregando localidade oficial...</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="mergeCategory">Categoria</label>
+              <label for="mergeCategory">Ramo / Categoria</label>
               <select id="mergeCategory" class="form-control" required disabled>
-                <option value="">Selecione a categoria</option>
+                <option value="">Selecione primeiro a categoria</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="mergeTarget">Candidato Oficial (Aquele que irá receber os votos e o selo)</label>
+              <label for="mergeTarget">Nome Principal (Aquele que vai continuar e receber todos os votos)</label>
               <select id="mergeTarget" class="form-control" required disabled>
                 <option value="">Selecione o candidato oficial</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="mergeDuplicate">Candidato Duplicado (Aquele que será mesclado e inativado)</label>
+              <label for="mergeDuplicate">Nome Repetido (Aquele digitado errado que será absorvido)</label>
               <select id="mergeDuplicate" class="form-control" required disabled>
-                <option value="">Selecione o candidato duplicado</option>
+                <option value="">Selecione o candidato que será juntado</option>
               </select>
             </div>
 
-            <button type="submit" class="btn" id="btnExecuteMerge" style="margin-top: 12px; width: 100%; justify-content: center;" disabled>Executar Mesclagem Segura</button>
+            <button type="submit" class="btn" id="btnExecuteMerge" style="margin-top: 14px; width: 100%; justify-content: center;" disabled>Juntar e Somar Votos com Segurança</button>
           </form>
         </div>
       </section>
 
-      <!-- ABA 3: CRM DE VENDAS (COMERCIAL) -->
+      <!-- ABA 3: VENDAS DA PLACA OFICIAL (CRM) -->
       <section class="tab-panel" id="tab-crm">
+        <div class="panel-guide-card">
+          <div class="guide-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+          </div>
+          <div class="guide-content">
+            <h4>Como fechar vendas da Placa Oficial?</h4>
+            <p>O produto exclusivo oferecido é a <strong>Placa Oficial com Certificado</strong>. Clique no botão de WhatsApp para abrir uma conversa direta com a empresa já com mensagem pronta, anote o valor combinado e mude o status para <strong>Comprou (Placa Fechada)</strong>.</p>
+          </div>
+        </div>
+
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
           <div>
-            <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">CRM Funil de Contatos Comerciais</h2>
-            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin: 0;">Acompanhe a prospecção e venda de selos para os candidatos oficiais.</p>
+            <h2 style="margin-top: 0; font-size: 1.5rem; margin-bottom: 6px;">Vendas da Placa Oficial de Homenagem</h2>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.88rem; margin: 0;">Acompanhe o contato comercial com cada empresa participante e registre as vendas.</p>
           </div>
           <button class="btn btn-secondary" id="btnExportCrmCsv" style="font-size: 0.85rem; padding: 10px 18px; display: inline-flex; align-items: center; gap: 8px;">
-            <span>📥 Exportar CRM em CSV</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Exportar Lista de Vendas (CSV)
           </button>
         </div>
 
-        <div class="selector-card" style="display: flex; gap: 16px; margin-bottom: 24px; background: transparent; padding: 0; border: none; box-shadow: none;">
-          <select id="crmSelectCity" class="form-control" style="max-width: 250px;">
-            <option value="">Selecione a cidade</option>
+        <div class="selector-card" style="display: flex; gap: 16px; margin-bottom: 20px; background: transparent; padding: 0; border: none; box-shadow: none;">
+          <select id="crmSelectCity" class="form-control" style="max-width: 280px;">
+            <option value="">Carregando localidade...</option>
           </select>
         </div>
 
@@ -228,76 +294,66 @@
           <table>
             <thead>
               <tr>
-                <th>Nome Concorrente</th>
+                <th>Empresa Concorrente</th>
                 <th>Categoria</th>
                 <th>Contato WhatsApp / E-mail</th>
-                <th>Funil / Pacote / Valor</th>
-                <th>Próxima Ação / Observações</th>
-                <th>Ações</th>
+                <th>Status da Venda / Pacote / Valor</th>
+                <th>Próxima Conversa / Observações</th>
+                <th>Salvar</th>
               </tr>
             </thead>
             <tbody id="crmTableBody">
               <tr>
-                <td colspan="6" style="text-align: center; color: rgba(255,255,255,0.3);">Selecione uma cidade para carregar o CRM comercial.</td>
+                <td colspan="6" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando funil de vendas...</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
 
-      <!-- ABA 4: CONFIGURAÇÕES E APURAÇÃO DE ELEIÇÕES -->
+      <!-- ABA 4: CONTROLE DA VOTAÇÃO, PRAZOS & STATUS -->
       <section class="tab-panel" id="tab-eleicoes">
-        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Status de Eleições & Publicação</h2>
-        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Encerre as edições ativas, apure os votos validados e publique os resultados oficiais.</p>
-
-        <div class="panel-card" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
-          <h3 style="color: #d4af37; font-size: 1.05rem; margin: 0 0 14px 0;">Desempate Manual Auditado</h3>
-          <form id="formResolveTie" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end;">
-            <div class="form-group" style="margin: 0;">
-              <label for="tieElection">Eleicao</label>
-              <select id="tieElection" class="form-control" required>
-                <option value="">Selecione...</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin: 0;">
-              <label for="tieCategory">Categoria</label>
-              <select id="tieCategory" class="form-control" required disabled>
-                <option value="">Selecione a eleicao</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin: 0;">
-              <label for="tieCandidate">Vencedor do desempate</label>
-              <select id="tieCandidate" class="form-control" required disabled>
-                <option value="">Selecione a categoria</option>
-              </select>
-            </div>
-            <button type="submit" class="btn" id="btnResolveTie" style="justify-content: center;">Registrar Desempate</button>
-          </form>
+        <div class="panel-guide-card">
+          <div class="guide-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          </div>
+          <div class="guide-content">
+            <h4>Controle simples da votação e prazos</h4>
+            <p>
+              • <strong>Abrir Votação:</strong> Libera a votação para o público votar.<br/>
+              • <strong>Mudar Prazo:</strong> Prorrogue ou altere o dia e hora de encerramento quando quiser.<br/>
+              • <strong>Encerrar Votação:</strong> Finaliza o período de votação.<br/>
+              • <strong>Reabrir Votação:</strong> Clicou em encerrar por engano? Clique em Reabrir para continuar a votação sem perder nada!<br/>
+              • <strong>Apurar & Publicar:</strong> Calcula os vencedores oficiais e publica no site.
+            </p>
+          </div>
         </div>
 
-        <div class="panel-card" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <!-- Seletor de Fase do Evento -->
+        <div class="panel-card" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 8px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
           <div>
-            <h3 style="color: #d4af37; font-size: 1.05rem; margin: 0 0 6px 0;">Fase Atual do Evento</h3>
-            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin: 0;">Determine se o portal está na fase de registros/indicações ou na fase de votação oficial ativa.</p>
+            <h3 style="color: #d4af37; font-size: 1.05rem; margin: 0 0 6px 0;">Fase Atual do Site</h3>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin: 0;">Mude entre a fase de receber indicações/cadastros ou a fase de votação ativa.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 12px;">
-            <select id="selectEventPhase" class="form-control" style="width: 220px; background: #0f0f11; color: #ffffff;">
+            <select id="selectEventPhase" class="form-control" style="width: 250px; background: #0f0f11; color: #ffffff;">
               <option value="registration">Fase 1: Indicações & Cadastros</option>
-              <option value="voting">Fase 2: Votação Oficial Ativa</option>
+              <option value="voting">Fase 2: Votação Oficial Aberta</option>
             </select>
-            <button id="btnSavePhase" class="btn" style="padding: 10px 16px;">Salvar Fase</button>
+            <button id="btnSavePhase" class="btn" style="padding: 10px 18px;">Salvar Fase</button>
           </div>
         </div>
 
+        <h3 style="color: #ffffff; font-size: 1.15rem; margin: 24px 0 14px 0;">Edições Cadastradas & Status de Votação</h3>
         <div class="table-container">
           <table>
             <thead>
               <tr>
-                <th>Cidade / Eleição</th>
+                <th>Cidade / Edição</th>
                 <th>Ano</th>
-                <th>Período</th>
-                <th>Status</th>
-                <th>Ações</th>
+                <th>Prazo da Votação</th>
+                <th>Status Atual</th>
+                <th>Ações de Controle</th>
               </tr>
             </thead>
             <tbody id="electionsTableBody">
@@ -307,75 +363,74 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Desempate Manual Auditado -->
+        <div class="panel-card" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 8px; margin-top: 32px;">
+          <h3 style="color: #d4af37; font-size: 1.05rem; margin: 0 0 14px 0;">Desempate Manual (Apenas se houver empate de votos)</h3>
+          <form id="formResolveTie" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: end;">
+            <div class="form-group" style="margin: 0;">
+              <label for="tieElection">Eleição</label>
+              <select id="tieElection" class="form-control" required>
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="tieCategory">Categoria</label>
+              <select id="tieCategory" class="form-control" required disabled>
+                <option value="">Selecione a eleição</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="tieCandidate">Vencedor Escolhido</label>
+              <select id="tieCandidate" class="form-control" required disabled>
+                <option value="">Selecione a categoria</option>
+              </select>
+            </div>
+            <button type="submit" class="btn" id="btnResolveTie" style="justify-content: center;">Confirmar Desempate</button>
+          </form>
+        </div>
       </section>
 
-      <!-- ABA 5: GERENCIAR ESTRUTURA (Cidades, Categorias, Eleições, Candidatos) -->
+      <!-- ABA 5: GERENCIAR CIDADES & CATEGORIAS (ESTRUTURA) -->
       <section class="tab-panel" id="tab-estrutura">
-        <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Gerenciar Estrutura</h2>
-        <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-bottom: 32px;">Configure a operação oficial de Bom Jardim - MG, suas categorias, edições e concorrentes.</p>
-
-        <!-- Sub-navegação interna da Estrutura -->
-        <div style="display: flex; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
-          <button type="button" class="btn btn-secondary sub-tab-btn active" data-subtab="subtab-cidades" style="font-size: 0.8rem; padding: 6px 12px;">Localidade</button>
-          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-categorias" style="font-size: 0.8rem; padding: 6px 12px;">Categorias</button>
-          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-eleicoes" style="font-size: 0.8rem; padding: 6px 12px;">Criar Eleição & Vincular</button>
-          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-candidatos" style="font-size: 0.8rem; padding: 6px 12px;">Candidatos</button>
-        </div>
-
-        <!-- 1. SUB-TAB: CIDADES -->
-        <div class="sub-tab-panel active" id="subtab-cidades">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-            <div>
-              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Localidade oficial</h3>
-              <form id="formAddCity" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
-                <div class="form-group">
-                  <label for="inputCityName">Cidade da premiação</label>
-                  <input type="text" id="inputCityName" class="form-control" value="Bom Jardim - MG" readonly required>
-                </div>
-                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Confirmar Bom Jardim–MG</button>
-              </form>
-            </div>
-            <div>
-              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Localidade cadastrada</h3>
-              <div class="table-container" style="max-height: 300px;">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Nome</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody id="citiesTableBody">
-                    <tr>
-                      <td colspan="2" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando cidades...</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+        <div class="panel-guide-card">
+          <div class="guide-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          </div>
+          <div class="guide-content">
+            <h4>Adicione ou remova ramos mesmo com a votação rolando</h4>
+            <p>Precisa incluir uma nova categoria (ex: "Melhor Hamburgueria", "Melhor Dentista") enquanto a votação está acontecendo? Basta cadastrar abaixo e marcar o vínculo com a eleição ativa! Você também pode desvincular categorias a qualquer momento.</p>
           </div>
         </div>
 
-        <!-- 2. SUB-TAB: CATEGORIAS -->
-        <div class="sub-tab-panel" id="subtab-categorias" style="display: none;">
+        <!-- Sub-navegação interna com linguagem clara -->
+        <div style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-secondary sub-tab-btn active" data-subtab="subtab-categorias" style="font-size: 0.82rem; padding: 8px 14px;">1. Categorias (Ramos)</button>
+          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-eleicoes" style="font-size: 0.82rem; padding: 8px 14px;">2. Vincular Categorias à Votação</button>
+          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-candidatos" style="font-size: 0.82rem; padding: 8px 14px;">3. Lista de Concorrentes Oficiais</button>
+          <button type="button" class="btn btn-secondary sub-tab-btn" data-subtab="subtab-cidades" style="font-size: 0.82rem; padding: 8px 14px;">4. Localidade</button>
+        </div>
+
+        <!-- 1. SUB-TAB: CATEGORIAS (RAMOS) -->
+        <div class="sub-tab-panel active" id="subtab-categorias">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
             <div>
-              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Adicionar Categoria</h3>
-              <form id="formAddCategory" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 14px;">Cadastrar Novo Ramo / Categoria</h3>
+              <form id="formAddCategory" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 8px;">
                 <div class="form-group">
                   <label for="inputCategoryName">Nome da Categoria</label>
-                  <input type="text" id="inputCategoryName" class="form-control" placeholder="Ex: Melhor Hamburgueria" required>
+                  <input type="text" id="inputCategoryName" class="form-control" placeholder="Ex: Melhor Pizzaria, Melhor Salão..." required>
                 </div>
-                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Salvar Categoria</button>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Salvar Nova Categoria</button>
               </form>
             </div>
             <div>
-              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Categorias Cadastradas</h3>
-              <div class="table-container" style="max-height: 300px;">
+              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 14px;">Categorias Cadastradas no Sistema</h3>
+              <div class="table-container" style="max-height: 380px;">
                 <table>
                   <thead>
                     <tr>
-                      <th>Nome</th>
+                      <th>Nome da Categoria</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
@@ -390,20 +445,20 @@
           </div>
         </div>
 
-        <!-- 3. SUB-TAB: CRIAR ELEIÇÃO & VINCULAR -->
+        <!-- 2. SUB-TAB: CRIAR ELEIÇÃO & VINCULAR CATEGORIAS -->
         <div class="sub-tab-panel" id="subtab-eleicoes" style="display: none;">
           <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px;">
             <div>
-              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Criar Edição/Eleição</h3>
-              <form id="formAddElection" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 14px;">Criar Nova Edição / Votação</h3>
+              <form id="formAddElection" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 8px;">
                 <div class="form-group">
-                  <label for="selectElectionCity">Localidade oficial</label>
+                  <label for="selectElectionCity">Cidade</label>
                   <select id="selectElectionCity" class="form-control" required>
-                    <option value="">Selecione...</option>
+                    <option value="">Selecione a cidade...</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="inputElectionYear">Ano</label>
+                  <label for="inputElectionYear">Ano da Premiação</label>
                   <input type="number" id="inputElectionYear" class="form-control" value="2026" required>
                 </div>
                 <div class="form-group">
@@ -411,96 +466,97 @@
                   <input type="date" id="inputElectionStart" class="form-control" required>
                 </div>
                 <div class="form-group">
-                  <label for="inputElectionEnd">Data de Fim</label>
+                  <label for="inputElectionEnd">Data de Encerramento (Prazo Final)</label>
                   <input type="date" id="inputElectionEnd" class="form-control" required>
                 </div>
-                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Criar Edição</button>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Criar Nova Edição</button>
               </form>
             </div>
             <div>
-              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;">Vincular Categorias à Eleição</h3>
-              <form id="formLinkCategories" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 24px;">
+              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 14px;">Quais Categorias Estão Ativas Nesta Edição?</h3>
+              <form id="formLinkCategories" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 8px;">
                 <div class="form-group">
-                  <label for="selectLinkElection">Selecionar Eleição</label>
+                  <label for="selectLinkElection">Escolha a Edição</label>
                   <select id="selectLinkElection" class="form-control" required>
                     <option value="">Selecione uma eleição...</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label style="margin-bottom: 12px; display: block;">Selecione as Categorias Ativas nesta Edição</label>
-                  <div id="linkCategoriesCheckboxes" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px;">
-                    <!-- Checkboxes injetados via JS -->
-                    <span style="color: rgba(255,255,255,0.3); font-size: 0.85rem;">Selecione primeiro uma eleição...</span>
+                  <label style="margin-bottom: 8px; display: block; font-size: 0.85rem; color: rgba(255,255,255,0.7);">
+                    Marque as caixas para ativar ou desmarque para retirar da votação (mesmo em andamento):
+                  </label>
+                  <div id="linkCategoriesCheckboxes" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+                    <span style="color: rgba(255,255,255,0.3); font-size: 0.85rem;">Selecione primeiro uma eleição acima...</span>
                   </div>
                 </div>
-                <button type="submit" class="btn" id="btnSaveCategoryLinks" style="width: 100%; justify-content: center;" disabled>Salvar Vínculos de Categoria</button>
+                <button type="submit" class="btn" id="btnSaveCategoryLinks" style="width: 100%; justify-content: center;" disabled>Salvar Categorias Desta Votação</button>
               </form>
             </div>
           </div>
         </div>
 
-        <!-- 4. SUB-TAB: CANDIDATOS -->
+        <!-- 3. SUB-TAB: CANDIDATOS OFICIAIS -->
         <div class="sub-tab-panel" id="subtab-candidatos" style="display: none;">
           <div style="display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 24px;">
             <div>
-              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 16px;" id="lblCandidateForm">Adicionar Candidato Oficial</h3>
-              <form id="formAddCandidate" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 8px;">
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 14px;" id="lblCandidateForm">Adicionar Concorrente Oficial</h3>
+              <form id="formAddCandidate" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 8px;">
                 <input type="hidden" id="inputCandidateId">
                 <div class="form-group">
-                  <label for="selectCandElection">Eleição (Cidade / Ano)</label>
+                  <label for="selectCandElection">Edição (Cidade / Ano)</label>
                   <select id="selectCandElection" class="form-control" required>
                     <option value="">Selecione a eleição...</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="selectCandCategory">Categoria</label>
+                  <label for="selectCandCategory">Categoria / Ramo</label>
                   <select id="selectCandCategory" class="form-control" required disabled>
                     <option value="">Selecione primeiro a eleição</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="inputCandName">Nome Oficial do Candidato</label>
-                  <input type="text" id="inputCandName" class="form-control" placeholder="Ex: Chefe Rodrigo Castro" required>
+                  <label for="inputCandName">Nome da Empresa / Profissional</label>
+                  <input type="text" id="inputCandName" class="form-control" placeholder="Ex: Panificadora Central" required>
                 </div>
                 <div class="form-group">
                   <label for="selectCandType">Tipo</label>
                   <select id="selectCandType" class="form-control" required>
-                    <option value="profissional">Profissional</option>
                     <option value="empresa">Empresa</option>
+                    <option value="profissional">Profissional Autônomo</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label for="inputCandInstagram">Instagram (Sem @)</label>
-                  <input type="text" id="inputCandInstagram" class="form-control" placeholder="Ex: cheferodrigo">
+                  <label for="inputCandInstagram">Instagram Oficial (Ex: @panificadoracentral)</label>
+                  <input type="text" id="inputCandInstagram" class="form-control" placeholder="panificadoracentral">
                 </div>
                 <div class="form-group">
-                  <label for="inputCandWhatsapp">WhatsApp</label>
-                  <input type="text" id="inputCandWhatsapp" class="form-control" placeholder="Ex: 19999999999">
+                  <label for="inputCandWhatsapp">WhatsApp de Atendimento</label>
+                  <input type="text" id="inputCandWhatsapp" class="form-control" placeholder="32999999999">
                 </div>
                 <div class="form-group">
-                  <label for="inputCandEmail">E-mail de Contato</label>
-                  <input type="email" id="inputCandEmail" class="form-control" placeholder="Ex: contato@rodrigo.com">
+                  <label for="inputCandEmail">E-mail Comercial</label>
+                  <input type="email" id="inputCandEmail" class="form-control" placeholder="contato@empresa.com.br">
                 </div>
                 <div class="form-group">
-                  <label for="inputCandLogo">URL do Logotipo/Foto</label>
-                  <input type="url" id="inputCandLogo" class="form-control" placeholder="https://exemplo.com/foto.jpg">
+                  <label for="inputCandLogo">Link da Logomarca (URL)</label>
+                  <input type="url" id="inputCandLogo" class="form-control" placeholder="https://exemplo.com/logo.png">
                 </div>
                 <div class="form-group">
-                  <label for="inputCandDesc">Descrição Curta</label>
-                  <textarea id="inputCandDesc" class="form-control" rows="3" placeholder="Descrição do concorrente..."></textarea>
+                  <label for="inputCandDesc">Descrição Breve</label>
+                  <textarea id="inputCandDesc" class="form-control" rows="3" placeholder="Fale sobre o destaque desta empresa..."></textarea>
                 </div>
                 <div style="display: flex; gap: 8px;">
-                  <button type="submit" class="btn" style="flex: 1; justify-content: center;">Salvar Candidato</button>
+                  <button type="submit" class="btn" style="flex: 1; justify-content: center;">Salvar Concorrente</button>
                   <button type="button" class="btn btn-secondary" id="btnCancelCandEdit" style="display: none;">Cancelar</button>
                 </div>
               </form>
             </div>
             <div>
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="color: #ffffff; font-size: 1.1rem; margin: 0;">Lista de Candidatos Oficiais</h3>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                <h3 style="color: #ffffff; font-size: 1.1rem; margin: 0;">Lista de Concorrentes Cadastrados</h3>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                  <select id="filterListElection" class="form-control" style="max-width: 200px; padding: 6px; font-size: 0.8rem;">
-                    <option value="">Filtrar por Eleição...</option>
+                  <select id="filterListElection" class="form-control" style="max-width: 220px; padding: 6px 10px; font-size: 0.8rem;">
+                    <option value="">Filtrar por Edição...</option>
                   </select>
                 </div>
               </div>
@@ -524,28 +580,73 @@
             </div>
           </div>
         </div>
+
+        <!-- 4. SUB-TAB: LOCALIDADE -->
+        <div class="sub-tab-panel" id="subtab-cidades" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+              <h3 style="color: #d4af37; font-size: 1.1rem; margin-top: 0; margin-bottom: 14px;">Localidade Oficial</h3>
+              <form id="formAddCity" style="background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 8px;">
+                <div class="form-group">
+                  <label for="inputCityName">Cidade</label>
+                  <input type="text" id="inputCityName" class="form-control" value="Bom Jardim - MG" readonly required>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; justify-content: center;">Confirmar Bom Jardim–MG</button>
+              </form>
+            </div>
+            <div>
+              <h3 style="color: #ffffff; font-size: 1.1rem; margin-top: 0; margin-bottom: 14px;">Cidades Registradas</h3>
+              <div class="table-container" style="max-height: 300px;">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="citiesTableBody">
+                    <tr>
+                      <td colspan="2" style="text-align: center; color: rgba(255,255,255,0.3);">Carregando cidades...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <!-- ABA 6: LOGS DE AUDITORIA E VOTOS SUSPEITOS -->
+      <!-- ABA 6: SEGURANÇA & LOGS DE AUDITORIA -->
       <section class="tab-panel" id="tab-logs">
+        <div class="panel-guide-card">
+          <div class="guide-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <div class="guide-content">
+            <h4>Segurança e Proteção contra Fraudes</h4>
+            <p>Aqui você acompanha o relatório transparente de todas as ações feitas pela administração e visualiza tentativas de votos suspeitos ou ataques de robôs barrados pelo sistema de proteção.</p>
+          </div>
+        </div>
+
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
           <div>
-            <h2 style="margin-top: 0; font-size: 1.6rem; margin-bottom: 8px;">Logs do Sistema & Auditoria</h2>
-            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin: 0;">Monitore as ações dos administradores e analise logs de auditoria contra fraudes.</p>
+            <h2 style="margin-top: 0; font-size: 1.5rem; margin-bottom: 6px;">Histórico de Ações da Equipe & Auditoria</h2>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.88rem; margin: 0;">Transparência total em cada alteração feita na premiação.</p>
           </div>
           <button class="btn btn-secondary" id="btnExportAuditCsv" style="font-size: 0.85rem; padding: 10px 18px; display: inline-flex; align-items: center; gap: 8px;">
-            <span>📥 Exportar Relatório em CSV</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Exportar Auditoria em CSV
           </button>
         </div>
 
-        <h3 style="color: #d4af37; font-size: 1.1rem; border-bottom: 1px solid rgba(212,175,55,0.1); padding-bottom: 8px; margin-bottom: 16px;">Logs de Ações de Administradores</h3>
-        <div class="table-container" style="max-height: 250px;">
+        <h3 style="color: #d4af37; font-size: 1.05rem; border-bottom: 1px solid rgba(212,175,55,0.1); padding-bottom: 8px; margin-bottom: 16px;">Ações Realizadas por Administradores</h3>
+        <div class="table-container" style="max-height: 280px; margin-bottom: 32px;">
           <table>
             <thead>
               <tr>
-                <th>Data</th>
-                <th>Admin Email</th>
-                <th>Ação</th>
+                <th>Data / Hora</th>
+                <th>E-mail do Administrador</th>
+                <th>Ação Executada</th>
                 <th>Detalhes</th>
               </tr>
             </thead>
@@ -557,21 +658,21 @@
           </table>
         </div>
 
-        <h3 style="color: #ff5555; font-size: 1.1rem; border-bottom: 1px solid rgba(255,85,85,0.15); padding-bottom: 8px; margin-top: 40px; margin-bottom: 16px;">Votos Sinalizados como Suspeitos</h3>
-        <div class="table-container" style="max-height: 250px;">
+        <h3 style="color: #ff5555; font-size: 1.05rem; border-bottom: 1px solid rgba(255,85,85,0.15); padding-bottom: 8px; margin-bottom: 16px;">Votos Bloqueados ou Sinalizados como Suspeitos</h3>
+        <div class="table-container" style="max-height: 280px;">
           <table>
             <thead>
               <tr>
-                <th>ID Voto</th>
-                <th>Candidato</th>
-                <th>Votante</th>
+                <th>ID do Voto</th>
+                <th>Candidato Votado</th>
+                <th>Eleitor</th>
                 <th>IP / Dispositivo</th>
-                <th>Motivo Suspeito</th>
+                <th>Motivo do Bloqueio</th>
               </tr>
             </thead>
             <tbody id="suspiciousVotesTableBody">
               <tr>
-                <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Nenhum voto suspeito sinalizado.</td>
+                <td colspan="5" style="text-align: center; color: rgba(255,255,255,0.3);">Nenhum voto suspeito registrado. O sistema está 100% íntegro.</td>
               </tr>
             </tbody>
           </table>

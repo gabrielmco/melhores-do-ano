@@ -12,18 +12,14 @@ export function escapeHtml(value) {
     .replace(/'/g, '&#039;');
 }
 
+// O único produto oficial comercializado é a Placa Oficial com Certificado
 export const CRM_PACKAGES = [
-  { value: 'nao_definido', label: 'Pacote a definir' },
-  { value: 'selo_digital', label: 'Selo digital' },
-  { value: 'placa_classica', label: 'Placa clássica' },
-  { value: 'kit_premium', label: 'Kit premium' }
+  { value: 'placa_oficial', label: 'Placa Oficial com Certificado' }
 ];
 
 export function renderCrmPackageOptions(selectedPackage) {
-  const selected = selectedPackage || 'nao_definido';
-  return CRM_PACKAGES.map(pkg => (
-    `<option value="${pkg.value}" ${selected === pkg.value ? 'selected' : ''}>${pkg.label}</option>`
-  )).join('');
+  // Sempre renderiza exclusivamente a Placa Oficial com Certificado
+  return `<option value="placa_oficial" selected>Placa Oficial com Certificado</option>`;
 }
 
 export function formatDateInput(value) {

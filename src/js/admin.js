@@ -1,6 +1,6 @@
 /* ============================================================================
    PROJETOS MELHORES DO ANO - ORQUESTRADOR CENTRAL DO PAINEL ADMIN
-   Ponto de entrada enxuto que integra autenticação, moderação, mesclagem,
+   Ponto de entrada enxuto que integra autenticação, aprovações, mesclagem,
    funil CRM, edições de eleição, logs de auditoria e estrutura.
    ============================================================================ */
 
@@ -10,7 +10,7 @@ import {
   setupAuthListeners,
   showLogin
 } from './admin/auth.js';
-import { loadNominations } from './admin/moderation.js';
+import { loadNominations, setupModerationListeners } from './admin/moderation.js';
 import { initMergeTab, setupMergeListeners } from './admin/merge.js';
 import { initCrmTab, setupCrmListeners } from './admin/crm.js';
 import {
@@ -27,7 +27,7 @@ import {
 
 // Estado de Navegação
 let currentTab = 'tab-moderacao';
-let currentSubTab = 'subtab-cidades';
+let currentSubTab = 'subtab-categorias';
 
 export function switchTab(tabId) {
   currentTab = tabId;
@@ -53,20 +53,7 @@ export function switchTab(tabId) {
     }
   });
 
-  // 3. Sincronizar botões do alternador rápido (Admin Geral ⇄ CRM Vendas)
-  const btnQuickModeAdmin = document.getElementById('btnQuickModeAdmin');
-  const btnQuickModeCrm = document.getElementById('btnQuickModeCrm');
-  if (btnQuickModeAdmin && btnQuickModeCrm) {
-    if (tabId === 'tab-crm') {
-      btnQuickModeCrm.className = 'btn btn-primary';
-      btnQuickModeAdmin.className = 'btn btn-secondary';
-    } else {
-      btnQuickModeAdmin.className = 'btn btn-primary';
-      btnQuickModeCrm.className = 'btn btn-secondary';
-    }
-  }
-
-  // 4. Acionar carregador de dados da aba correspondente
+  // 3. Acionar carregador de dados da aba correspondente
   if (tabId === 'tab-moderacao') loadNominations();
   if (tabId === 'tab-mesclagem') initMergeTab();
   if (tabId === 'tab-crm') initCrmTab();
@@ -83,16 +70,6 @@ function setupGlobalNavigation() {
       if (targetTab) switchTab(targetTab);
     });
   });
-
-  const btnQuickModeAdmin = document.getElementById('btnQuickModeAdmin');
-  const btnQuickModeCrm = document.getElementById('btnQuickModeCrm');
-
-  if (btnQuickModeAdmin) {
-    btnQuickModeAdmin.addEventListener('click', () => switchTab('tab-moderacao'));
-  }
-  if (btnQuickModeCrm) {
-    btnQuickModeCrm.addEventListener('click', () => switchTab('tab-crm'));
-  }
 
   // Navegação de Sub-abas da Estrutura
   const subTabBtns = document.querySelectorAll('.sub-tab-btn');
@@ -118,6 +95,7 @@ function setupGlobalNavigation() {
 window.addEventListener('DOMContentLoaded', async () => {
   setupGlobalNavigation();
   setupAuthListeners({ switchTab, onPhaseLoad: loadEventPhase });
+  setupModerationListeners();
   setupMergeListeners();
   setupCrmListeners();
   setupElectionsListeners(loadCategoriesForElectionSelect);

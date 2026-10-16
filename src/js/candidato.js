@@ -190,6 +190,17 @@ function setupEventListeners() {
     registerForm.reset();
   });
 
+  const linkBackToLoginFromRegister = document.getElementById('linkBackToLoginFromRegister');
+  if (linkBackToLoginFromRegister) {
+    linkBackToLoginFromRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      registerScreen.style.display = 'none';
+      if (confirmEmailScreen) confirmEmailScreen.style.display = 'none';
+      loginScreen.style.display = 'block';
+      loginForm.reset();
+    });
+  }
+
   linkGoToLogin.addEventListener('click', (e) => {
     e.preventDefault();
     registerScreen.style.display = 'none';
