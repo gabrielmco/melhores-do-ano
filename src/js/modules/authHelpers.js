@@ -145,14 +145,15 @@ export function setupForgotPasswordButton({
   });
 }
 
-export const EYE_OPEN_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+export const EYE_OPEN_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
 
-export const EYE_OFF_SVG = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+export const EYE_OFF_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
 
 /**
  * Vincula um botão de alternância de visibilidade de senha a um campo de input.
- * Altera visualmente o botão (ícone de olho aberto/cortado e texto 'Ver'/'Ocultar')
- * e alterna o tipo do input entre 'password' e 'text'.
+ * Exibe unicamente o ícone de olho (aberto/cortado) sem rótulos de texto,
+ * e adapta automaticamente o contraste do botão (preto em fundos claros/autofill,
+ * branco/cinza no padrão escuro).
  */
 export function setupPasswordToggle(buttonOrId, inputOrId) {
   if (typeof document === 'undefined') return;
@@ -161,15 +162,37 @@ export function setupPasswordToggle(buttonOrId, inputOrId) {
 
   if (!btn || !input) return;
 
+  const syncTheme = () => {
+    try {
+      let isLight = false;
+      if (input.matches && input.matches(':-webkit-autofill')) {
+        isLight = true;
+      } else {
+        const bg = window.getComputedStyle(input).backgroundColor;
+        const m = bg && bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+        if (m) {
+          const lum = (0.299 * Number(m[1]) + 0.587 * Number(m[2]) + 0.114 * Number(m[3])) / 255;
+          if (lum > 0.6) isLight = true;
+        }
+      }
+      if (isLight) {
+        btn.classList.add('on-light-bg');
+      } else {
+        btn.classList.remove('on-light-bg');
+      }
+    } catch (_) {}
+  };
+
   const updateUI = (isVisible) => {
     btn.setAttribute('aria-label', isVisible ? 'Ocultar senha' : 'Ver senha');
     btn.setAttribute('title', isVisible ? 'Ocultar senha' : 'Ver senha');
-    btn.innerHTML = `${isVisible ? EYE_OFF_SVG : EYE_OPEN_SVG}<span>${isVisible ? 'Ocultar' : 'Ver'}</span>`;
+    btn.innerHTML = isVisible ? EYE_OFF_SVG : EYE_OPEN_SVG;
     if (isVisible) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
     }
+    syncTheme();
   };
 
   btn.addEventListener('click', (e) => {
@@ -186,7 +209,14 @@ export function setupPasswordToggle(buttonOrId, inputOrId) {
     } catch (_) {}
   });
 
-  // Garante estado inicial consistente
+  input.addEventListener('input', syncTheme);
+  input.addEventListener('change', syncTheme);
+  input.addEventListener('focus', syncTheme);
+  input.addEventListener('blur', syncTheme);
+  setTimeout(syncTheme, 100);
+  setTimeout(syncTheme, 500);
+
+  // Garante estado inicial consistente (apenas o ícone)
   updateUI(input.type === 'text');
 }
 

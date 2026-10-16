@@ -93,7 +93,8 @@ input[type="submit"],
 }
 
 // ============================================================================
-// Controle Universal de Visibilidade de Senha ("Ver" / "Ocultar" + Ícone Olho)
+// Controle Universal de Visibilidade de Senha (Apenas Ícone de Olho Adaptativo)
+// Quando o campo for claro/autofill, o olho fica PRETO. No padrão escuro, BRANCO/CINZA.
 // ============================================================================
 .password-input-wrapper {
   position: relative;
@@ -103,7 +104,7 @@ input[type="submit"],
 
   input {
     width: 100%;
-    padding-right: 88px !important;
+    padding-right: 48px !important;
     box-sizing: border-box;
   }
 }
@@ -113,58 +114,94 @@ input[type="submit"],
   right: 6px;
   top: 50%;
   transform: translateY(-50%);
-  min-height: 32px !important;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 6px;
+  width: 34px;
+  height: 34px;
+  min-height: 34px !important;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
   color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  padding: 0 10px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  font-family: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   z-index: 2;
 
   svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
     flex-shrink: 0;
     transition: transform 0.2s ease;
   }
 
-  span {
-    line-height: 1;
-  }
-
+  // Padrão escuro: Branco e Cinza
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(212, 175, 55, 0.45);
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(212, 175, 55, 0.5);
     color: #ffffff;
     svg {
-      transform: scale(1.08);
+      transform: scale(1.12);
     }
   }
 
   &.active {
-    background: rgba(212, 175, 55, 0.15);
-    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(212, 175, 55, 0.18);
+    border-color: rgba(212, 175, 55, 0.6);
     color: #d4af37;
 
     &:hover {
-      background: rgba(212, 175, 55, 0.24);
+      background: rgba(212, 175, 55, 0.28);
       border-color: #d4af37;
+    }
+  }
+
+  // Se o bloco for branco ou autofill claro: O olho fica PRETO
+  &.on-light-bg {
+    background: rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid rgba(0, 0, 0, 0.28) !important;
+    color: #111111 !important;
+
+    svg {
+      stroke: #111111 !important;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.22) !important;
+      border-color: rgba(0, 0, 0, 0.5) !important;
+      color: #000000 !important;
+      svg {
+        stroke: #000000 !important;
+      }
+    }
+
+    &.active {
+      background: rgba(184, 134, 11, 0.22) !important;
+      border-color: #b8860b !important;
+      color: #8b6508 !important;
+      svg {
+        stroke: #8b6508 !important;
+      }
     }
   }
 
   &:focus-visible {
     outline: 2px solid #d4af37 !important;
     outline-offset: 1px !important;
+  }
+}
+
+// Seletor CSS nativo para autofill de navegadores WebKit/Chromium
+input:-webkit-autofill ~ .btn-toggle-password {
+  background: rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(0, 0, 0, 0.28) !important;
+  color: #111111 !important;
+
+  svg {
+    stroke: #111111 !important;
   }
 }
 
