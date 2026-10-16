@@ -1,11 +1,15 @@
 import { supabase } from './supabaseClient.js';
-import { translateAuthError } from './modules/authHelpers.js';
+import { translateAuthError, setupPasswordToggle } from './modules/authHelpers.js';
 
 const form = document.getElementById('passwordForm');
 const input = document.getElementById('newPassword');
 const confirmInput = document.getElementById('confirmPassword');
 const btnSave = document.getElementById('btnSavePassword');
 const msg = document.getElementById('statusMessage');
+
+// Inicializar alternadores de visibilidade ("Ver" / "Ocultar" + Ícone de Olho)
+setupPasswordToggle('btnToggleNewPassword', 'newPassword');
+setupPasswordToggle('btnToggleConfirmPassword', 'confirmPassword');
 
 function showMsg(text, type) {
   if (!msg) return;

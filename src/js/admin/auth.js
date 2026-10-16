@@ -4,7 +4,7 @@
    ============================================================================ */
 
 import { supabase } from '../supabaseClient.js';
-import { translateAuthError, setupForgotPasswordButton } from '../modules/authHelpers.js';
+import { translateAuthError, setupForgotPasswordButton, setupPasswordToggle } from '../modules/authHelpers.js';
 
 let currentStaff = null;
 
@@ -122,13 +122,7 @@ export function setupAuthListeners({ switchTab, onPhaseLoad } = {}) {
   const btnAdminLogout = document.getElementById('btnAdminLogout');
   const btnToggleAdminPassword = document.getElementById('btnToggleAdminPassword');
 
-  if (btnToggleAdminPassword && adminPassword) {
-    btnToggleAdminPassword.addEventListener('click', () => {
-      const isPassword = adminPassword.type === 'password';
-      adminPassword.type = isPassword ? 'text' : 'password';
-      btnToggleAdminPassword.style.color = isPassword ? '#d4af37' : 'rgba(255,255,255,0.4)';
-    });
-  }
+  setupPasswordToggle(btnToggleAdminPassword, adminPassword);
 
   setupForgotPasswordButton({
     buttonId: 'btnForgotPasswordAdmin',

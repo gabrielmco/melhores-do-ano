@@ -4,7 +4,8 @@ import {
   translateAuthError,
   isEmailInCooldown,
   markEmailCooldown,
-  setupForgotPasswordButton
+  setupForgotPasswordButton,
+  setupPasswordToggle
 } from './modules/authHelpers.js';
 
 // Elements
@@ -164,22 +165,9 @@ function setupEventListeners() {
     supabase
   });
 
-  // Alternadores de exibição de senha
-  if (btnToggleLoginPassword && loginPassword) {
-    btnToggleLoginPassword.addEventListener('click', () => {
-      const isPwd = loginPassword.type === 'password';
-      loginPassword.type = isPwd ? 'text' : 'password';
-      btnToggleLoginPassword.style.color = isPwd ? '#d4af37' : 'rgba(255,255,255,0.4)';
-    });
-  }
-
-  if (btnToggleRegisterPassword && registerPassword) {
-    btnToggleRegisterPassword.addEventListener('click', () => {
-      const isPwd = registerPassword.type === 'password';
-      registerPassword.type = isPwd ? 'text' : 'password';
-      btnToggleRegisterPassword.style.color = isPwd ? '#d4af37' : 'rgba(255,255,255,0.4)';
-    });
-  }
+  // Alternadores universais de exibição de senha ("Ver" / "Ocultar" + Ícone Olho)
+  setupPasswordToggle(btnToggleLoginPassword, loginPassword);
+  setupPasswordToggle(btnToggleRegisterPassword, registerPassword);
 
   // Navegação entre Telas
   linkGoToRegister.addEventListener('click', (e) => {

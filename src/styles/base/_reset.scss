@@ -92,4 +92,80 @@ input[type="submit"],
   }
 }
 
+// ============================================================================
+// Controle Universal de Visibilidade de Senha ("Ver" / "Ocultar" + Ícone Olho)
+// ============================================================================
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  input {
+    width: 100%;
+    padding-right: 88px !important;
+    box-sizing: border-box;
+  }
+}
+
+.btn-toggle-password {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 32px !important;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  z-index: 2;
+
+  svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  span {
+    line-height: 1;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(212, 175, 55, 0.45);
+    color: #ffffff;
+    svg {
+      transform: scale(1.08);
+    }
+  }
+
+  &.active {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.5);
+    color: #d4af37;
+
+    &:hover {
+      background: rgba(212, 175, 55, 0.24);
+      border-color: #d4af37;
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid #d4af37 !important;
+    outline-offset: 1px !important;
+  }
+}
+
 
