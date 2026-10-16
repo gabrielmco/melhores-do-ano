@@ -120,15 +120,7 @@ export function setupAuthListeners({ switchTab, onPhaseLoad } = {}) {
   const adminPassword = document.getElementById('adminPassword');
   const btnAdminLoginSubmit = document.getElementById('btnAdminLoginSubmit');
   const btnAdminLogout = document.getElementById('btnAdminLogout');
-  const btnPreFillMaster = document.getElementById('btnPreFillMaster');
   const btnToggleAdminPassword = document.getElementById('btnToggleAdminPassword');
-
-  if (btnPreFillMaster && adminEmail) {
-    btnPreFillMaster.addEventListener('click', () => {
-      adminEmail.value = 'biel321oliveira@gmail.com';
-      if (adminPassword) adminPassword.focus();
-    });
-  }
 
   if (btnToggleAdminPassword && adminPassword) {
     btnToggleAdminPassword.addEventListener('click', () => {

@@ -1,38 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 import { OFFICIAL_CITY } from './siteConfig.js';
-import { createMockClient } from './mockClient.js';
 
 const env = (typeof import.meta !== 'undefined' && import.meta.env) ? import.meta.env : (typeof process !== 'undefined' && process.env ? process.env : {});
-const supabaseUrl = String(env.VITE_SUPABASE_URL || '').trim();
-const supabaseAnonKey = String(env.VITE_SUPABASE_ANON_KEY || '').trim();
-const enableMocks = env.VITE_ENABLE_MOCKS === 'true';
+const supabaseUrl = String(env.VITE_SUPABASE_URL || 'https://xjgkjkmxuhbhkdhaxxey.supabase.co').trim();
+const supabaseAnonKey = String(env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhqZ2tqa214dWhiaGtkaGF4eGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMDMyNTQsImV4cCI6MjEwNjg3OTI1NH0.LK61XYNcY5PEKt7kQmXGzenSoUFz763-B3tAqqTUHDA').trim();
 
-const hasValidSupabaseConfig = Boolean(
-  supabaseUrl &&
-  supabaseAnonKey &&
-  !supabaseUrl.includes('sua-url-aqui') &&
-  !supabaseAnonKey.includes('sua-anon-key-aqui')
-);
+export const isUsingMock = false;
 
-let useMock = enableMocks || !hasValidSupabaseConfig;
-export const isUsingMock = useMock;
-
-let supabaseInstance;
-
-if (useMock) {
-  supabaseInstance = createMockClient();
-} else {
-  // Inicialização real do Supabase
-  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  });
-}
-
-export const supabase = supabaseInstance;
+// Inicialização exclusiva em modo produção com cliente real do Supabase
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});
 
 // --- GLOBAL TOAST SYSTEM FOR DASHBOARDS ---
 if (typeof window !== 'undefined') {

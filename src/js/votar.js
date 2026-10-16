@@ -1,4 +1,4 @@
-import { supabase, isUsingMock } from './supabaseClient.js';
+import { supabase } from './supabaseClient.js';
 import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
 import { validateWhatsapp, validateEmail, maskContact } from './modules/voterValidation.js';
 import { api } from './services/api.js';
@@ -846,24 +846,6 @@ function initTurnstile() {
 async function submitVoteFlow() {
   btnSubmitVote.disabled = true;
   btnSubmitVote.textContent = 'Enviando voto...';
-
-  if (isUsingMock) {
-    console.log("🗳️ [MOCK] Simulando registro de voto/indicação offline.");
-    const catName = selectCategory.options[selectCategory.selectedIndex]?.text || 'Categoria Selecionada';
-    const candName = state.nominatedName || state.candidates.find(c => c.id === state.selectedCandidateId)?.name || 'Candidato Escolhido';
-    saveVotedCategory(state.selectedElectionId, {
-      categoryId: state.selectedCategoryId,
-      categoryName: catName,
-      candidateId: state.selectedCandidateId || 'mock-nomination',
-      candidateName: candName
-    });
-    refreshProgressUI();
-    setTimeout(() => {
-      renderSuccessScreen(false, 'Seu voto foi registrado com sucesso no ambiente local!');
-      goToStep(4);
-    }, 600);
-    return;
-  }
 
   const isNomination = !state.selectedCandidateId;
 

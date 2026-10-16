@@ -2984,7 +2984,111 @@ begin
 end;
 $$;-- [COMMIT REMOVED FOR ATOMIC CONCAT]
 
+-- RPCs: reopen_election, extend_election_deadline, admin_link_single_category, admin_unlink_single_category
+create or replace function public.reopen_election(
+  p_election_id uuid,
+  p_new_end_date timestamp with time zone default null
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_admin_profile_id uuid := auth.uid();
+  v_prev_status text;
+  v_target_end timestamp with time zone;
+begin
+  if not public.has_role(array['admin', 'super_admin']) then
+    raise exception 'Acesso negado: Perfil sem privilégio para reabrir votação.';
+  end if;
+
+  select status, end_date into v_prev_status, v_target_end
+  from public.elections
+  where id = p_election_id;
+
+  if not found then
+    raise exception 'Eleição não encontrada.';
+  end if;
+
+  if p_new_end_date is not null then
+    v_target_end := p_new_end_date;
+  elsif v_target_end <= now() then
+    v_target_end := now() + interval '7 days';
+  end if;
+
+  update public.elections
+  set status = 'aberta',
+      end_date = v_target_end
+  where id = p_election_id;
+
+  insert into public.admin_action_logs (profile_id, action, details)
+  values (
+    v_admin_profile_id,
+    'reabriu_eleicao',
+    jsonb_build_object(
+      'election_id', p_election_id,
+      'previous_status', v_prev_status,
+      'new_status', 'aberta',
+      'end_date', v_target_end
+    )
+  );
+end;
+$$;
+
+revoke execute on function public.reopen_election(uuid, timestamp with time zone) from public, anon, authenticated;
+grant execute on function public.reopen_election(uuid, timestamp with time zone) to authenticated;
+
+create or replace function public.extend_election_deadline(
+  p_election_id uuid,
+  p_new_end_date timestamp with time zone
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_admin_profile_id uuid := auth.uid();
+  v_current_start timestamp with time zone;
+begin
+  if not public.has_role(array['admin', 'super_admin']) then
+    raise exception 'Acesso negado: Perfil sem privilégio para alterar prazos.';
+  end if;
+
+  select start_date into v_current_start
+  from public.elections
+  where id = p_election_id;
+
+  if not found then
+    raise exception 'Eleição não encontrada.';
+  end if;
+
+  if p_new_end_date <= v_current_start then
+    raise exception 'A nova data final deve ser posterior à data de início da eleição.';
+  end if;
+
+  update public.elections
+  set end_date = p_new_end_date
+  where id = p_election_id;
+
+  insert into public.admin_action_logs (profile_id, action, details)
+  values (
+    v_admin_profile_id,
+    'alterou_prazo_eleicao',
+    jsonb_build_object(
+      'election_id', p_election_id,
+      'new_end_date', p_new_end_date
+    )
+  );
+end;
+$$;
+
+revoke execute on function public.extend_election_deadline(uuid, timestamp with time zone) from public, anon, authenticated;
+grant execute on function public.extend_election_deadline(uuid, timestamp with time zone) to authenticated;
+
 COMMIT;
 -- ============================================================================
 -- SUCESSO: Todas as tabelas, índices, triggers e funções foram criadas!
 -- ============================================================================
+

@@ -204,15 +204,24 @@ export async function handleReopenElection(election) {
       newEnd = nextWeek.toISOString();
     }
 
-    const { error } = await supabase
-      .from('elections')
-      .update({
-        status: 'aberta',
-        end_date: newEnd
-      })
-      .eq('id', election.id);
+    // Tentar via RPC seguro primeiro
+    const { error: rpcErr } = await supabase.rpc('reopen_election', {
+      p_election_id: election.id,
+      p_new_end_date: newEnd
+    });
 
-    if (error) throw error;
+    if (rpcErr) {
+      // Fallback transparente para RLS direto na tabela
+      const { error: directErr } = await supabase
+        .from('elections')
+        .update({
+          status: 'aberta',
+          end_date: newEnd
+        })
+        .eq('id', election.id);
+
+      if (directErr) throw directErr;
+    }
 
     // Registrar no log de auditoria
     const { data: { user } } = await supabase.auth.getUser();
@@ -252,12 +261,21 @@ export async function handleChangeElectionDeadline(election) {
   }
 
   try {
-    const { error } = await supabase
-      .from('elections')
-      .update({ end_date: parsedDate.toISOString() })
-      .eq('id', election.id);
+    // Tentar via RPC seguro primeiro
+    const { error: rpcErr } = await supabase.rpc('extend_election_deadline', {
+      p_election_id: election.id,
+      p_new_end_date: parsedDate.toISOString()
+    });
 
-    if (error) throw error;
+    if (rpcErr) {
+      // Fallback transparente para RLS direto na tabela
+      const { error: directErr } = await supabase
+        .from('elections')
+        .update({ end_date: parsedDate.toISOString() })
+        .eq('id', election.id);
+
+      if (directErr) throw directErr;
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
