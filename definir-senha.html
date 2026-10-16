@@ -12,19 +12,31 @@
 <body>
   <main class="auth-page-wrapper">
     <div class="card">
-    <h2>Definir Nova Senha</h2>
-    <p>Digite a senha desejada para a sua conta de administrador abaixo.</p>
-    
-    <form id="passwordForm">
-      <div class="form-group">
-        <label for="newPassword">Nova Senha</label>
-        <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" required minlength="6">
+      <h2>Definir Nova Senha</h2>
+      <p>Digite a nova senha de acesso para sua conta no Melhores do Ano.</p>
+      
+      <form id="passwordForm">
+        <div class="form-group">
+          <label for="newPassword">Nova Senha</label>
+          <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required minlength="6">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirmar Nova Senha</label>
+          <input type="password" id="confirmPassword" placeholder="Repita a nova senha" autocomplete="new-password" required minlength="6">
+        </div>
+        <button type="submit" class="btn" id="btnSavePassword">Salvar Nova Senha</button>
+      </form>
+      
+      <div id="statusMessage" class="message"></div>
+
+      <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; font-size: 0.84rem;">
+        <a href="/candidato.html" style="color: #d4af37; text-decoration: none; font-weight: 600;">Painel do Candidato</a>
+        <span style="color: rgba(255,255,255,0.2);">•</span>
+        <a href="/admin.html" style="color: rgba(255,255,255,0.65); text-decoration: none;">Admin</a>
+        <span style="color: rgba(255,255,255,0.2);">•</span>
+        <a href="/comercial.html" style="color: rgba(255,255,255,0.65); text-decoration: none;">CRM Comercial</a>
       </div>
-      <button type="submit" class="btn">Salvar Senha</button>
-    </form>
-    
-    <div id="statusMessage" class="message"></div>
-  </div>
+    </div>
   </main>
 
   <script type="module" src="/src/js/definirSenha.js"></script>

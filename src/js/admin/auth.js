@@ -4,6 +4,7 @@
    ============================================================================ */
 
 import { supabase } from '../supabaseClient.js';
+import { translateAuthError, setupForgotPasswordButton } from '../modules/authHelpers.js';
 
 let currentStaff = null;
 
@@ -117,7 +118,14 @@ export function setupAuthListeners({ switchTab, onPhaseLoad } = {}) {
   const adminLoginForm = document.getElementById('adminLoginForm');
   const adminEmail = document.getElementById('adminEmail');
   const adminPassword = document.getElementById('adminPassword');
+  const btnAdminLoginSubmit = document.getElementById('btnAdminLoginSubmit');
   const btnAdminLogout = document.getElementById('btnAdminLogout');
+
+  setupForgotPasswordButton({
+    buttonId: 'btnForgotPasswordAdmin',
+    emailInputId: 'adminEmail',
+    supabase
+  });
 
   if (adminLoginForm) {
     adminLoginForm.addEventListener('submit', async (e) => {
@@ -126,14 +134,24 @@ export function setupAuthListeners({ switchTab, onPhaseLoad } = {}) {
       const email = rawEmail.includes('@') ? rawEmail : `${rawEmail}@gmail.com`;
       const password = adminPassword ? adminPassword.value : '';
 
+      if (btnAdminLoginSubmit) {
+        btnAdminLoginSubmit.disabled = true;
+        btnAdminLoginSubmit.textContent = 'Autenticando...';
+      }
+
       try {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } catch (err) {
         if (typeof window.showToast === 'function') {
-          window.showToast('Falha ao autenticar. Verifique suas credenciais.', 'error');
+          window.showToast(translateAuthError(err), 'error');
         }
         console.error(err);
+      } finally {
+        if (btnAdminLoginSubmit) {
+          btnAdminLoginSubmit.disabled = false;
+          btnAdminLoginSubmit.textContent = 'Entrar no Painel';
+        }
       }
     });
   }

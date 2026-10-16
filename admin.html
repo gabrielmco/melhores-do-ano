@@ -35,8 +35,11 @@
       <div class="form-group" style="text-align: left;">
         <label for="adminPassword">Senha</label>
         <input type="password" id="adminPassword" class="form-control" placeholder="Senha" autocomplete="current-password" required>
+        <div class="forgot-password-row">
+          <button type="button" class="forgot-password-link" id="btnForgotPasswordAdmin">Esqueci minha senha</button>
+        </div>
       </div>
-      <button type="submit" class="btn" style="width: 100%; padding: 14px; justify-content: center;">Entrar no Painel</button>
+      <button type="submit" class="btn" id="btnAdminLoginSubmit" style="width: 100%; padding: 14px; justify-content: center;">Entrar no Painel</button>
     </form>
     <div style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; text-align: center;">
       <a href="/#footer" data-safe-back style="color: rgba(255, 255, 255, 0.4); text-decoration: none; font-size: 0.85rem; transition: color 0.3s; display: inline-flex; align-items: center; gap: 8px;">

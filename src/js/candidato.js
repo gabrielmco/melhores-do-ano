@@ -1,5 +1,11 @@
 import { supabase } from './supabaseClient.js';
 import { downloadStoryCard } from './modules/storyCardGenerator.js';
+import {
+  translateAuthError,
+  isEmailInCooldown,
+  markEmailCooldown,
+  setupForgotPasswordButton
+} from './modules/authHelpers.js';
 
 // Elements
 const loginScreen = document.getElementById('loginScreen');
@@ -39,6 +45,7 @@ const commercialRequestLink = document.getElementById('commercialRequestLink');
 
 // State
 let currentCandidate = null;
+let categoryMap = new Map();
 
 function getCommercialRequestUrl(candidate) {
   const configuredUrl = String(import.meta.env.VITE_CANDIDATE_COMMERCIAL_URL || import.meta.env.VITE_COMMERCIAL_CONTACT_URL || '').trim();
@@ -63,6 +70,9 @@ function getCommercialRequestUrl(candidate) {
 // Initialize Auth listener
 window.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
+
+  // Carregar categorias no formulário de cadastro
+  await loadCategoriesForRegister();
   
   // Verificar sessão atual
   const { data: { session } } = await supabase.auth.getSession();
@@ -80,9 +90,6 @@ window.addEventListener('DOMContentLoaded', async () => {
       showLogin();
     }
   });
-
-  // Carregar categorias no formulário de cadastro
-  loadCategoriesForRegister();
 });
 
 async function loadCategoriesForRegister() {
@@ -95,7 +102,9 @@ async function loadCategoriesForRegister() {
     if (error) throw error;
 
     registerCategory.innerHTML = '<option value="">Selecione a categoria...</option>';
+    categoryMap.clear();
     categories.forEach(cat => {
+      categoryMap.set(cat.id, cat.name);
       const option = document.createElement('option');
       option.value = cat.id;
       option.textContent = cat.name;
@@ -106,7 +115,39 @@ async function loadCategoriesForRegister() {
   }
 }
 
+async function submitPublicNominationFallback({ electionId, categoryId, name, instagram }) {
+  try {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !anonKey) return;
+
+    await fetch(`${supabaseUrl}/functions/v1/nominate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${anonKey}`,
+        'apikey': anonKey
+      },
+      body: JSON.stringify({
+        election_id: electionId,
+        category_id: categoryId,
+        name,
+        instagram,
+        type: 'empresa'
+      })
+    });
+  } catch (err) {
+    console.warn('Fallback de pré-indicação via Edge Function:', err);
+  }
+}
+
 function setupEventListeners() {
+  setupForgotPasswordButton({
+    buttonId: 'btnForgotPasswordCandidato',
+    emailInputId: 'loginEmail',
+    supabase
+  });
+
   // Navegação entre Telas
   linkGoToRegister.addEventListener('click', (e) => {
     e.preventDefault();
@@ -136,7 +177,7 @@ function setupEventListeners() {
       if (error) throw error;
     } catch (err) {
       console.error('Erro de login:', err);
-      window.showToast('Falha na autenticação: E-mail ou senha incorretos.', 'error');
+      window.showToast(translateAuthError(err), 'error');
       btnLoginSubmit.disabled = false;
       btnLoginSubmit.textContent = 'Entrar';
     }
@@ -145,8 +186,6 @@ function setupEventListeners() {
   // Enviar Cadastro (Autocadastro de Candidato)
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    btnRegisterSubmit.disabled = true;
-    btnRegisterSubmit.textContent = 'Cadastrando...';
 
     const name = registerName.value.trim();
     const rawInstagram = registerInstagram.value.trim();
@@ -154,15 +193,26 @@ function setupEventListeners() {
     const email = registerEmail.value.trim();
     const password = registerPassword.value;
 
+    // Verificar cooldown de 55s por e-mail para evitar erro "after 50 seconds" do Supabase
+    const waitSecs = isEmailInCooldown(email);
+    if (waitSecs > 0) {
+      window.showToast(`Já enviamos um cadastro para ${email}. Aguarde ${waitSecs}s ou verifique sua caixa de entrada (e Spam) para confirmar seu e-mail.`, 'info');
+      registerScreen.style.display = 'none';
+      loginScreen.style.display = 'block';
+      loginEmail.value = email;
+      return;
+    }
+
     // Normalizar Instagram
     let instagram = rawInstagram.toLowerCase().replace(/[\s@]/g, '');
     if (!instagram) {
       window.showToast('Instagram oficial é obrigatório.', 'error');
-      btnRegisterSubmit.disabled = false;
-      btnRegisterSubmit.textContent = 'Criar Conta e Entrar';
       return;
     }
     instagram = `@${instagram}`;
+
+    btnRegisterSubmit.disabled = true;
+    btnRegisterSubmit.textContent = 'Cadastrando...';
 
     try {
       // 1. Obter a eleição aberta em Bom Jardim - MG
@@ -190,42 +240,83 @@ function setupEventListeners() {
       if (!candCheckErr && existingCandidates && existingCandidates.length > 0) {
         candidateToBind = existingCandidates[0];
         if (candidateToBind.profile_id) {
-          throw new Error('Este Instagram já possui um perfil cadastrado no sistema.');
+          throw new Error('Este Instagram já possui um perfil vinculado no sistema. Faça login na tela anterior.');
         }
       }
 
-      // 3. Cadastrar usuário no Auth do Supabase
+      // 3. Cadastrar usuário no Auth do Supabase (com metadados da empresa)
       const { data: authData, error: signUpErr } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { name }
+          emailRedirectTo: `${window.location.origin}/candidato.html`,
+          data: {
+            name,
+            instagram,
+            category_id: categoryId,
+            election_id: electionId,
+            role: 'candidato'
+          }
         }
       });
 
-      if (signUpErr) throw signUpErr;
+      if (signUpErr) {
+        const lowerErr = String(signUpErr.message || '').toLowerCase();
+        if (lowerErr.includes('already registered') || lowerErr.includes('already been registered')) {
+          window.showToast('Este e-mail já possui conta! Faça login abaixo ou clique em "Esqueci minha senha".', 'info');
+          registerScreen.style.display = 'none';
+          loginScreen.style.display = 'block';
+          loginEmail.value = email;
+          return;
+        }
+        throw signUpErr;
+      }
+
+      markEmailCooldown(email);
 
       const authUserId = authData.user?.id;
       if (!authUserId) {
         throw new Error('Falha ao obter o ID do usuário cadastrado.');
       }
 
-      // 4. Salvar na tabela de Perfis do Supabase
+      // Se o Supabase retornou identities vazio, o e-mail já existia no Auth
+      if (Array.isArray(authData.user?.identities) && authData.user.identities.length === 0) {
+        window.showToast('Este e-mail já está registrado! Faça login abaixo ou use "Esqueci minha senha".', 'info');
+        registerScreen.style.display = 'none';
+        loginScreen.style.display = 'block';
+        loginEmail.value = email;
+        return;
+      }
+
+      // Caso o Supabase exija confirmação de e-mail (session === null):
+      // Registramos a indicação via Edge Function pública e redirecionamos para a tela de login!
+      if (!authData.session) {
+        if (!candidateToBind) {
+          await submitPublicNominationFallback({ electionId, categoryId, name, instagram });
+        }
+        window.showToast(`Conta criada com sucesso! Enviamos um link de confirmação para ${email}. Confirme no seu e-mail e depois faça login abaixo.`, 'success');
+        registerForm.reset();
+        registerScreen.style.display = 'none';
+        loginScreen.style.display = 'block';
+        loginEmail.value = email;
+        return;
+      }
+
+      // 4. Se a sessão já veio ativa (autoconfirm ligado), salvar perfil e candidato
       const { error: profileErr } = await supabase
         .from('profiles')
-        .insert({
+        .upsert({
           id: authUserId,
           name: name,
           role: 'candidato'
-        });
+        }, { onConflict: 'id' });
       
-      if (profileErr && !profileErr.message.includes('unique')) {
-        console.warn('Erro ao inserir perfil do candidato:', profileErr);
+      if (profileErr) {
+        console.warn('Aviso ao salvar perfil do candidato:', profileErr);
       }
 
       // 5. Vincular candidato ou criar novo
       if (candidateToBind) {
-        // Reivindicar candidato pré-existente (indicação do público sem e-mail/dono)
         const { error: updateErr } = await supabase
           .from('candidates')
           .update({
@@ -236,10 +327,11 @@ function setupEventListeners() {
           })
           .eq('id', candidateToBind.id);
 
-        if (updateErr) throw updateErr;
+        if (updateErr) {
+          await submitPublicNominationFallback({ electionId, categoryId, name, instagram });
+        }
         window.showToast('Empresa oficializada e vinculada à sua conta com sucesso!', 'success');
       } else {
-        // Criar novo candidato
         const { error: insertErr } = await supabase
           .from('candidates')
           .insert({
@@ -255,7 +347,9 @@ function setupEventListeners() {
             profile_id: authUserId
           });
 
-        if (insertErr) throw insertErr;
+        if (insertErr) {
+          await submitPublicNominationFallback({ electionId, categoryId, name, instagram });
+        }
         window.showToast('Sua empresa foi cadastrada com sucesso e está concorrendo!', 'success');
       }
 
@@ -264,7 +358,7 @@ function setupEventListeners() {
 
     } catch (err) {
       console.error('Erro de cadastro:', err);
-      window.showToast(err.message || 'Falha ao registrar a empresa. Verifique os dados.', 'error');
+      window.showToast(translateAuthError(err), 'error');
     } finally {
       btnRegisterSubmit.disabled = false;
       btnRegisterSubmit.textContent = 'Criar Conta e Entrar';
@@ -294,12 +388,28 @@ function setupEventListeners() {
         p_description: description
       });
 
-      if (error) throw error;
+      if (error) {
+        // Fallback direto para super_admin/admin editando candidato
+        const { error: directUpdateErr } = await supabase
+          .from('candidates')
+          .update({
+            instagram,
+            logo_url: logoUrl,
+            description
+          })
+          .eq('id', currentCandidate.id);
+
+        if (directUpdateErr) throw error;
+      }
+
+      currentCandidate.instagram = instagram;
+      currentCandidate.logo_url = logoUrl;
+      currentCandidate.description = description;
 
       window.showToast('Perfil atualizado com sucesso!', 'success');
     } catch (err) {
       console.error('Erro ao atualizar perfil:', err);
-      window.showToast('Erro ao salvar as informações: ' + err.message, 'error');
+      window.showToast('Erro ao salvar as informações: ' + translateAuthError(err), 'error');
     } finally {
       btnUpdateProfile.disabled = false;
       btnUpdateProfile.textContent = 'Salvar Informações';
@@ -322,9 +432,10 @@ function setupEventListeners() {
       btnGenerateStoryCard.disabled = true;
       btnGenerateStoryCard.textContent = 'Gerando...';
       try {
+        const catName = currentCandidate.category_name || categoryMap.get(currentCandidate.category_id) || 'Categoria Oficial';
         await downloadStoryCard({
           candidateName: currentCandidate.name,
-          categoryName: currentCandidate.category_name || 'Categoria Oficial',
+          categoryName: catName,
           cityName: 'Bom Jardim – MG',
           year: '2026'
         });
@@ -351,6 +462,58 @@ function showLogin() {
   currentCandidate = null;
 }
 
+async function resolveCandidateForSession() {
+  // 1. Tentar RPC oficial do candidato vinculado por profile_id
+  const { data: rpcCandidates, error: rpcErr } = await supabase.rpc('get_my_candidate_profile');
+  if (!rpcErr && Array.isArray(rpcCandidates) && rpcCandidates.length > 0) {
+    return rpcCandidates[0];
+  }
+
+  // 2. Obter usuário autenticado e metadados
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const meta = user.user_metadata || {};
+
+  // 3. Se o usuário tem instagram nos metadados (recém-confirmou o e-mail), tentar buscar o candidato
+  if (meta.instagram) {
+    const { data: byInsta } = await supabase
+      .from('candidates')
+      .select('*')
+      .eq('instagram', meta.instagram)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (byInsta && byInsta.length > 0) {
+      return byInsta[0];
+    }
+  }
+
+  // 4. Verificar se o usuário logado é super_admin / admin (Modo Visualização Master)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role, name')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (profile && (profile.role === 'super_admin' || profile.role === 'admin')) {
+    const { data: adminCandidates } = await supabase
+      .from('candidates')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (adminCandidates && adminCandidates.length > 0) {
+      return {
+        ...adminCandidates[0],
+        _isAdminPreview: true
+      };
+    }
+  }
+
+  return null;
+}
+
 // Inicializar painel após login de sucesso
 async function initDashboard() {
   loginScreen.style.display = 'none';
@@ -360,23 +523,21 @@ async function initDashboard() {
   try {
     txtCandidateName.textContent = 'Carregando perfil...';
     
-    // 1. Chamar RPC para buscar dados privados do candidato logado
-    const { data: candidates, error } = await supabase.rpc('get_my_candidate_profile');
-    
-    if (error) throw error;
+    const candidate = await resolveCandidateForSession();
 
-    if (!candidates || candidates.length === 0) {
-      txtCandidateName.textContent = 'Perfil não vinculado';
-      txtEditionInfo.textContent = 'Entre em contato com a administração para vincular esta conta a um candidato.';
+    if (!candidate) {
+      txtCandidateName.textContent = 'Perfil em Análise / Não Vinculado';
+      txtEditionInfo.textContent = 'Sua conta está ativa! Caso tenha acabado de indicar sua empresa, aguarde a aprovação ou solicite o vínculo à administração.';
       profileUpdateForm.style.display = 'none';
       return;
     }
 
-    const candidate = candidates[0];
     currentCandidate = candidate;
 
     // 2. Preencher dados na interface
-    txtCandidateName.textContent = candidate.name;
+    txtCandidateName.textContent = candidate._isAdminPreview
+      ? `${candidate.name} (Modo Admin)`
+      : candidate.name;
     txtWhatsapp.textContent = candidate.whatsapp || 'N/A';
     txtEmail.textContent = candidate.email || 'N/A';
     inputInstagram.value = candidate.instagram || '';
@@ -384,8 +545,9 @@ async function initDashboard() {
     inputDescription.value = candidate.description || '';
 
     // Renderizar badge de status
-    badgeStatus.textContent = candidate.status;
-    badgeStatus.className = `status-badge status-${candidate.status.toLowerCase()}`;
+    const statusText = candidate.status || 'aprovado';
+    badgeStatus.textContent = statusText;
+    badgeStatus.className = `status-badge status-${statusText.toLowerCase()}`;
 
     // 3. Buscar informações da eleição para exibir no cabeçalho
     const { data: election, error: electErr } = await supabase

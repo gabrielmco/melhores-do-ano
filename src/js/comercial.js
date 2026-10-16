@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient.js';
 import { OFFICIAL_CITY, findOfficialCity } from './siteConfig.js';
 import { exportCrmLeadsToCsv } from './modules/csvExporter.js';
+import { translateAuthError, setupForgotPasswordButton } from './modules/authHelpers.js';
 
 // DOM Elements
 const comercialLoginScreen = document.getElementById('comercialLoginScreen');
@@ -131,6 +132,12 @@ async function initAgentDashboard() {
 }
 
 function setupEventListeners() {
+  setupForgotPasswordButton({
+    buttonId: 'btnForgotPasswordComercial',
+    emailInputId: 'comercialEmail',
+    supabase
+  });
+
   // Login Form submit
   comercialLoginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -144,7 +151,7 @@ function setupEventListeners() {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } catch (err) {
-      window.showToast('Falha na autenticação. Verifique os dados fornecidos.', 'error');
+      window.showToast(translateAuthError(err), 'error');
       console.error(err);
     } finally {
       btnComercialLoginSubmit.disabled = false;
