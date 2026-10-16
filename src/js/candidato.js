@@ -604,7 +604,21 @@ function setupEventListeners() {
         window.showToast('Não foi possível gerar a arte: ' + (err.message || err), 'error');
       } finally {
         btnGenerateStoryCard.disabled = false;
-        btnGenerateStoryCard.textContent = 'Gerar Card';
+        btnGenerateStoryCard.textContent = '📥 Gerar Card Story';
+      }
+    });
+  }
+
+  // Copiar Link Oficial de Votação
+  const btnCopyVotingLink = document.getElementById('btnCopyVotingLink');
+  if (btnCopyVotingLink) {
+    btnCopyVotingLink.addEventListener('click', async () => {
+      const voteUrl = `${window.location.origin}/votar.html`;
+      try {
+        await navigator.clipboard.writeText(voteUrl);
+        window.showToast('Link de votação copiado com sucesso! Cole na figurinha de Link dos seus Stories.', 'success');
+      } catch (err) {
+        window.showToast(`Link de votação: ${voteUrl}`, 'info');
       }
     });
   }

@@ -531,6 +531,10 @@ tr:hover td {
   padding: 28px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 
+  @media (max-width: 600px) {
+    padding: 20px 16px;
+  }
+
   h3 {
     font-size: 1.2rem;
     margin-top: 0;

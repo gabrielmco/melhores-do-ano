@@ -9,7 +9,7 @@ function setupSafeBackNavigation() {
         referrer = null;
       }
 
-      if (referrer?.origin === window.location.origin && window.history.length > 1) {
+      if (referrer?.origin === window.location.origin && referrer.pathname !== window.location.pathname && window.history.length > 1) {
         event.preventDefault();
         window.history.back();
       }

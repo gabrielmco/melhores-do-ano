@@ -1,7 +1,84 @@
 // ============================================================================
 // PROJETOS MELHORES DO ANO - GERADOR DE CARDS PARA INSTAGRAM STORIES
 // Criação de artes em alta resolução (1080x1920 - 9:16) via HTML5 Canvas
+// Totalmente responsivo e blindado contra estouro de texto fora da moldura
 // ============================================================================
+
+function drawFittedText(ctx, text, x, y, maxW, {
+  baseSize = 42,
+  minSize = 22,
+  weight = '700',
+  family = '"Plus Jakarta Sans", sans-serif',
+  color = '#ffffff',
+  letterSpacing = '0px',
+  align = 'center'
+} = {}) {
+  ctx.save();
+  ctx.letterSpacing = letterSpacing;
+  ctx.textAlign = align;
+  ctx.fillStyle = color;
+
+  let currentSize = baseSize;
+  ctx.font = `${weight} ${currentSize}px ${family}`;
+  while (ctx.measureText(text).width > maxW && currentSize > minSize) {
+    currentSize -= 2;
+    ctx.font = `${weight} ${currentSize}px ${family}`;
+  }
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+function drawMultilineCentered(ctx, text, centerX, centerY, maxW, {
+  baseSize = 64,
+  minSize = 34,
+  weight = '800',
+  family = '"Plus Jakarta Sans", sans-serif',
+  color = '#ffffff',
+  lineHeightRatio = 1.2
+} = {}) {
+  ctx.save();
+  ctx.letterSpacing = '0px';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = color;
+
+  let fontSize = baseSize;
+  let lines = [];
+
+  function splitIntoLines(size) {
+    ctx.font = `${weight} ${size}px ${family}`;
+    const words = String(text || '').trim().split(/\s+/);
+    const result = [];
+    let currentLine = '';
+
+    for (const word of words) {
+      const candidate = currentLine ? `${currentLine} ${word}` : word;
+      if (ctx.measureText(candidate).width > maxW && currentLine) {
+        result.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = candidate;
+      }
+    }
+    if (currentLine) result.push(currentLine);
+    return result;
+  }
+
+  lines = splitIntoLines(fontSize);
+  while (lines.some(l => ctx.measureText(l).width > maxW) && fontSize > minSize) {
+    fontSize -= 2;
+    lines = splitIntoLines(fontSize);
+  }
+
+  const lineHeight = fontSize * lineHeightRatio;
+  const totalHeight = lines.length * lineHeight;
+  const startY = centerY - (totalHeight / 2) + (fontSize * 0.85);
+
+  lines.forEach((line, index) => {
+    ctx.fillText(line, centerX, startY + (index * lineHeight));
+  });
+
+  ctx.restore();
+}
 
 export function renderStoryCardToCanvas(canvas, {
   candidateName = 'Empresa Participante',
@@ -18,10 +95,13 @@ export function renderStoryCardToCanvas(canvas, {
   canvas.width = width;
   canvas.height = height;
 
+  const safeW = 860; // Largura útil máxima centralizada entre X=110 e X=970
+  const centerX = width / 2;
+
   // 1. Fundo Gradiente Luxury Dark
-  const bgGrad = ctx.createRadialGradient(width / 2, height / 2, 100, width / 2, height / 2, 1100);
-  bgGrad.addColorStop(0, '#1c1b17');
-  bgGrad.addColorStop(0.5, '#0e0e11');
+  const bgGrad = ctx.createRadialGradient(centerX, height / 2, 80, centerX, height / 2, 1150);
+  bgGrad.addColorStop(0, '#1c1a16');
+  bgGrad.addColorStop(0.5, '#0d0d10');
   bgGrad.addColorStop(1, '#050506');
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
@@ -36,7 +116,7 @@ export function renderStoryCardToCanvas(canvas, {
   ctx.strokeRect(56, 56, width - 112, height - 112);
 
   // Cantoneiras decorativas douradas
-  const cornerSize = 40;
+  const cornerSize = 44;
   ctx.fillStyle = '#f5d788';
   // Top-left
   ctx.fillRect(40, 40, cornerSize, 6);
@@ -51,113 +131,143 @@ export function renderStoryCardToCanvas(canvas, {
   ctx.fillRect(width - 40 - cornerSize, height - 46, cornerSize, 6);
   ctx.fillRect(width - 46, height - 40 - cornerSize, 6, cornerSize);
 
-  // 3. Selo / Ícone Superior
+  // 3. Estrelas do Topo
   ctx.fillStyle = '#d4af37';
-  ctx.font = 'bold 84px serif';
+  ctx.font = 'bold 76px serif';
   ctx.textAlign = 'center';
-  ctx.fillText('★ ★ ★', width / 2, 220);
+  ctx.fillText('★ ★ ★', centerX, 190);
 
-  // 4. Título do Evento
-  ctx.font = 'bold 42px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = '#f5d788';
-  ctx.letterSpacing = '6px';
-  ctx.fillText('PRÊMIO OFICIAL DE EXCELÊNCIA', width / 2, 320);
+  // 4. Cabeçalho do Evento (Fitted Text para nunca cortar)
+  drawFittedText(ctx, 'PRÊMIO OFICIAL DE EXCELÊNCIA', centerX, 260, safeW, {
+    baseSize: 32,
+    minSize: 22,
+    weight: '700',
+    color: '#f5d788',
+    letterSpacing: '3px'
+  });
 
-  ctx.font = '800 88px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText(`MELHORES DO ANO`, width / 2, 420);
+  drawFittedText(ctx, 'MELHORES DO ANO', centerX, 360, safeW, {
+    baseSize: 84,
+    minSize: 52,
+    weight: '900',
+    color: '#ffffff',
+    letterSpacing: '1px'
+  });
 
-  ctx.font = '600 48px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = '#d4af37';
-  ctx.fillText(`${cityName.toUpperCase()} • ${year}`, width / 2, 500);
+  drawFittedText(ctx, `${cityName.toUpperCase()} • ${year}`, centerX, 440, safeW, {
+    baseSize: 42,
+    minSize: 28,
+    weight: '700',
+    color: '#d4af37'
+  });
 
-  // Linha divisória
-  ctx.strokeStyle = 'rgba(212, 175, 55, 0.4)';
+  // Linha divisória dourada
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.45)';
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(width / 2 - 250, 560);
-  ctx.lineTo(width / 2 + 250, 560);
+  ctx.moveTo(centerX - 240, 490);
+  ctx.lineTo(centerX + 240, 490);
   ctx.stroke();
 
-  // 5. Chamada de Indicação
-  ctx.font = '600 40px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-  ctx.fillText('ESTAMOS CONCORRENDO AO PRÊMIO NA CATEGORIA:', width / 2, 700);
+  // 5. Chamada de Indicação e Categoria (Ajustadas com segurança)
+  drawFittedText(ctx, 'ESTAMOS CONCORRENDO AO PRÊMIO NA CATEGORIA:', centerX, 580, safeW, {
+    baseSize: 32,
+    minSize: 22,
+    weight: '600',
+    color: 'rgba(255, 255, 255, 0.85)'
+  });
 
-  // Categoria
-  ctx.font = 'bold 54px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = '#f5d788';
-  ctx.fillText(categoryName.toUpperCase(), width / 2, 780);
+  drawMultilineCentered(ctx, categoryName.toUpperCase(), centerX, 680, safeW, {
+    baseSize: 52,
+    minSize: 32,
+    weight: '800',
+    color: '#f5d788'
+  });
 
   // 6. Card Central do Candidato
-  const cardY = 880;
-  const cardH = 380;
-  const cardW = width - 200;
+  const cardY = 780;
+  const cardH = 390;
+  const cardW = safeW;
   const cardX = (width - cardW) / 2;
 
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-  ctx.fillRect(cardX, cardY, cardW, cardH);
-  ctx.strokeStyle = 'rgba(212, 175, 55, 0.5)';
+  // Fundo suave e borda dourada com cantos arredondados
+  ctx.fillStyle = 'rgba(212, 175, 55, 0.05)';
+  ctx.beginPath();
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(cardX, cardY, cardW, cardH, 16);
+  } else {
+    ctx.rect(cardX, cardY, cardW, cardH);
+  }
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.65)';
   ctx.lineWidth = 3;
-  ctx.strokeRect(cardX, cardY, cardW, cardH);
+  ctx.stroke();
 
-  // Nome do Candidato
-  ctx.font = '800 72px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = '#ffffff';
-  
-  // Quebra de linha inteligente se o nome for longo
-  const maxCardTextW = cardW - 60;
-  const words = candidateName.split(' ');
-  let line = '';
-  let lines = [];
-  for (let n = 0; n < words.length; n++) {
-    const testLine = line + words[n] + ' ';
-    const metrics = ctx.measureText(testLine);
-    if (metrics.width > maxCardTextW && n > 0) {
-      lines.push(line.trim());
-      line = words[n] + ' ';
-    } else {
-      line = testLine;
-    }
-  }
-  lines.push(line.trim());
-
-  const startY = cardY + (cardH / 2) - ((lines.length - 1) * 40);
-  for (let i = 0; i < lines.length; i++) {
-    ctx.fillText(lines[i], width / 2, startY + (i * 80));
-  }
+  // Nome do Candidato Perfeitamente Centralizado e Quebrado dentro do Card
+  drawMultilineCentered(ctx, candidateName, centerX, cardY + (cardH / 2), cardW - 80, {
+    baseSize: 66,
+    minSize: 34,
+    weight: '800',
+    color: '#ffffff',
+    lineHeightRatio: 1.15
+  });
 
   // 7. Chamada de Votação (Call To Action)
-  ctx.font = '700 52px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = '#ffffff';
-  ctx.fillText('VOTE AGORA NO SITE OFICIAL', width / 2, 1420);
+  drawFittedText(ctx, 'VOTE AGORA NO SITE OFICIAL', centerX, 1270, safeW, {
+    baseSize: 50,
+    minSize: 32,
+    weight: '800',
+    color: '#ffffff'
+  });
 
-  ctx.font = '400 38px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-  ctx.fillText('Sua escolha é fundamental para nosso reconhecimento!', width / 2, 1490);
+  drawFittedText(ctx, 'Sua escolha é fundamental para nosso reconhecimento!', centerX, 1340, safeW, {
+    baseSize: 32,
+    minSize: 20,
+    weight: '500',
+    color: 'rgba(255, 255, 255, 0.78)'
+  });
 
-  // Botão visual / Badge
-  const btnW = 680;
+  // Botão Estilo Sticker dos Stories
+  const btnW = 760;
   const btnH = 110;
   const btnX = (width - btnW) / 2;
-  const btnY = 1580;
+  const btnY = 1420;
 
   const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY + btnH);
   btnGrad.addColorStop(0, '#f5d788');
   btnGrad.addColorStop(1, '#d4af37');
   ctx.fillStyle = btnGrad;
   ctx.beginPath();
-  ctx.roundRect(btnX, btnY, btnW, btnH, 16);
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(btnX, btnY, btnW, btnH, 55);
+  } else {
+    ctx.rect(btnX, btnY, btnW, btnH);
+  }
   ctx.fill();
 
-  ctx.font = '800 42px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = '#070708';
-  ctx.fillText('melhores-do-ano-chi.vercel.app', width / 2, btnY + 70);
+  drawFittedText(ctx, 'CLIQUE NO LINK DOS STORIES PARA VOTAR', centerX, btnY + 68, btnW - 60, {
+    baseSize: 32,
+    minSize: 22,
+    weight: '800',
+    color: '#070708'
+  });
 
-  // Rodapé
-  ctx.font = '400 32px "Plus Jakarta Sans", sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.fillText('Votação Popular Auditada • Empório Excelência Oficial', width / 2, 1820);
+  // Dica da figurinha de link no Instagram
+  drawFittedText(ctx, 'Use a figurinha de link do Instagram direcionando para o site oficial', centerX, 1580, safeW, {
+    baseSize: 26,
+    minSize: 18,
+    weight: '400',
+    color: 'rgba(255, 255, 255, 0.55)'
+  });
+
+  // 8. Rodapé Oficial
+  drawFittedText(ctx, 'Votação Popular Auditada • Empório Excelência Oficial', centerX, 1780, safeW, {
+    baseSize: 28,
+    minSize: 18,
+    weight: '400',
+    color: 'rgba(255, 255, 255, 0.45)'
+  });
 
   return canvas;
 }

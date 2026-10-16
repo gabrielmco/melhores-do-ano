@@ -72,16 +72,16 @@
         <span>ADMINISTRAÇÃO</span>
       </div>
       
-      <nav style="flex: 1;">
-        <ul class="nav-list">
+      <nav style="flex: 1; overflow-y: auto;">
+        <div style="font-size: 0.7rem; font-weight: 700; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; padding: 12px 16px 6px;">
+          Gestão da Eleição
+        </div>
+        <ul class="nav-list" style="margin-bottom: 10px;">
           <li class="nav-item active" data-tab="tab-moderacao" id="navModeracao">
             <span class="nav-mark">MI</span> Moderar Indicações
           </li>
           <li class="nav-item" data-tab="tab-mesclagem" id="navMesclagem">
             <span class="nav-mark">MC</span> Mesclar Candidatos
-          </li>
-          <li class="nav-item" data-tab="tab-crm" id="navCrm">
-            <span class="nav-mark">CV</span> CRM Vendas
           </li>
           <li class="nav-item" data-tab="tab-eleicoes" id="navEleicoes">
             <span class="nav-mark">CE</span> Config. Eleições
@@ -93,11 +93,25 @@
             <span class="nav-mark">LA</span> Logs de Auditoria
           </li>
         </ul>
+
+        <!-- Divisão visual clara para o Módulo Comercial -->
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); margin: 10px 12px 10px;"></div>
+        <div style="font-size: 0.7rem; font-weight: 700; color: #d4af37; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 16px 6px;">
+          Módulo Comercial
+        </div>
+        <ul class="nav-list">
+          <li class="nav-item" data-tab="tab-crm" id="navCrm">
+            <span class="nav-mark" style="background: rgba(212,175,55,0.18); color: #f5d788; border-color: #d4af37;">CV</span> CRM Vendas
+          </li>
+        </ul>
       </nav>
 
-      <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
-        <div id="txtAdminUser" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px;">Carregando...</div>
-        <div id="txtAdminRole" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 16px;">Papel</div>
+      <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 18px;">
+        <div id="txtAdminUser" style="font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;">Carregando...</div>
+        <div id="txtAdminRole" style="font-size: 0.75rem; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 14px;">Papel</div>
+        <a href="/" class="btn btn-secondary" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px 12px; margin-bottom: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          ← Voltar ao Site
+        </a>
         <button class="btn btn-secondary" id="btnAdminLogout" style="width: 100%; justify-content: center; font-size: 0.8rem; padding: 8px 12px;">Sair do Painel</button>
       </div>
     </aside>
